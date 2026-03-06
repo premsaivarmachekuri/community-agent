@@ -1,0 +1,348 @@
+import { createSavoir } from '@savoir/sdk';
+import { generateText, gateway } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { WebClient } from '@slack/web-api';
+import { z } from 'zod';
+import { channels } from '@/lib/channels';
+import { config } from '@/lib/config';
+import { logAction } from '@/lib/store';
+
+const savoir = config.savoirApiUrl
+  ? createSavoir({
+      apiUrl: config.savoirApiUrl,
+      apiKey: config.savoirApiKey || undefined,
+    })
+  : null;
+
+async function executeBash({ command }: { command: string }) {
+  'use step';
+
+  if (!savoir) {
+    return {
+      stdout: '',
+      stderr: 'Savoir API is not configured. Set SAVOIR_API_URL to enable file search.',
+      exitCode: 1,
+    };
+  }
+
+  const result = await savoir.client.bash(command);
+
+  return {
+    stdout: result.stdout,
+    stderr: result.stderr,
+    exitCode: result.exitCode,
+  };
+}
+
+async function executeBashBatch({ commands }: { commands: string[] }) {
+  'use step';
+
+  if (!savoir) {
+    return {
+      results: commands.map((command) => ({
+        command,
+        stdout: '',
+        stderr: 'Savoir API is not configured. Set SAVOIR_API_URL to enable file search.',
+        exitCode: 1,
+      })),
+    };
+  }
+
+  const result = await savoir.client.bashBatch(commands);
+
+  return {
+    results: result.results.map((r) => ({
+      command: r.command,
+      stdout: r.stdout,
+      stderr: r.stderr,
+      exitCode: r.exitCode,
+    })),
+  };
+}
+
+const bashInputSchema = z.object({
+  command: z.string().describe('The bash command to execute'),
+});
+
+const bashBatchInputSchema = z.object({
+  commands: z.array(z.string()).describe('List of bash commands to execute in one request'),
+});
+
+const suggestChannelInputSchema = z.object({
+  topic: z
+    .string()
+    .describe('A short description of the question or topic to find the right channel for'),
+});
+
+async function executeSuggestChannel({ topic }: { topic: string }) {
+  'use step';
+
+  const topicLower = topic.toLowerCase();
+
+  const scored = Object.values(channels).map((ch) => {
+    const score = ch.topics.reduce((acc, t) => {
+      const keyword = t.toLowerCase();
+      return acc + (topicLower.includes(keyword) || keyword.includes(topicLower) ? 1 : 0);
+    }, 0);
+    return { channel: ch, score };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+
+  const best = scored[0];
+  const allChannels = Object.values(channels)
+    .map((ch) => `#${ch.name} — ${ch.description}`)
+    .join('\n');
+
+  if (best.score > 0) {
+    await logAction({
+      type: 'routed',
+      channel: `#${best.channel.name}`,
+      description: `Suggested routing question to #${best.channel.name}`,
+      metadata: { topic },
+    });
+  }
+
+  return {
+    suggested: best.score > 0 ? `#${best.channel.name}` : null,
+    description: best.score > 0 ? best.channel.description : null,
+    confidence: best.score > 0 ? 'match' : 'no_match',
+    allChannels,
+  };
+}
+
+const unansweredInputSchema = z.object({
+  channel: z
+    .string()
+    .describe(
+      'Channel name to scan (without #), e.g. "help". If you receive a Slack channel ID like C0AJGCJSCES, pass it as-is.',
+    ),
+  hours: z.number().optional().describe('How many hours back to look (default: 24)'),
+});
+
+function parseChannelInput(raw: string): string {
+  const cleaned = raw.replace(/^#/, '');
+  const slackMention = cleaned.match(/^<#(\w+)\|?(\w*)>$/);
+  if (slackMention) return slackMention[1];
+  return cleaned;
+}
+
+async function executeUnanswered({ channel, hours = 24 }: { channel: string; hours?: number }) {
+  'use step';
+
+  const parsed = parseChannelInput(channel);
+  const isChannelId = /^[A-Z0-9]+$/.test(parsed) && parsed.startsWith('C');
+  const slack = new WebClient(process.env.SLACK_BOT_TOKEN);
+
+  let channelId: string;
+  let channelName: string;
+
+  if (isChannelId) {
+    channelId = parsed;
+    try {
+      const info = await slack.conversations.info({ channel: channelId });
+      channelName = info.channel?.name ?? parsed;
+    } catch {
+      channelName = parsed;
+    }
+  } else {
+    const listResult = await slack.conversations.list({
+      types: 'public_channel',
+      limit: 200,
+    });
+    const target = listResult.channels?.find((ch) => ch.name === parsed);
+    if (!target?.id) {
+      return { error: `Channel #${parsed} not found`, questions: [] };
+    }
+    channelId = target.id;
+    channelName = parsed;
+  }
+
+  const oldest = String(Math.floor(Date.now() / 1000) - hours * 3600);
+
+  let historyResult;
+  try {
+    historyResult = await slack.conversations.history({
+      channel: channelId,
+      oldest,
+      limit: 100,
+    });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes('not_in_channel') || msg.includes('channel_not_found')) {
+      return {
+        error: `I'm not a member of #${channelName}. Invite me first: /invite @Community Agent in that channel.`,
+        questions: [],
+      };
+    }
+    return { error: `Failed to read #${channelName}: ${msg}`, questions: [] };
+  }
+
+  const unanswered = (historyResult.messages ?? [])
+    .filter(
+      (msg) => !msg.subtype && msg.text && (msg.reply_count === undefined || msg.reply_count === 0),
+    )
+    .map((msg) => ({
+      text: msg.text!.slice(0, 200),
+      user: msg.user ?? 'unknown',
+      ts: msg.ts,
+      permalink: `https://slack.com/archives/${channelId}/p${msg.ts?.replace('.', '')}`,
+    }));
+
+  if (unanswered.length > 0) {
+    await logAction({
+      type: 'surfaced',
+      channel: `#${channelName}`,
+      description: `Found ${unanswered.length} unanswered question${unanswered.length === 1 ? '' : 's'} in the last ${hours} hours`,
+      metadata: { count: String(unanswered.length), hours: String(hours) },
+    });
+  }
+
+  return {
+    channel: `#${channelName}`,
+    hoursScanned: hours,
+    count: unanswered.length,
+    questions: unanswered.slice(0, 10),
+  };
+}
+
+const flagInputSchema = z.object({
+  summary: z.string().describe('Brief summary of the issue being flagged'),
+  context: z
+    .string()
+    .describe('Relevant context: what was asked, what channel, why it needs human attention'),
+  permalink: z
+    .string()
+    .optional()
+    .describe('Slack permalink to the original message, if available'),
+});
+
+async function executeFlagToLead({
+  summary,
+  context,
+  permalink,
+}: {
+  summary: string;
+  context: string;
+  permalink?: string;
+}) {
+  'use step';
+
+  const leadId = config.communityLeadSlackId;
+  if (!leadId) {
+    return {
+      success: false,
+      error: 'No community lead configured. Set COMMUNITY_LEAD_SLACK_ID.',
+    };
+  }
+
+  const slack = new WebClient(process.env.SLACK_BOT_TOKEN);
+
+  const message = [
+    `:rotating_light: *Flagged for review*`,
+    '',
+    `*Summary:* ${summary}`,
+    '',
+    context,
+    permalink ? `\n<${permalink}|View in Slack>` : '',
+  ].join('\n');
+
+  try {
+    await slack.chat.postMessage({
+      channel: leadId,
+      text: message,
+    });
+
+    await logAction({
+      type: 'flagged',
+      channel: 'DM',
+      description: `Flagged issue to community lead: ${summary}`,
+      metadata: { summary },
+    });
+
+    return { success: true, message: 'Issue flagged to community lead.' };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { success: false, error: `Failed to flag: ${msg}` };
+  }
+}
+
+export const durableTools: Record<string, any> = {
+  suggest_channel: {
+    description: `Find the best channel for a question or topic. Use this when someone posts a question that might belong in a different channel. Returns the suggested channel and a list of all available channels.
+
+Examples:
+  "how do I fix this error" → #help
+  "the login page is broken" → #bugs
+  "hi I just joined" → #introductions`,
+    inputSchema: suggestChannelInputSchema,
+    execute: executeSuggestChannel,
+  },
+  unanswered: {
+    description: `Scan a channel for recent messages that haven't received any replies. Use this when someone asks about unanswered questions or when you want to help surface threads that need attention.
+
+Returns up to 10 unanswered messages with text previews and permalinks.
+
+Examples:
+  channel: "help"              → unanswered questions in #help (last 24h)
+  channel: "bugs", hours: 48   → unanswered bug reports in the last 2 days`,
+    inputSchema: unansweredInputSchema,
+    execute: executeUnanswered,
+  },
+  bash: {
+    description: `Execute a bash command to search and read knowledge base files.
+
+Available commands: ls, cat, head, tail, grep, find, wc, sort, uniq, cut, awk, sed, etc.
+
+Examples:
+  ls -la                    # List files with details
+  cat docs/file.txt         # View file contents
+  grep -r 'pattern' .       # Search file contents recursively
+  find . -name '*.md'       # Find files by pattern`,
+    inputSchema: bashInputSchema,
+    execute: executeBash,
+  },
+  bash_batch: {
+    description: `Execute multiple bash commands in one request (more efficient than multiple single calls). Use when you need to run several commands, e.g. listing files and then reading multiple.
+
+Example: ["ls -la", "cat README.md", "grep -r 'auth' docs/"]`,
+    inputSchema: bashBatchInputSchema,
+    execute: executeBashBatch,
+  },
+  web_search: {
+    description: `Search the web for current information. ALWAYS use this tool when someone asks a technical question, about recent updates, news, releases, or anything that may have changed since your training data. Do not answer questions about current events, recent developments, or technical concepts without searching first.`,
+    inputSchema: z.object({
+      query: z
+        .string()
+        .describe(
+          'A specific, detailed search query. Include version numbers, framework names, and the exact feature being asked about. Example: "Next.js 16 use cache directive" not just "use cache"',
+        ),
+    }),
+    execute: async function executeWebSearch({ query }: { query: string }) {
+      'use step';
+
+      try {
+        const result = await generateText({
+          model: gateway(config.model),
+          prompt: query,
+          tools: {
+            web_search: openai.tools.webSearch({}),
+          },
+        });
+
+        return result.text || 'No search results found.';
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error('[web_search] Failed:', message);
+        return `Search failed: ${message}`;
+      }
+    },
+  },
+  flag_to_lead: {
+    description: `Flag a tricky issue to a community lead for human review. Use this when you encounter a question or situation you cannot confidently handle — for example, sensitive topics, complex technical issues requiring expert knowledge, or potential policy violations.
+
+The community lead will receive a Slack DM with your summary and context.`,
+    inputSchema: flagInputSchema,
+    execute: executeFlagToLead,
+  },
+};
