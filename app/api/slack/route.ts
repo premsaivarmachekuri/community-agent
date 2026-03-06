@@ -1,6 +1,9 @@
 import { chat } from '@/lib/chat';
+import { createLogger } from '@/lib/logger';
 import { handleMemberJoined } from '@/lib/welcome';
 import { after } from 'next/server';
+
+const logger = createLogger('slack-webhook');
 
 export async function POST(request: Request) {
   const clone = request.clone();
@@ -20,8 +23,8 @@ export async function POST(request: Request) {
         }),
       );
     }
-  } catch {
-    // Body parse failed — fall through to Chat SDK
+  } catch (error) {
+    logger.debug('Body parse failed, falling through to Chat SDK', { error });
   }
 
   return chat.webhooks.slack(request, { waitUntil: (p) => after(() => p) });

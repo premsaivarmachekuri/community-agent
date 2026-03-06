@@ -1,7 +1,6 @@
 import { createSavoir } from '@savoir/sdk';
 import { generateText, gateway } from 'ai';
 import { openai } from '@ai-sdk/openai';
-import { WebClient } from '@slack/web-api';
 import { z } from 'zod';
 import { channels } from '@/lib/channels';
 import { config } from '@/lib/config';
@@ -132,7 +131,8 @@ async function executeUnanswered({ channel, hours = 24 }: { channel: string; hou
 
   const parsed = parseChannelInput(channel);
   const isChannelId = /^[A-Z0-9]+$/.test(parsed) && parsed.startsWith('C');
-  const slack = new WebClient(process.env.SLACK_BOT_TOKEN);
+  const { getSlackClient } = await import('@/lib/slack');
+  const slack = getSlackClient();
 
   let channelId: string;
   let channelName: string;
@@ -236,7 +236,8 @@ async function executeFlagToLead({
     };
   }
 
-  const slack = new WebClient(process.env.SLACK_BOT_TOKEN);
+  const { getSlackClient } = await import('@/lib/slack');
+  const slack = getSlackClient();
 
   const message = [
     `:rotating_light: *Flagged for review*`,
@@ -333,7 +334,8 @@ Example: ["ls -la", "cat README.md", "grep -r 'auth' docs/"]`,
         return result.text || 'No search results found.';
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        console.error('[web_search] Failed:', message);
+        const { createLogger } = await import('@/lib/logger');
+        createLogger('web_search').error('Search failed', { error: message });
         return `Search failed: ${message}`;
       }
     },

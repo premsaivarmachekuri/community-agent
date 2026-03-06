@@ -1,13 +1,13 @@
 import { Chat, ConsoleLogger } from 'chat';
 import { createSlackAdapter } from '@chat-adapter/slack';
 import { createRedisState } from '@chat-adapter/state-redis';
-import { WebClient } from '@slack/web-api';
 import { workflowAgent } from '@/workflows/agent-workflow';
+import { getSlackClient } from '@/lib/slack';
 import { start } from 'workflow/api';
 
 const logger = new ConsoleLogger('info');
 
-const slackClient = new WebClient(process.env.SLACK_BOT_TOKEN);
+const slackClient = getSlackClient();
 
 /** Thread IDs follow the format: "slack:CHANNEL_ID:THREAD_TS" */
 function parseThreadId(threadId: string): { channelId: string; threadTs: string } | null {
@@ -38,7 +38,7 @@ async function fetchThreadHistory(
     const messages = result.messages.slice(0, -1);
 
     return messages
-      .filter((msg) => msg.text && !(msg as any).subtype) // Filter out system messages
+      .filter((msg) => msg.text && !('subtype' in msg))
       .map((msg) => ({
         role: (msg.user === botUserId ? 'assistant' : 'user') as 'user' | 'assistant',
         content: msg.text!,
@@ -106,7 +106,10 @@ async function handleMessage(
         botToken: process.env.SLACK_BOT_TOKEN!,
       },
     },
-  ]);
+  ]).catch((err) => {
+    logger.error('Workflow failed to start', { error: String(err) });
+    thread.post('Sorry, something went wrong processing your message.').catch(() => {});
+  });
 }
 
 chat.onNewMention(async (thread, message) => {

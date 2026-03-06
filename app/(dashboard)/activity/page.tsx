@@ -15,6 +15,7 @@ import { Header } from '@/components/Header';
 import { FormattedTime } from '@/components/FormattedTime';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { getRecentActions } from '@/data/queries/actions';
 import { auth } from '@/lib/auth';
 import { getLastSeen, setLastSeen } from '@/lib/store';
@@ -52,7 +53,9 @@ export default function ActivityPage() {
 async function ActivityList() {
   const [actions, session] = await Promise.all([
     getRecentActions(),
-    auth.api.getSession({ headers: await headers() }).catch(() => null),
+    auth.api.getSession({ headers: await headers() }).catch(() => {
+      return null;
+    }),
   ]);
 
   let lastSeen = 0;
@@ -89,13 +92,20 @@ async function ActivityList() {
         return (
           <ViewTransition key={action.id}>
             <Card className={isNew ? 'animate-new-glow' : ''}>
-              <CardContent className="flex items-start gap-4 py-4">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted">
-                  <Icon className="h-4 w-4 text-muted-foreground" />
+              <CardContent className="flex items-start gap-3 py-3 sm:gap-4 sm:py-4">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted sm:h-9 sm:w-9">
+                  <Icon className="h-3.5 w-3.5 text-muted-foreground sm:h-4 sm:w-4" />
                 </div>
-                <div className="flex-1 space-y-1.5">
-                  <p className="text-sm">{action.description}</p>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="min-w-0 flex-1 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm">{action.description}</p>
+                    {isNew && (
+                      <Badge variant="secondary" className="shrink-0 text-[10px] sm:hidden">
+                        New
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                     <FormattedTime timestamp={action.timestamp} />
                     {action.lastUpdated && action.lastUpdated !== action.timestamp && (
                       <>
@@ -109,7 +119,7 @@ async function ActivityList() {
                     <span>{action.channel}</span>
                   </div>
                   {(action.type === 'answered' || action.metadata?.permalink) && (
-                    <div className="flex items-center gap-2 pt-0.5">
+                    <div className="flex flex-wrap items-center gap-2 pt-0.5">
                       {action.type === 'answered' && (
                         <Link
                           href={`/activity/${action.id}` as any}
@@ -133,7 +143,7 @@ async function ActivityList() {
                     </div>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="hidden items-center gap-2 sm:flex">
                   {isNew && <Badge variant="secondary">New</Badge>}
                   <Badge variant={config.variant}>{config.label}</Badge>
                 </div>
@@ -152,13 +162,13 @@ function ActivityListSkeleton() {
       {[1, 2, 3, 4, 5].map((i) => (
         <Card key={i}>
           <CardContent className="flex items-start gap-4 py-4">
-            <div className="h-9 w-9 shrink-0 animate-pulse rounded-full bg-muted" />
+            <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
             <div className="flex-1 space-y-1.5">
-              <div className="h-4 w-64 animate-pulse rounded bg-muted" />
-              <div className="h-4 w-36 animate-pulse rounded bg-muted" />
-              <div className="h-7 w-24 animate-pulse rounded bg-muted" />
+              <Skeleton className="h-4 w-64" />
+              <Skeleton className="h-4 w-36" />
+              <Skeleton className="h-7 w-24" />
             </div>
-            <div className="h-6 w-16 animate-pulse rounded bg-muted" />
+            <Skeleton className="h-6 w-16" />
           </CardContent>
         </Card>
       ))}

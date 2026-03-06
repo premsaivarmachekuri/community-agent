@@ -7,6 +7,7 @@ import { Header } from '@/components/Header';
 import { FormattedTime } from '@/components/FormattedTime';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { getActionById, getConversation } from '@/data/queries/actions';
 import { isCurrentUserLead } from '@/lib/auth';
 import { cn } from '@/lib/utils';
@@ -91,7 +92,7 @@ async function ConversationDetail({ params }: { params: Params }) {
                 )}
               </div>
               <Card className={cn('max-w-[75%]', msg.role === 'assistant' && 'bg-muted/50')}>
-                <CardContent className="py-3 text-sm whitespace-pre-wrap">
+                <CardContent className="py-3 text-sm whitespace-pre-wrap break-words">
                   {cleanSlackText(msg.content)}
                   {msg.timestamp && (
                     <div className="mt-1 text-xs text-muted-foreground">
@@ -123,14 +124,14 @@ function ConversationSkeleton() {
     <div className="space-y-4">
       <Card>
         <CardContent className="flex items-center justify-between py-3">
-          <div className="h-3.5 w-64 animate-pulse rounded bg-muted" />
-          <div className="h-5 w-24 animate-pulse rounded bg-muted" />
+          <Skeleton className="h-3.5 w-64" />
+          <Skeleton className="h-5 w-24" />
         </CardContent>
       </Card>
       <div className="space-y-2 py-4">
-        <div className="h-4 w-48 animate-pulse rounded bg-muted" />
-        <div className="h-4 w-72 animate-pulse rounded bg-muted" />
-        <div className="h-4 w-56 animate-pulse rounded bg-muted" />
+        <Skeleton className="h-4 w-48" />
+        <Skeleton className="h-4 w-72" />
+        <Skeleton className="h-4 w-56" />
       </div>
     </div>
   );

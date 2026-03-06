@@ -297,7 +297,8 @@ Tools (`suggest_channel`, `unanswered`, `bash`, `bash_batch`, `web_search`, `fla
 | `workflows/agent-workflow/index.ts` | Durable workflow — runs DurableAgent, posts response to Slack, logs the action with conversation                                                 |
 | `workflows/agent-workflow/steps.ts` | Individual durable steps (`'use step'` directive) — post to Slack, resolve channel names, log actions                                            |
 | `lib/config.ts`                     | Centralized env var config (`COMMUNITY_NAME`, `AI_MODEL`, `SAVOIR_API_URL`, etc.)                                                                |
-| `lib/store.ts`                      | Upstash Redis store — writes/reads bot actions, stats, and conversations                                                                         |
+| `lib/slack.ts`                      | Singleton Slack `WebClient` factory — used by Chat SDK and workflow steps                                                                        |
+| `lib/store.ts`                      | Upstash Redis store — writes/reads bot actions, stats, and conversations (indexed by action ID with sorted-set fallback)                         |
 | `lib/logger.ts`                     | Structured logger — outputs to console (visible in Vercel dashboard)                                                                             |
 
 > **Workflow constraint:** Files using `'use step'` or `'use workflow'` must live inside the `workflows/` directory for the bundler to process them. Node.js-only packages (like `@slack/web-api`) must be dynamically imported inside step functions — they can't be used at the workflow top level.

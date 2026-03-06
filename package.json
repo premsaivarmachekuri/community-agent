@@ -8,6 +8,19 @@
     "type": "git",
     "url": "git+https://github.com/vercel-labs/community-agent-template.git"
   },
+  "homepage": "https://github.com/vercel-labs/community-agent-template#readme",
+  "author": "Vercel",
+  "keywords": [
+    "slack-bot",
+    "ai-agent",
+    "community-management",
+    "nextjs",
+    "vercel",
+    "ai-sdk",
+    "chat-sdk",
+    "admin-panel",
+    "template"
+  ],
   "bugs": {
     "url": "https://github.com/vercel-labs/community-agent-template/issues"
   },

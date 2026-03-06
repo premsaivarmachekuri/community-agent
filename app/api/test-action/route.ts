@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { logAction, clearAllActions } from '@/lib/store';
-import { auth } from '@/lib/auth';
+import { auth, isCurrentUserLead } from '@/lib/auth';
 import { headers } from 'next/headers';
 import type { BotAction, ConversationMessage } from '@/lib/types';
 
@@ -75,16 +75,21 @@ const actions: TestAction[] = [
   },
 ];
 
-async function requireAuth() {
+async function requireAuthOrDev() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  if (process.env.NODE_ENV !== 'production') return null;
+  const isLead = await isCurrentUserLead();
+  if (!isLead) {
+    return NextResponse.json({ error: 'Forbidden — lead access required' }, { status: 403 });
   }
   return null;
 }
 
 export async function POST() {
-  const denied = await requireAuth();
+  const denied = await requireAuthOrDev();
   if (denied) return denied;
 
   const action = actions[Math.floor(Math.random() * actions.length)];
@@ -99,7 +104,7 @@ export async function POST() {
 }
 
 export async function DELETE() {
-  const denied = await requireAuth();
+  const denied = await requireAuthOrDev();
   if (denied) return denied;
 
   await clearAllActions();

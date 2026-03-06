@@ -1,7 +1,7 @@
-import { WebClient } from '@slack/web-api';
 import { channels, getWelcomeChannel } from './channels';
 import { config } from './config';
 import { createLogger } from './logger';
+import { getSlackClient } from './slack';
 import { logAction } from './store';
 
 const logger = createLogger('welcome');
@@ -26,7 +26,7 @@ export async function handleMemberJoined(event: { user: string; channel: string 
   const welcomeChannel = getWelcomeChannel();
   if (!welcomeChannel) return;
 
-  const slack = new WebClient(process.env.SLACK_BOT_TOKEN);
+  const slack = getSlackClient();
 
   try {
     const info = await slack.conversations.info({ channel: event.channel });

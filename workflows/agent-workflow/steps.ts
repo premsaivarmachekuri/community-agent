@@ -1,4 +1,3 @@
-import { WebClient } from '@slack/web-api';
 import { chat } from '@/lib/chat';
 import { logAction } from '@/lib/store';
 import type { BotAction, ConversationMessage, SlackContext } from '@/lib/types';
@@ -19,10 +18,12 @@ export async function stepResolveChannelName(channelId: string): Promise<string>
   'use step';
 
   try {
-    const slack = new WebClient(process.env.SLACK_BOT_TOKEN);
-    const info = await slack.conversations.info({ channel: channelId });
+    const { getSlackClient } = await import('@/lib/slack');
+    const info = await getSlackClient().conversations.info({ channel: channelId });
     return info.channel?.name ? `#${info.channel.name}` : 'DM';
-  } catch {
+  } catch (error) {
+    const { createLogger } = await import('@/lib/logger');
+    createLogger('steps').debug('Failed to resolve channel name', { channelId, error });
     return 'DM';
   }
 }
@@ -34,10 +35,15 @@ export async function stepGetPermalink(
   'use step';
 
   try {
-    const slack = new WebClient(process.env.SLACK_BOT_TOKEN);
-    const result = await slack.chat.getPermalink({ channel: channelId, message_ts: messageTs });
+    const { getSlackClient } = await import('@/lib/slack');
+    const result = await getSlackClient().chat.getPermalink({
+      channel: channelId,
+      message_ts: messageTs,
+    });
     return result.permalink ?? null;
-  } catch {
+  } catch (error) {
+    const { createLogger } = await import('@/lib/logger');
+    createLogger('steps').debug('Failed to get permalink', { channelId, error });
     return null;
   }
 }
