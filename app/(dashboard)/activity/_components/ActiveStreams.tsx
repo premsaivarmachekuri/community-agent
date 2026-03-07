@@ -6,6 +6,7 @@ import { Loader2, Radio } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { fetchActiveStreams, type AnnotatedStream } from '@/data/actions/stream';
+import { cn } from '@/lib/utils';
 import { useActiveStreams } from './ActiveStreamsContext';
 
 export function ActiveStreams() {
@@ -41,34 +42,51 @@ export function ActiveStreams() {
 
   const newStreams = streams.filter((s) => !s.isFollowUp);
 
-  if (newStreams.length === 0) return null;
+  const isActive = newStreams.length > 0;
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-        <Radio className="h-3.5 w-3.5 animate-pulse text-green-500" />
-        Live
-      </div>
-      <ViewTransition>
-        <Card className="border-green-500/20 bg-green-500/5">
-          <CardContent className="flex items-start gap-3 py-3 sm:gap-4 sm:py-4">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-green-500/10 sm:h-9 sm:w-9">
+    <ViewTransition>
+      <Card
+        className={
+          isActive
+            ? 'border-green-500/20 bg-green-500/5'
+            : 'border-dashed'
+        }
+      >
+        <CardContent className="flex items-center gap-3 py-3 sm:gap-4 sm:py-4">
+          <div
+            className={cn(
+              'flex h-7 w-7 shrink-0 items-center justify-center rounded-full sm:h-9 sm:w-9',
+              isActive ? 'bg-green-500/10' : 'bg-muted',
+            )}
+          >
+            {isActive ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin text-green-500 sm:h-4 sm:w-4" />
-            </div>
-            <div className="min-w-0 flex-1 space-y-1">
-              <p className="text-sm">Bot is responding&hellip;</p>
-              <p className="line-clamp-2 text-xs text-muted-foreground">{newStreams[0].prompt}</p>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span>{newStreams[0].channel}</span>
-                {newStreams.length > 1 && <span>&middot; and {newStreams.length - 1} more</span>}
-              </div>
-            </div>
-            <Badge variant="outline" className="shrink-0 border-green-500/30 text-green-600">
-              Streaming
-            </Badge>
-          </CardContent>
-        </Card>
-      </ViewTransition>
-    </div>
+            ) : (
+              <Radio className="h-3.5 w-3.5 text-muted-foreground/40 sm:h-4 sm:w-4" />
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm">
+              {isActive
+                ? newStreams.length > 1
+                  ? `Bot is responding to ${newStreams.length} conversations\u2026`
+                  : `Bot is responding in ${newStreams[0].channel}\u2026`
+                : 'Bot is idle'}
+            </p>
+          </div>
+          <Badge
+            variant="outline"
+            className={
+              isActive
+                ? 'shrink-0 border-green-500/30 text-green-600'
+                : 'shrink-0 text-muted-foreground/50'
+            }
+          >
+            {isActive ? 'Streaming' : 'Idle'}
+          </Badge>
+        </CardContent>
+      </Card>
+    </ViewTransition>
   );
 }

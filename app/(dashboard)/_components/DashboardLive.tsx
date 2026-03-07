@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, startTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Radio } from 'lucide-react';
 import { fetchActiveStreams } from '@/data/actions/stream';
+import { cn } from '@/lib/utils';
 
 export function DashboardLive() {
   const [count, setCount] = useState(0);
@@ -33,18 +34,34 @@ export function DashboardLive() {
     return () => clearInterval(interval);
   }, [router]);
 
-  if (count === 0) return null;
-
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-green-500/20 bg-green-500/5 px-4 py-2.5 text-sm">
-      <Radio className="h-3.5 w-3.5 animate-pulse text-green-500" />
-      <span>
-        Bot is handling{' '}
-        <span className="font-medium text-green-600">
-          {count} {count === 1 ? 'conversation' : 'conversations'}
+    <div
+      className={cn(
+        'flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm',
+        count > 0
+          ? 'border-green-500/20 bg-green-500/5'
+          : 'border-dashed text-muted-foreground/50',
+      )}
+    >
+      <Radio
+        className={cn(
+          'h-3.5 w-3.5',
+          count > 0 ? 'animate-pulse text-green-500' : 'text-muted-foreground/30',
+        )}
+      />
+      {count > 0 ? (
+        <span>
+          Bot is handling{' '}
+          <span className="font-medium text-green-600">
+            {count} {count === 1 ? 'conversation' : 'conversations'}
+          </span>
         </span>
-      </span>
-      <Loader2 className="ml-auto h-3.5 w-3.5 animate-spin text-green-500" />
+      ) : (
+        <span>Bot is idle</span>
+      )}
+      {count > 0 && (
+        <Loader2 className="ml-auto h-3.5 w-3.5 animate-spin text-green-500" />
+      )}
     </div>
   );
 }
