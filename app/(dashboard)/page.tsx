@@ -246,14 +246,15 @@ function RecentActivitySkeleton() {
         <Skeleton className="h-5 w-28" />
         <Skeleton className="h-8 w-20" />
       </CardHeader>
-      <CardContent className="space-y-3">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="flex items-start gap-3">
-            <Skeleton className="mt-1 h-2 w-2 rounded-full" />
+      <CardContent className="space-y-1">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="-mx-2 flex items-start gap-3 px-2 py-2">
+            <Skeleton className="mt-0.5 h-6 w-6 shrink-0 rounded-full" />
             <div className="flex-1 space-y-1">
               <Skeleton className="h-4 w-3/4" />
               <Skeleton className="h-3 w-1/3" />
             </div>
+            <Skeleton className="hidden h-5 w-16 sm:block" />
           </div>
         ))}
       </CardContent>
@@ -268,11 +269,11 @@ function StatsCardsSkeleton() {
         <Card key={i} className="gap-2 py-3 sm:gap-6 sm:py-6">
           <CardHeader className="flex flex-row items-center justify-between px-3 pb-0 sm:px-6 sm:pb-2">
             <Skeleton className="h-3 w-16 sm:h-4 sm:w-24" />
-            <Skeleton className="hidden h-4 w-4 sm:block" />
+            <Skeleton className="hidden h-7 w-7 rounded-full sm:block" />
           </CardHeader>
           <CardContent className="px-3 sm:px-6">
             <Skeleton className="mb-1 h-7 w-10 sm:h-9 sm:w-12" />
-            <Skeleton className="hidden h-4 w-32 sm:block" />
+            <Skeleton className="hidden h-3 w-24 sm:block" />
           </CardContent>
         </Card>
       ))}

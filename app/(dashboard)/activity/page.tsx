@@ -284,7 +284,7 @@ function ActivityFiltersSkeleton() {
         <Skeleton
           key={label}
           className="h-[30px] rounded-md"
-          style={{ width: `${label.length * 8 + 24}px` }}
+          style={{ width: `${label.length * 8 + 40}px` }}
         />
       ))}
     </div>
