@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { logAction, clearAllActions } from '@/lib/store';
+import { logAction, clearAllActions, writeStreamEntry } from '@/lib/store';
 import { auth, isCurrentUserLead } from '@/lib/auth';
 import { headers } from 'next/headers';
 import type { BotAction, ConversationMessage } from '@/lib/types';
@@ -101,6 +101,23 @@ export async function POST() {
 
   const id = await logAction(action, conversation);
   return NextResponse.json({ logged: { ...action, id }, hasConversation: Boolean(conversation) });
+}
+
+export async function PUT() {
+  const denied = await requireAuthOrDev();
+  if (denied) return denied;
+
+  const threadId = `TEST:${Date.now()}`;
+  await writeStreamEntry({
+    threadId,
+    channel: '#help',
+    prompt: 'How do I set up authentication in this project?',
+    text: '',
+    status: 'streaming',
+    timestamp: Date.now(),
+  });
+
+  return NextResponse.json({ streaming: true, threadId, ttlSeconds: 120 });
 }
 
 export async function DELETE() {

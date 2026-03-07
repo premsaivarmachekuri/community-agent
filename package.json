@@ -33,11 +33,10 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@ai-sdk/openai": "^3.0.41",
+    "@ai-sdk/anthropic": "^3.0.58",
     "@chat-adapter/slack": "^4.17.0",
     "@chat-adapter/state-redis": "^4.17.0",
     "@libsql/client": "^0.17.0",
-    "@savoir/sdk": "^0.1.0-alpha.1",
     "@slack/web-api": "^7.14.1",
     "@tailwindcss/postcss": "^4.2.1",
     "@upstash/redis": "^1.36.3",

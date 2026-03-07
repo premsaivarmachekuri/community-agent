@@ -47,14 +47,12 @@ function buildWebSearchInstructions(): string {
 
 ## Web Search
 
-You have a web_search tool that searches the internet for current information. You MUST use it when:
-- Someone asks a technical question about a framework, library, API, or tool
-- Someone asks about recent updates, releases, news, or "what's the latest"
-- A question requires information that may have changed since your training data
-- You're unsure about current facts, versions, or announcements
-- Someone asks "what is X" or "how does X work" for any technical concept
+You have web search and web fetch tools. Use them proactively when:
+- Someone asks a technical question you're not 100% sure about
+- A question involves recent updates, releases, or current information
+- You need to look up documentation or verify facts
 
-IMPORTANT: When in doubt, SEARCH. Never say "I couldn't find information", "check the docs", or suggest asking in another channel if the question is something you could answer by searching first. Use web_search before falling back to routing.`;
+When in doubt, search first. Don't suggest "check the docs" if you can search for the answer yourself.`;
 }
 
 function buildFlaggingInstructions(): string {

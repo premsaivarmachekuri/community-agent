@@ -1,6 +1,6 @@
 import { chat } from '@/lib/chat';
-import { logAction } from '@/lib/store';
-import type { BotAction, ConversationMessage, SlackContext } from '@/lib/types';
+import { logAction, writeStreamEntry, clearStream } from '@/lib/store';
+import type { BotAction, ConversationMessage, SlackContext, StreamEntry } from '@/lib/types';
 
 export async function stepPostToSlack(slack: SlackContext, text: string): Promise<void> {
   'use step';
@@ -56,4 +56,16 @@ export async function stepLogAction(
   'use step';
 
   await logAction(action, conversation, threadKey);
+}
+
+export async function stepStartStream(entry: StreamEntry): Promise<void> {
+  'use step';
+
+  await writeStreamEntry(entry);
+}
+
+export async function stepEndStream(threadId: string): Promise<void> {
+  'use step';
+
+  await clearStream(threadId);
 }

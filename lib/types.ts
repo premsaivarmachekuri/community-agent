@@ -57,3 +57,13 @@ export type Conversation = {
   actionId: string;
   messages: ConversationMessage[];
 };
+
+/** An active agent stream visible in the admin panel */
+export type StreamEntry = {
+  threadId: string;
+  channel: string;
+  prompt: string;
+  text: string;
+  status: 'streaming' | 'done';
+  timestamp: number;
+};

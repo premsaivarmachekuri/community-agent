@@ -1,5 +1,4 @@
 import { ExternalLink } from 'lucide-react';
-import { AutoRefresh } from '@/components/AutoRefresh';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -19,7 +18,6 @@ export function Header({ title, description }: HeaderProps) {
         {description && <p className="truncate text-sm text-muted-foreground">{description}</p>}
       </div>
       <div className="flex items-center gap-2 sm:gap-3">
-        <AutoRefresh />
         {config.slackWorkspaceUrl && (
           <Button variant="outline" size="sm" className="hidden sm:inline-flex" asChild>
             <a href={config.slackWorkspaceUrl} target="_blank" rel="noopener noreferrer">

@@ -1,16 +1,16 @@
-import { createSavoir } from '@savoir/sdk';
-import { generateText, gateway } from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { anthropic } from '@ai-sdk/anthropic';
 import { z } from 'zod';
 import { channels } from '@/lib/channels';
 import { config } from '@/lib/config';
+import { createSavoirClient } from '@/lib/savoir';
 import { logAction } from '@/lib/store';
 
+const deferLoading = {
+  providerOptions: { anthropic: { deferLoading: true } },
+};
+
 const savoir = config.savoirApiUrl
-  ? createSavoir({
-      apiUrl: config.savoirApiUrl,
-      apiKey: config.savoirApiKey || undefined,
-    })
+  ? createSavoirClient(config.savoirApiUrl, config.savoirApiKey || undefined)
   : null;
 
 async function executeBash({ command }: { command: string }) {
@@ -24,7 +24,7 @@ async function executeBash({ command }: { command: string }) {
     };
   }
 
-  const result = await savoir.client.bash(command);
+  const result = await savoir.bash(command);
 
   return {
     stdout: result.stdout,
@@ -47,7 +47,7 @@ async function executeBashBatch({ commands }: { commands: string[] }) {
     };
   }
 
-  const result = await savoir.client.bashBatch(commands);
+  const result = await savoir.bashBatch(commands);
 
   return {
     results: result.results.map((r) => ({
@@ -302,6 +302,7 @@ Examples:
   find . -name '*.md'       # Find files by pattern`,
     inputSchema: bashInputSchema,
     execute: executeBash,
+    ...deferLoading,
   },
   bash_batch: {
     description: `Execute multiple bash commands in one request (more efficient than multiple single calls). Use when you need to run several commands, e.g. listing files and then reading multiple.
@@ -309,42 +310,26 @@ Examples:
 Example: ["ls -la", "cat README.md", "grep -r 'auth' docs/"]`,
     inputSchema: bashBatchInputSchema,
     execute: executeBashBatch,
+    ...deferLoading,
   },
-  web_search: {
-    description: `Search the web for current information. ALWAYS use this tool when someone asks a technical question, about recent updates, news, releases, or anything that may have changed since your training data. Do not answer questions about current events, recent developments, or technical concepts without searching first.`,
-    inputSchema: z.object({
-      query: z
-        .string()
-        .describe(
-          'A specific, detailed search query. Include version numbers, framework names, and the exact feature being asked about. Example: "Next.js 16 use cache directive" not just "use cache"',
-        ),
-    }),
-    execute: async function executeWebSearch({ query }: { query: string }) {
-      'use step';
-
-      try {
-        const result = await generateText({
-          model: gateway(config.model),
-          prompt: query,
-          tools: {
-            web_search: openai.tools.webSearch({}),
-          },
-        });
-
-        return result.text || 'No search results found.';
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        const { createLogger } = await import('@/lib/logger');
-        createLogger('web_search').error('Search failed', { error: message });
-        return `Search failed: ${message}`;
-      }
-    },
-  },
+  webSearch: anthropic.tools.webSearch_20250305({
+    maxUses: 5,
+    ...(config.searchDomains.length > 0
+      ? { allowedDomains: config.searchDomains }
+      : {}),
+  }),
+  webFetch: anthropic.tools.webFetch_20250910({
+    maxUses: 5,
+    ...(config.searchDomains.length > 0
+      ? { allowedDomains: config.searchDomains }
+      : {}),
+  }),
   flag_to_lead: {
     description: `Flag a tricky issue to a community lead for human review. Use this when you encounter a question or situation you cannot confidently handle — for example, sensitive topics, complex technical issues requiring expert knowledge, or potential policy violations.
 
 The community lead will receive a Slack DM with your summary and context.`,
     inputSchema: flagInputSchema,
     execute: executeFlagToLead,
+    ...deferLoading,
   },
 };

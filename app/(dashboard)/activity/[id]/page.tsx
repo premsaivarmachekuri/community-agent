@@ -1,20 +1,22 @@
-import { Suspense } from 'react';
+import { Suspense, ViewTransition } from 'react';
 import { connection } from 'next/server';
 import { ArrowLeft, Bot, ExternalLink, Lock, User } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { FormattedTime } from '@/components/FormattedTime';
+import { LiveStreamIndicator } from '@/components/LiveStreamIndicator';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getActionById, getConversation } from '@/data/queries/actions';
 import { isCurrentUserLead } from '@/lib/auth';
+import { getThreadKeyForAction } from '@/lib/store';
 import { cn } from '@/lib/utils';
 
-type Params = Promise<{ id: string }>;
-
-export default function ConversationPage({ params }: { params: Params }) {
+export default function ConversationPage({
+  params,
+}: PageProps<"/activity/[id]">) {
   return (
     <>
       <Header title="Conversation" description="Full conversation thread" />
@@ -32,7 +34,9 @@ export default function ConversationPage({ params }: { params: Params }) {
   );
 }
 
-async function ConversationDetail({ params }: { params: Params }) {
+async function ConversationDetail({
+  params,
+}: Pick<PageProps<"/activity/[id]">, "params">) {
   await connection();
   const { id: actionId } = await params;
 
@@ -40,72 +44,78 @@ async function ConversationDetail({ params }: { params: Params }) {
   if (!action) notFound();
 
   const isDM = action.channel === 'DM';
-  const canViewDM = isDM ? await isCurrentUserLead() : true;
+  const [canViewDM, threadKey] = await Promise.all([
+    isDM ? isCurrentUserLead() : true,
+    getThreadKeyForAction(actionId),
+  ]);
 
   const messages = canViewDM ? await getConversation(actionId) : [];
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardContent className="flex items-center justify-between py-3">
-          <span className="text-sm text-muted-foreground">
-            {action.description} &middot; {action.channel} &middot;{' '}
-            <FormattedTime timestamp={action.timestamp} />
-          </span>
-          {action.metadata?.permalink && (
-            <a href={action.metadata.permalink} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="sm">
-                <ExternalLink className="mr-1 h-3 w-3" />
-                View in Slack
-              </Button>
-            </a>
-          )}
-        </CardContent>
-      </Card>
-      {isDM && !canViewDM ? (
+    <ViewTransition>
+      <div className="space-y-4">
         <Card>
-          <CardContent className="flex items-center gap-3 py-8 justify-center text-muted-foreground">
-            <Lock className="h-4 w-4" />
-            <span className="text-sm">
-              DM conversations are only visible to the community lead.
+          <CardContent className="flex items-center justify-between py-3">
+            <span className="text-sm text-muted-foreground">
+              {action.description} &middot; {action.channel} &middot;{' '}
+              <FormattedTime timestamp={action.timestamp} />
             </span>
+            {action.metadata?.permalink && (
+              <a href={action.metadata.permalink} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm">
+                  <ExternalLink className="mr-1 h-3 w-3" />
+                  View in Slack
+                </Button>
+              </a>
+            )}
           </CardContent>
         </Card>
-      ) : messages.length === 0 ? (
-        <Card>
-          <CardContent className="py-8 text-center text-sm text-muted-foreground">
-            No conversation content available for this action.
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-3">
-          {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={cn('flex gap-3', msg.role === 'assistant' && 'flex-row-reverse')}
-            >
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
-                {msg.role === 'user' ? (
-                  <User className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <Bot className="h-4 w-4 text-muted-foreground" />
-                )}
-              </div>
-              <Card className={cn('max-w-[75%]', msg.role === 'assistant' && 'bg-muted/50')}>
-                <CardContent className="py-3 text-sm whitespace-pre-wrap break-words">
-                  {cleanSlackText(msg.content)}
-                  {msg.timestamp && (
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      <FormattedTime timestamp={msg.timestamp} />
-                    </div>
+        {isDM && !canViewDM ? (
+          <Card>
+            <CardContent className="flex items-center justify-center gap-3 py-8 text-muted-foreground">
+              <Lock className="h-4 w-4" />
+              <span className="text-sm">
+                DM conversations are only visible to the community lead.
+              </span>
+            </CardContent>
+          </Card>
+        ) : messages.length === 0 ? (
+          <Card>
+            <CardContent className="py-8 text-center text-sm text-muted-foreground">
+              No conversation content available for this action.
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {messages.map((msg, i) => (
+              <div
+                key={i}
+                className={cn('flex gap-3', msg.role === 'assistant' && 'flex-row-reverse')}
+              >
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
+                  {msg.role === 'user' ? (
+                    <User className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Bot className="h-4 w-4 text-muted-foreground" />
                   )}
-                </CardContent>
-              </Card>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+                </div>
+                <Card className={cn('max-w-[75%]', msg.role === 'assistant' && 'bg-muted/50')}>
+                  <CardContent className="py-3 text-sm whitespace-pre-wrap break-words">
+                    {cleanSlackText(msg.content)}
+                    {msg.timestamp && (
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        <FormattedTime timestamp={msg.timestamp} />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            ))}
+            {threadKey && <LiveStreamIndicator threadKey={threadKey} />}
+          </div>
+        )}
+      </div>
+    </ViewTransition>
   );
 }
 

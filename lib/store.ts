@@ -1,5 +1,5 @@
 import { Redis } from '@upstash/redis';
-import type { BotAction, ConversationMessage } from './types';
+import type { BotAction, ConversationMessage, StreamEntry } from './types';
 import { createLogger } from './logger';
 
 const logger = createLogger('store');
@@ -32,8 +32,11 @@ const ACTIONS_INDEX_PREFIX = 'bot:action:';
 const STATS_KEY = 'bot:stats';
 const CONVERSATIONS_PREFIX = 'bot:conv:';
 const THREAD_ACTION_PREFIX = 'bot:thread:';
+const ACTION_THREAD_PREFIX = 'bot:action-thread:';
 const LASTSEEN_PREFIX = 'bot:lastseen:';
+const STREAM_PREFIX = 'bot:stream:';
 const TTL_30_DAYS = 60 * 60 * 24 * 30;
+const TTL_STREAM = 120;
 
 function parseEntry<T>(entry: string | T): T {
   return typeof entry === 'string' ? JSON.parse(entry) : entry;
@@ -84,7 +87,10 @@ export async function logAction(
     }
 
     if (threadKey) {
-      ops.push(client.set(`${THREAD_ACTION_PREFIX}${threadKey}`, id, { ex: TTL_30_DAYS }));
+      ops.push(
+        client.set(`${THREAD_ACTION_PREFIX}${threadKey}`, id, { ex: TTL_30_DAYS }),
+        client.set(`${ACTION_THREAD_PREFIX}${id}`, threadKey, { ex: TTL_30_DAYS }),
+      );
     }
 
     await Promise.all(ops);
@@ -179,12 +185,13 @@ export async function clearAllActions(): Promise<void> {
   if (!client) return;
 
   try {
-    const [convKeys, threadKeys, indexKeys] = await Promise.all([
+    const [convKeys, threadKeys, indexKeys, reverseKeys] = await Promise.all([
       scanKeys(client, `${CONVERSATIONS_PREFIX}*`),
       scanKeys(client, `${THREAD_ACTION_PREFIX}*`),
       scanKeys(client, `${ACTIONS_INDEX_PREFIX}*`),
+      scanKeys(client, `${ACTION_THREAD_PREFIX}*`),
     ]);
-    const allKeys = [ACTIONS_KEY, STATS_KEY, ...convKeys, ...threadKeys, ...indexKeys];
+    const allKeys = [ACTIONS_KEY, STATS_KEY, ...convKeys, ...threadKeys, ...indexKeys, ...reverseKeys];
     if (allKeys.length > 0) {
       await client.del(...allKeys);
     }
@@ -264,5 +271,71 @@ export async function getStats(): Promise<ActionStats> {
   } catch (error) {
     logger.error('Failed to get stats', { error: safeErrorMessage(error) });
     return { routed: 0, welcomed: 0, surfaced: 0, answered: 0, flagged: 0, total: 0 };
+  }
+}
+
+export async function writeStreamEntry(entry: StreamEntry): Promise<void> {
+  const client = getRedis();
+  if (!client) return;
+
+  try {
+    await client.set(`${STREAM_PREFIX}${entry.threadId}`, JSON.stringify(entry), {
+      ex: TTL_STREAM,
+    });
+  } catch (error) {
+    logger.error('Failed to write stream entry', { error: safeErrorMessage(error) });
+  }
+}
+
+export async function clearStream(threadId: string): Promise<void> {
+  const client = getRedis();
+  if (!client) return;
+
+  try {
+    await client.del(`${STREAM_PREFIX}${threadId}`);
+  } catch (error) {
+    logger.error('Failed to clear stream', { error: safeErrorMessage(error) });
+  }
+}
+
+export async function getActiveStreams(): Promise<StreamEntry[]> {
+  const client = getRedis();
+  if (!client) return [];
+
+  try {
+    const keys = await scanKeys(client, `${STREAM_PREFIX}*`);
+    if (keys.length === 0) return [];
+
+    const values = await Promise.all(keys.map((key) => client.get<string>(key)));
+    return values.filter(Boolean).map((v) => parseEntry<StreamEntry>(v!));
+  } catch (error) {
+    logger.error('Failed to get active streams', { error: safeErrorMessage(error) });
+    return [];
+  }
+}
+
+export async function getThreadKeyForAction(actionId: string): Promise<string | null> {
+  const client = getRedis();
+  if (!client) return null;
+
+  try {
+    return await client.get<string>(`${ACTION_THREAD_PREFIX}${actionId}`);
+  } catch (error) {
+    logger.error('Failed to get thread key for action', { error: safeErrorMessage(error) });
+    return null;
+  }
+}
+
+export async function getStreamByThreadKey(threadKey: string): Promise<StreamEntry | null> {
+  const client = getRedis();
+  if (!client) return null;
+
+  try {
+    const raw = await client.get<string>(`${STREAM_PREFIX}${threadKey}`);
+    if (!raw) return null;
+    return parseEntry<StreamEntry>(raw);
+  } catch (error) {
+    logger.error('Failed to get stream by thread key', { error: safeErrorMessage(error) });
+    return null;
   }
 }

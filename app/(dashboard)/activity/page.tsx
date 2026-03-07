@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
+import { ActiveStreams } from '@/components/ActiveStreams';
 import { FormattedTime } from '@/components/FormattedTime';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -41,7 +42,8 @@ export default function ActivityPage() {
   return (
     <>
       <Header title="Activity" description="Recent bot actions across your community" />
-      <div className="flex-1 p-6">
+      <div className="flex-1 space-y-4 p-6">
+        <ActiveStreams />
         <Suspense fallback={<ActivityListSkeleton />}>
           <ActivityList />
         </Suspense>

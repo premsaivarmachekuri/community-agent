@@ -8,9 +8,9 @@ importers:
 
   .:
     dependencies:
-      '@ai-sdk/openai':
-        specifier: ^3.0.41
-        version: 3.0.41(zod@3.25.76)
+      '@ai-sdk/anthropic':
+        specifier: ^3.0.58
+        version: 3.0.58(zod@3.25.76)
       '@chat-adapter/slack':
         specifier: ^4.17.0
         version: 4.17.0
@@ -20,9 +20,6 @@ importers:
       '@libsql/client':
         specifier: ^0.17.0
         version: 0.17.0
-      '@savoir/sdk':
-        specifier: ^0.1.0-alpha.1
-        version: 0.1.0-alpha.1(ai@6.0.116(zod@3.25.76))
       '@slack/web-api':
         specifier: ^7.14.1
         version: 7.14.1
@@ -150,8 +147,8 @@ importers:
 
 packages:
 
-  '@ai-sdk/anthropic@3.0.12':
-    resolution: {integrity: sha512-1ygMQ2acJ9k+CPRuDiywtkuQwSdsZwAISgbRIayE3PF/Ct2b80c4iGS1CbycYMx+yswPyBMOuPTqebh9vvwMMg==}
+  '@ai-sdk/anthropic@3.0.58':
+    resolution: {integrity: sha512-/53SACgmVukO4bkms4dpxpRlYhW8Ct6QZRe6sj1Pi5H00hYhxIrqfiLbZBGxkdRvjsBQeP/4TVGsXgH5rQeb8Q==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -2189,15 +2186,6 @@ packages:
 
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
-
-  '@savoir/sdk@0.1.0-alpha.1':
-    resolution: {integrity: sha512-114Lkkf6b4Ij38IrlClFAIlJWYBRIrP8HpwKgPFqzY3Fh9eal2hRliLl0CGHZ4wt4vcEYIkMkFkPKoHguI3YmQ==}
-    engines: {node: '>=20.0.0'}
-    peerDependencies:
-      ai: '>=6.0.68'
-    peerDependenciesMeta:
-      ai:
-        optional: true
 
   '@sec-ant/readable-stream@0.4.1':
     resolution: {integrity: sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg==}
@@ -6796,10 +6784,16 @@ packages:
 
 snapshots:
 
-  '@ai-sdk/anthropic@3.0.12(zod@4.3.6)':
+  '@ai-sdk/anthropic@3.0.58(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/provider': 3.0.2
-      '@ai-sdk/provider-utils': 4.0.5(zod@4.3.6)
+      '@ai-sdk/provider': 3.0.8
+      '@ai-sdk/provider-utils': 4.0.19(zod@3.25.76)
+      zod: 3.25.76
+
+  '@ai-sdk/anthropic@3.0.58(zod@4.3.6)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.8
+      '@ai-sdk/provider-utils': 4.0.19(zod@4.3.6)
       zod: 4.3.6
     optional: true
 
@@ -6831,12 +6825,6 @@ snapshots:
       '@ai-sdk/provider-utils': 4.0.5(zod@4.3.6)
       zod: 4.3.6
     optional: true
-
-  '@ai-sdk/openai@3.0.41(zod@3.25.76)':
-    dependencies:
-      '@ai-sdk/provider': 3.0.8
-      '@ai-sdk/provider-utils': 4.0.19(zod@3.25.76)
-      zod: 3.25.76
 
   '@ai-sdk/openai@3.0.41(zod@4.3.6)':
     dependencies:
@@ -8934,12 +8922,6 @@ snapshots:
 
   '@rtsao/scc@1.1.0': {}
 
-  '@savoir/sdk@0.1.0-alpha.1(ai@6.0.116(zod@3.25.76))':
-    dependencies:
-      zod: 4.3.6
-    optionalDependencies:
-      ai: 6.0.116(zod@3.25.76)
-
   '@sec-ant/readable-stream@0.4.1': {}
 
   '@sindresorhus/is@5.6.0': {}
@@ -9655,7 +9637,7 @@ snapshots:
       workflow: 4.2.0-beta.65(@nestjs/common@11.1.15(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.15(@nestjs/common@11.1.15(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(@opentelemetry/api@1.9.0)(@swc/cli@0.8.0(@swc/core@1.15.3)(chokidar@5.0.0))(@swc/core@1.15.3)(next@16.1.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-router@7.13.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)
       zod: 4.3.6
     optionalDependencies:
-      '@ai-sdk/anthropic': 3.0.12(zod@4.3.6)
+      '@ai-sdk/anthropic': 3.0.58(zod@4.3.6)
       '@ai-sdk/gateway': 3.0.13(zod@4.3.6)
       '@ai-sdk/google': 3.0.7(zod@4.3.6)
       '@ai-sdk/openai': 3.0.41(zod@4.3.6)

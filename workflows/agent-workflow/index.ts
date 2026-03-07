@@ -1,12 +1,20 @@
 import { DurableAgent } from '@workflow/ai/agent';
 import { getWritable } from 'workflow';
 import type { UIMessageChunk } from 'ai';
+import type { AnthropicLanguageModelOptions } from '@ai-sdk/anthropic';
 import type { AgentInput, AgentResult } from '@/lib/types';
 import { createLogger } from '@/lib/logger';
 import { config } from '@/lib/config';
 import { buildInstructions } from '@/lib/agent';
 import { durableTools } from './tools';
-import { stepPostToSlack, stepResolveChannelName, stepGetPermalink, stepLogAction } from './steps';
+import {
+  stepPostToSlack,
+  stepResolveChannelName,
+  stepGetPermalink,
+  stepLogAction,
+  stepStartStream,
+  stepEndStream,
+} from './steps';
 
 export async function workflowAgent(input: AgentInput): Promise<AgentResult> {
   'use workflow';
@@ -19,14 +27,51 @@ export async function workflowAgent(input: AgentInput): Promise<AgentResult> {
   let success = true;
   let result: any = null;
 
+  const streamThreadId = input.slack
+    ? `${input.slack.channelId}:${input.slack.threadTs}`
+    : undefined;
+
   try {
     const agent = new DurableAgent({
       model: config.model,
       system: buildInstructions(),
       tools: durableTools as any,
+      providerOptions: {
+        anthropic: {
+          contextManagement: {
+            edits: [
+              {
+                type: 'clear_tool_uses_20250919',
+                trigger: { type: 'input_tokens', value: 80_000 },
+                keep: { type: 'tool_uses', value: 5 },
+                clearAtLeast: { type: 'input_tokens', value: 5000 },
+                clearToolInputs: true,
+              },
+              {
+                type: 'compact_20260112',
+                trigger: { type: 'input_tokens', value: 100_000 },
+                instructions:
+                  'Summarize the conversation concisely, preserving key decisions, tool results, and context.',
+                pauseAfterCompaction: false,
+              },
+            ],
+          },
+        } satisfies AnthropicLanguageModelOptions,
+      },
     });
 
     const messages = [...(input.history || []), { role: 'user' as const, content: input.prompt }];
+
+    if (streamThreadId && input.slack) {
+      await stepStartStream({
+        threadId: streamThreadId,
+        channel: input.slack.channelId,
+        prompt: input.prompt,
+        text: '',
+        status: 'streaming',
+        timestamp: Date.now(),
+      });
+    }
 
     result = await agent.stream({
       messages,
@@ -108,6 +153,10 @@ export async function workflowAgent(input: AgentInput): Promise<AgentResult> {
         threadKey,
       );
     }
+  }
+
+  if (streamThreadId) {
+    await stepEndStream(streamThreadId);
   }
 
   logger.info('Workflow completed', { success, responseLength: responseText.length });
