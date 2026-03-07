@@ -3,6 +3,7 @@ import { connection } from 'next/server';
 import { ArrowLeft, Bot, ExternalLink, Lock, User } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import Markdown from 'react-markdown';
 import { Header } from '@/components/Header';
 import { FormattedTime } from '@/components/FormattedTime';
 import { LiveStreamIndicator } from '@/components/LiveStreamIndicator';
@@ -99,8 +100,14 @@ async function ConversationDetail({
                     )}
                   </div>
                   <Card className={cn('max-w-[75%]', msg.role === 'assistant' && 'bg-muted/50')}>
-                    <CardContent className="px-4 py-2 text-sm whitespace-pre-wrap break-words">
-                      {cleanSlackText(msg.content)}
+                    <CardContent className="px-4 py-2 text-sm wrap-break-word">
+                      {msg.role === 'assistant' ? (
+                        <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-headings:my-2">
+                          <Markdown>{cleanSlackText(msg.content)}</Markdown>
+                        </div>
+                      ) : (
+                        <span className="whitespace-pre-wrap">{cleanSlackText(msg.content)}</span>
+                      )}
                       {msg.timestamp && (
                         <div className="mt-1 text-xs text-muted-foreground">
                           <FormattedTime timestamp={msg.timestamp} />

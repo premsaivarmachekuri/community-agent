@@ -39,6 +39,7 @@
     "@libsql/client": "^0.17.0",
     "@slack/web-api": "^7.14.1",
     "@tailwindcss/postcss": "^4.2.1",
+    "@tailwindcss/typography": "^0.5.19",
     "@upstash/redis": "^1.36.3",
     "@workflow/ai": "4.0.1-beta.54",
     "ai": "^6.0.116",
@@ -54,6 +55,7 @@
     "radix-ui": "^1.4.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-markdown": "^10.1.0",
     "tailwind-merge": "^3.5.0",
     "workflow": "4.2.0-beta.65",
     "zod": "^3.25.76"

@@ -15,6 +15,7 @@ import { Header } from '@/components/Header';
 import { ActiveStreams } from '@/components/ActiveStreams';
 import { ActiveStreamsProvider } from '@/components/ActiveStreamsContext';
 import { ActivityCardGlow } from '@/components/ActivityCardGlow';
+import { ActivityFilters } from '@/components/ActivityFilters';
 import { FormattedTime } from '@/components/FormattedTime';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -40,15 +41,20 @@ const typeConfig: Record<
   flagged: { icon: AlertTriangle, label: 'Flagged', variant: 'destructive' },
 };
 
-export default function ActivityPage() {
+export default function ActivityPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string }>;
+}) {
   return (
     <>
       <Header title="Activity" description="Recent bot actions across your community" />
       <div className="flex-1 space-y-4 p-6">
         <ActiveStreamsProvider>
           <ActiveStreams />
+          <ActivityFilters />
           <Suspense fallback={<ActivityListSkeleton />}>
-            <ActivityList />
+            <ActivityList searchParams={searchParams} />
           </Suspense>
         </ActiveStreamsProvider>
       </div>
@@ -56,13 +62,20 @@ export default function ActivityPage() {
   );
 }
 
-async function ActivityList() {
-  const [actions, session] = await Promise.all([
+async function ActivityList({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string }>;
+}) {
+  const [{ type }, allActions, session] = await Promise.all([
+    searchParams,
     getRecentActions(),
     auth.api.getSession({ headers: await headers() }).catch(() => {
       return null;
     }),
   ]);
+
+  const actions = type ? allActions.filter((a) => a.type === type) : allActions;
 
   let lastSeen = 0;
   if (session?.user?.id) {
