@@ -214,7 +214,14 @@ export async function clearAllActions(): Promise<void> {
       scanKeys(client, `${ACTIONS_INDEX_PREFIX}*`),
       scanKeys(client, `${ACTION_THREAD_PREFIX}*`),
     ]);
-    const allKeys = [ACTIONS_KEY, STATS_KEY, ...convKeys, ...threadKeys, ...indexKeys, ...reverseKeys];
+    const allKeys = [
+      ACTIONS_KEY,
+      STATS_KEY,
+      ...convKeys,
+      ...threadKeys,
+      ...indexKeys,
+      ...reverseKeys,
+    ];
     if (allKeys.length > 0) {
       await client.del(...allKeys);
     }

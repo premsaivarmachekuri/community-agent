@@ -14,10 +14,7 @@ const ActiveStreamsContext = createContext<ActiveStreamsContextValue>({
 
 export function ActiveStreamsProvider({ children }: { children: ReactNode }) {
   const [activeThreadKeys, setActiveThreadKeys] = useState<string[]>([]);
-  const value = useMemo(
-    () => ({ activeThreadKeys, setActiveThreadKeys }),
-    [activeThreadKeys],
-  );
+  const value = useMemo(() => ({ activeThreadKeys, setActiveThreadKeys }), [activeThreadKeys]);
   return <ActiveStreamsContext value={value}>{children}</ActiveStreamsContext>;
 }
 

@@ -70,28 +70,28 @@ After creating:
 
 Add these in your Vercel project settings (or `.env.local` for local dev):
 
-| Variable                   | Required  | Description                                                                                                   |
-| -------------------------- | --------- | ------------------------------------------------------------------------------------------------------------- |
-| `SLACK_BOT_TOKEN`          | For Slack | Bot token from your Slack app (`xoxb-...`)                                                                    |
-| `SLACK_SIGNING_SECRET`     | For Slack | Signing secret from Slack app settings                                                                        |
-| `REDIS_URL`                | For Slack | Redis for conversation state (`redis://...`)                                                                  |
-| `ANTHROPIC_API_KEY`        | For AI    | Anthropic API key from [console.anthropic.com](https://console.anthropic.com/settings/keys)                   |
-| `COMMUNITY_NAME`           | No        | Name shown in bot responses (default: "Your Community")                                                       |
-| `AI_MODEL`                 | No        | AI model (default: `anthropic/claude-sonnet-4-20250514`). Uses [AI Gateway](https://vercel.com/docs/ai-gateway) for routing |
-| `UPSTASH_REDIS_REST_URL`   | No        | Upstash Redis REST URL (or use `KV_REST_API_URL` from Vercel Marketplace)                                     |
-| `UPSTASH_REDIS_REST_TOKEN` | No        | Upstash Redis REST token (or use `KV_REST_API_TOKEN` from Vercel Marketplace)                                 |
-| `SLACK_WORKSPACE_URL`      | No        | Slack workspace URL — adds an "Open Slack" link to the admin panel                                            |
-| `AI_GATEWAY_API_KEY`       | No        | AI Gateway API key (auto-authenticated on Vercel via OIDC)                                                    |
-| `SAVOIR_API_URL`           | No        | [Knowledge Agent Template](https://github.com/vercel-labs/knowledge-agent-template) API URL for sandboxed bash execution |
-| `SAVOIR_API_KEY`           | No        | Savoir API key (if the instance requires auth)                                                                |
+| Variable                   | Required  | Description                                                                                                                                        |
+| -------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SLACK_BOT_TOKEN`          | For Slack | Bot token from your Slack app (`xoxb-...`)                                                                                                         |
+| `SLACK_SIGNING_SECRET`     | For Slack | Signing secret from Slack app settings                                                                                                             |
+| `REDIS_URL`                | For Slack | Redis for conversation state (`redis://...`)                                                                                                       |
+| `ANTHROPIC_API_KEY`        | For AI    | Anthropic API key from [console.anthropic.com](https://console.anthropic.com/settings/keys)                                                        |
+| `COMMUNITY_NAME`           | No        | Name shown in bot responses (default: "Your Community")                                                                                            |
+| `AI_MODEL`                 | No        | AI model (default: `anthropic/claude-sonnet-4-20250514`). Uses [AI Gateway](https://vercel.com/docs/ai-gateway) for routing                        |
+| `UPSTASH_REDIS_REST_URL`   | No        | Upstash Redis REST URL (or use `KV_REST_API_URL` from Vercel Marketplace)                                                                          |
+| `UPSTASH_REDIS_REST_TOKEN` | No        | Upstash Redis REST token (or use `KV_REST_API_TOKEN` from Vercel Marketplace)                                                                      |
+| `SLACK_WORKSPACE_URL`      | No        | Slack workspace URL — adds an "Open Slack" link to the admin panel                                                                                 |
+| `AI_GATEWAY_API_KEY`       | No        | AI Gateway API key (auto-authenticated on Vercel via OIDC)                                                                                         |
+| `SAVOIR_API_URL`           | No        | [Knowledge Agent Template](https://github.com/vercel-labs/knowledge-agent-template) API URL for sandboxed bash execution                           |
+| `SAVOIR_API_KEY`           | No        | Savoir API key (if the instance requires auth)                                                                                                     |
 | `SEARCH_DOMAINS`           | No        | Comma-separated domains for Claude's web search/fetch tools (e.g. `docs.example.com,partner.com`). When set, the bot can only search these domains |
-| `COMMUNITY_LEAD_SLACK_ID`  | No        | Slack user ID — bot can escalate tricky issues via DM                                                         |
-| `BETTER_AUTH_SECRET`       | Yes       | Secret for admin panel auth sessions (min 32 chars). Generate with `openssl rand -base64 32`                  |
-| `SLACK_CLIENT_ID`          | Yes       | Slack app Client ID (Basic Information → App Credentials)                                                     |
-| `SLACK_CLIENT_SECRET`      | Yes       | Slack app Client Secret (same location)                                                                       |
-| `SLACK_TEAM_ID`            | Yes       | Slack workspace ID (`T...`) — restricts admin sign-in to workspace members                                    |
-| `TURSO_DATABASE_URL`       | For prod  | Turso database URL (`libsql://...`). Defaults to `file:local.db` for local dev                                |
-| `TURSO_AUTH_TOKEN`         | For prod  | Turso auth token (from Vercel Turso integration or [turso.tech](https://turso.tech))                          |
+| `COMMUNITY_LEAD_SLACK_ID`  | No        | Slack user ID — bot can escalate tricky issues via DM                                                                                              |
+| `BETTER_AUTH_SECRET`       | Yes       | Secret for admin panel auth sessions (min 32 chars). Generate with `openssl rand -base64 32`                                                       |
+| `SLACK_CLIENT_ID`          | Yes       | Slack app Client ID (Basic Information → App Credentials)                                                                                          |
+| `SLACK_CLIENT_SECRET`      | Yes       | Slack app Client Secret (same location)                                                                                                            |
+| `SLACK_TEAM_ID`            | Yes       | Slack workspace ID (`T...`) — restricts admin sign-in to workspace members                                                                         |
+| `TURSO_DATABASE_URL`       | For prod  | Turso database URL (`libsql://...`). Defaults to `file:local.db` for local dev                                                                     |
+| `TURSO_AUTH_TOKEN`         | For prod  | Turso auth token (from Vercel Turso integration or [turso.tech](https://turso.tech))                                                               |
 
 ## 3. Set up Vercel Storage
 
@@ -181,17 +181,17 @@ After deploying, go to your Slack app → **Event Subscriptions** → set the Re
 
 ## Testing the bot
 
-| What to try      | How                                                                                                 | Example response                                                                                                                                                                              |
-| ---------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Channel routing  | `@Community Agent I found a security vulnerability in the API, the auth tokens are being logged in` | "It sounds like this is a serious issue with potential security implications. I recommend reporting this in the #bugs channel so that it can be addressed by the right team."                 |
-| Channel routing  | `@Community Agent how do I set up Vercel Workflow?`                                                 | "It looks like your question about setting up Vercel Workflow would fit best in the #help channel, as it's related to getting support."                                                       |
-| Flag to lead     | `@Community Agent someone is being rude in #help, can you get a human to look at it?`               | "I've flagged the rudeness issue in the channel to a community lead. They'll take a look at it. Thanks for bringing it to my attention!" (bot DMs the lead)                                   |
-| Web search       | `@Community Agent what's the latest on Next.js 16 caching?`                                         | "Next.js 16 introduces significant updates to caching mechanisms. Key features include: 1. Caching Profiles..." (searches via Claude's native web search, scoped to `SEARCH_DOMAINS`)         |
-| Knowledge base   | `@Community Agent what files are in the knowledge base?`                                            | "We have the following files in the knowledge base: README.md, docs (directory)." (uses `bash` tool via Savoir — requires `SAVOIR_API_URL`)                                                   |
-| Knowledge search | `@Community Agent search the docs for authentication`                                               | Bot runs `grep -r "authentication" docs/` in the Savoir sandbox and summarizes the results                                                                                                   |
-| Unanswered scan  | `@Community Agent are there any unanswered questions in #help?`                                     | "There are no unanswered questions in the #help channel in the last 24 hours!" (or lists threads that need attention)                                                                         |
-| Thread follow-up | Reply in the thread: `thanks, where can I report a bug?`                                            | "You can report bugs in the #bugs channel." (maintains conversation context)                                                                                                                  |
-| Trigger welcome  | Join `#introductions`                                                                               | Bot posts a welcome message with a channel guide                                                                                                                                              |
-| DM the bot       | Send a direct message                                                                               | Bot responds as a community manager with general help                                                                                                                                         |
+| What to try      | How                                                                                                 | Example response                                                                                                                                                                      |
+| ---------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Channel routing  | `@Community Agent I found a security vulnerability in the API, the auth tokens are being logged in` | "It sounds like this is a serious issue with potential security implications. I recommend reporting this in the #bugs channel so that it can be addressed by the right team."         |
+| Channel routing  | `@Community Agent how do I set up Vercel Workflow?`                                                 | "It looks like your question about setting up Vercel Workflow would fit best in the #help channel, as it's related to getting support."                                               |
+| Flag to lead     | `@Community Agent someone is being rude in #help, can you get a human to look at it?`               | "I've flagged the rudeness issue in the channel to a community lead. They'll take a look at it. Thanks for bringing it to my attention!" (bot DMs the lead)                           |
+| Web search       | `@Community Agent what's the latest on Next.js 16 caching?`                                         | "Next.js 16 introduces significant updates to caching mechanisms. Key features include: 1. Caching Profiles..." (searches via Claude's native web search, scoped to `SEARCH_DOMAINS`) |
+| Knowledge base   | `@Community Agent what files are in the knowledge base?`                                            | "We have the following files in the knowledge base: README.md, docs (directory)." (uses `bash` tool via Savoir — requires `SAVOIR_API_URL`)                                           |
+| Knowledge search | `@Community Agent search the docs for authentication`                                               | Bot runs `grep -r "authentication" docs/` in the Savoir sandbox and summarizes the results                                                                                            |
+| Unanswered scan  | `@Community Agent are there any unanswered questions in #help?`                                     | "There are no unanswered questions in the #help channel in the last 24 hours!" (or lists threads that need attention)                                                                 |
+| Thread follow-up | Reply in the thread: `thanks, where can I report a bug?`                                            | "You can report bugs in the #bugs channel." (maintains conversation context)                                                                                                          |
+| Trigger welcome  | Join `#introductions`                                                                               | Bot posts a welcome message with a channel guide                                                                                                                                      |
+| DM the bot       | Send a direct message                                                                               | Bot responds as a community manager with general help                                                                                                                                 |
 
 Each action is logged to the admin panel — check the dashboard to see stats and activity update in real time.

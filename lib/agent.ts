@@ -48,7 +48,7 @@ function buildWebSearchInstructions(): string {
 ## Web Search
 
 You have web search and web fetch tools. Use them when:
-- Someone asks a technical question you're not 100% sure about${config.savoirApiUrl ? ' and the knowledge base doesn\'t cover it' : ''}
+- Someone asks a technical question you're not 100% sure about${config.savoirApiUrl ? " and the knowledge base doesn't cover it" : ''}
 - A question involves recent updates, releases, or current information
 - You need to verify facts that may have changed recently
 

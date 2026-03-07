@@ -15,9 +15,7 @@ import { isCurrentUserLead } from '@/lib/auth';
 import { getThreadKeyForAction } from '@/lib/store';
 import { cn } from '@/lib/utils';
 
-export default function ConversationPage({
-  params,
-}: PageProps<"/activity/[id]">) {
+export default function ConversationPage({ params }: PageProps<'/activity/[id]'>) {
   return (
     <>
       <Header title="Conversation" description="Full conversation thread" />
@@ -35,9 +33,7 @@ export default function ConversationPage({
   );
 }
 
-async function ConversationDetail({
-  params,
-}: Pick<PageProps<"/activity/[id]">, "params">) {
+async function ConversationDetail({ params }: Pick<PageProps<'/activity/[id]'>, 'params'>) {
   await connection();
   const { id: actionId } = await params;
 
@@ -53,75 +49,73 @@ async function ConversationDetail({
   const messages = canViewDM ? await getConversation(actionId) : [];
 
   return (
-      <div className="space-y-4">
+    <div className="space-y-4">
+      <Card>
+        <CardContent className="flex items-center justify-between py-3">
+          <span className="text-sm text-muted-foreground">
+            {action.description} &middot; {action.channel} &middot;{' '}
+            <FormattedTime timestamp={action.timestamp} />
+          </span>
+          {action.metadata?.permalink && (
+            <a href={action.metadata.permalink} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" size="sm">
+                <ExternalLink className="mr-1 h-3 w-3" />
+                View in Slack
+              </Button>
+            </a>
+          )}
+        </CardContent>
+      </Card>
+      {isDM && !canViewDM ? (
         <Card>
-          <CardContent className="flex items-center justify-between py-3">
-            <span className="text-sm text-muted-foreground">
-              {action.description} &middot; {action.channel} &middot;{' '}
-              <FormattedTime timestamp={action.timestamp} />
+          <CardContent className="flex items-center justify-center gap-3 py-8 text-muted-foreground">
+            <Lock className="h-4 w-4" />
+            <span className="text-sm">
+              DM conversations are only visible to the community lead.
             </span>
-            {action.metadata?.permalink && (
-              <a href={action.metadata.permalink} target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" size="sm">
-                  <ExternalLink className="mr-1 h-3 w-3" />
-                  View in Slack
-                </Button>
-              </a>
-            )}
           </CardContent>
         </Card>
-        {isDM && !canViewDM ? (
-          <Card>
-            <CardContent className="flex items-center justify-center gap-3 py-8 text-muted-foreground">
-              <Lock className="h-4 w-4" />
-              <span className="text-sm">
-                DM conversations are only visible to the community lead.
-              </span>
-            </CardContent>
-          </Card>
-        ) : messages.length === 0 ? (
-          <Card>
-            <CardContent className="py-8 text-center text-sm text-muted-foreground">
-              No conversation content available for this action.
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-3">
-            {messages.map((msg, i) => (
-              <ViewTransition key={i}>
-                <div
-                  className={cn('flex gap-3', msg.role === 'assistant' && 'flex-row-reverse')}
-                >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
-                    {msg.role === 'user' ? (
-                      <User className="h-4 w-4 text-muted-foreground" />
-                    ) : (
-                      <Bot className="h-4 w-4 text-muted-foreground" />
-                    )}
-                  </div>
-                  <Card className={cn('max-w-[75%]', msg.role === 'assistant' && 'bg-muted/50')}>
-                    <CardContent className="px-4 py-2 text-sm wrap-break-word">
-                      {msg.role === 'assistant' ? (
-                        <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-headings:my-2">
-                          <Markdown>{cleanSlackText(msg.content)}</Markdown>
-                        </div>
-                      ) : (
-                        <span className="whitespace-pre-wrap">{cleanSlackText(msg.content)}</span>
-                      )}
-                      {msg.timestamp && (
-                        <div className="mt-1 text-xs text-muted-foreground">
-                          <FormattedTime timestamp={msg.timestamp} />
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
+      ) : messages.length === 0 ? (
+        <Card>
+          <CardContent className="py-8 text-center text-sm text-muted-foreground">
+            No conversation content available for this action.
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {messages.map((msg, i) => (
+            <ViewTransition key={i}>
+              <div className={cn('flex gap-3', msg.role === 'assistant' && 'flex-row-reverse')}>
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
+                  {msg.role === 'user' ? (
+                    <User className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Bot className="h-4 w-4 text-muted-foreground" />
+                  )}
                 </div>
-              </ViewTransition>
-            ))}
-            {threadKey && <LiveStreamIndicator threadKey={threadKey} />}
-          </div>
-        )}
-      </div>
+                <Card className={cn('max-w-[75%]', msg.role === 'assistant' && 'bg-muted/50')}>
+                  <CardContent className="px-4 py-2 text-sm wrap-break-word">
+                    {msg.role === 'assistant' ? (
+                      <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-headings:my-2">
+                        <Markdown>{cleanSlackText(msg.content)}</Markdown>
+                      </div>
+                    ) : (
+                      <span className="whitespace-pre-wrap">{cleanSlackText(msg.content)}</span>
+                    )}
+                    {msg.timestamp && (
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        <FormattedTime timestamp={msg.timestamp} />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </ViewTransition>
+          ))}
+          {threadKey && <LiveStreamIndicator threadKey={threadKey} />}
+        </div>
+      )}
+    </div>
   );
 }
 

@@ -41,18 +41,16 @@ const typeConfig: Record<
   flagged: { icon: AlertTriangle, label: 'Flagged', variant: 'destructive' },
 };
 
-export default function ActivityPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ type?: string }>;
-}) {
+export default function ActivityPage({ searchParams }: PageProps<'/activity'>) {
   return (
     <>
       <Header title="Activity" description="Recent bot actions across your community" />
       <div className="flex-1 space-y-4 p-6">
         <ActiveStreamsProvider>
           <ActiveStreams />
-          <ActivityFilters />
+          <Suspense fallback={<ActivityFiltersSkeleton />}>
+            <ActivityFilters />
+          </Suspense>
           <Suspense fallback={<ActivityListSkeleton />}>
             <ActivityList searchParams={searchParams} />
           </Suspense>
@@ -62,20 +60,18 @@ export default function ActivityPage({
   );
 }
 
-async function ActivityList({
-  searchParams,
-}: {
-  searchParams: Promise<{ type?: string }>;
-}) {
+async function ActivityList({ searchParams }: Pick<PageProps<'/activity'>, 'searchParams'>) {
   const [{ type }, allActions, session] = await Promise.all([
     searchParams,
     getRecentActions(),
     auth.api.getSession({ headers: await headers() }).catch(() => {
       return null;
     }),
-  ]);
+  ] as const);
 
-  const actions = type ? allActions.filter((a) => a.type === type) : allActions;
+  const actions: BotAction[] = type
+    ? allActions.filter((a: BotAction) => a.type === type)
+    : allActions;
 
   let lastSeen = 0;
   if (session?.user?.id) {
@@ -111,68 +107,82 @@ async function ActivityList({
         return (
           <ViewTransition key={action.threadKey ?? action.id}>
             <ActivityCardGlow threadKey={action.threadKey}>
-            <Card className={isNew ? 'animate-new-glow' : ''}>
-              <CardContent className="flex items-start gap-3 py-3 sm:gap-4 sm:py-4">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted sm:h-9 sm:w-9">
-                  <Icon className="h-3.5 w-3.5 text-muted-foreground sm:h-4 sm:w-4" />
-                </div>
-                <div className="min-w-0 flex-1 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm">{action.description}</p>
-                    {isNew && (
-                      <Badge variant="secondary" className="shrink-0 text-[10px] sm:hidden">
-                        New
-                      </Badge>
-                    )}
+              <Card className={isNew ? 'animate-new-glow' : ''}>
+                <CardContent className="flex items-start gap-3 py-3 sm:gap-4 sm:py-4">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted sm:h-9 sm:w-9">
+                    <Icon className="h-3.5 w-3.5 text-muted-foreground sm:h-4 sm:w-4" />
                   </div>
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-                    <FormattedTime timestamp={action.timestamp} />
-                    {action.lastUpdated && action.lastUpdated !== action.timestamp && (
-                      <>
-                        <span>&middot;</span>
-                        <span>
-                          updated <FormattedTime timestamp={action.lastUpdated} />
-                        </span>
-                      </>
-                    )}
-                    <span>&middot;</span>
-                    <span>{action.channel}</span>
-                  </div>
-                  {(action.type === 'answered' || action.metadata?.permalink) && (
-                    <div className="flex flex-wrap items-center gap-2 pt-0.5">
-                      {action.type === 'answered' && (
-                        <Link
-                          href={`/activity/${action.id}` as any}
-                          className="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
-                        >
-                          <MessageCircle className="h-3 w-3" />
-                          Conversation
-                        </Link>
-                      )}
-                      {action.metadata?.permalink && (
-                        <a
-                          href={action.metadata.permalink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                          View in Slack
-                        </a>
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm">{action.description}</p>
+                      {isNew && (
+                        <Badge variant="secondary" className="shrink-0 text-[10px] sm:hidden">
+                          New
+                        </Badge>
                       )}
                     </div>
-                  )}
-                </div>
-                <div className="hidden items-center gap-2 sm:flex">
-                  {isNew && <Badge variant="secondary">New</Badge>}
-                  <Badge variant={config.variant}>{config.label}</Badge>
-                </div>
-              </CardContent>
-            </Card>
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                      <FormattedTime timestamp={action.timestamp} />
+                      {action.lastUpdated && action.lastUpdated !== action.timestamp && (
+                        <>
+                          <span>&middot;</span>
+                          <span>
+                            updated <FormattedTime timestamp={action.lastUpdated} />
+                          </span>
+                        </>
+                      )}
+                      <span>&middot;</span>
+                      <span>{action.channel}</span>
+                    </div>
+                    {(action.type === 'answered' || action.metadata?.permalink) && (
+                      <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                        {action.type === 'answered' && (
+                          <Link
+                            href={`/activity/${action.id}` as any}
+                            className="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+                          >
+                            <MessageCircle className="h-3 w-3" />
+                            Conversation
+                          </Link>
+                        )}
+                        {action.metadata?.permalink && (
+                          <a
+                            href={action.metadata.permalink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            View in Slack
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="hidden items-center gap-2 sm:flex">
+                    {isNew && <Badge variant="secondary">New</Badge>}
+                    <Badge variant={config.variant}>{config.label}</Badge>
+                  </div>
+                </CardContent>
+              </Card>
             </ActivityCardGlow>
           </ViewTransition>
         );
       })}
+    </div>
+  );
+}
+
+function ActivityFiltersSkeleton() {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {['All', 'Answered', 'Routed', 'Welcomed', 'Surfaced', 'Flagged'].map((label) => (
+        <Skeleton
+          key={label}
+          className="h-[30px] rounded-md"
+          style={{ width: `${label.length * 8 + 24}px` }}
+        />
+      ))}
     </div>
   );
 }

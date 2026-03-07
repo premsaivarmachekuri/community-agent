@@ -13,7 +13,9 @@ Each call logs a random action (answered, routed, welcomed, surfaced, or flagged
 The `PUT` method creates a temporary stream entry so you can verify the real-time indicators without a Slack connection. Open the Activity page (`/activity`) in your browser, then run this in the DevTools console:
 
 ```js
-fetch('/api/test-action', { method: 'PUT' }).then(r => r.json()).then(console.log)
+fetch('/api/test-action', { method: 'PUT' })
+  .then((r) => r.json())
+  .then(console.log);
 ```
 
 Within a few seconds, a green "Live" card should appear at the top of the activity list showing "Bot is responding..." with a spinner. The stream entry auto-expires after 120 seconds (Redis TTL).
