@@ -7,7 +7,7 @@ import {
   UserPlus,
 } from 'lucide-react';
 import { Header } from '@/components/Header';
-import { AnalyticsChart } from '../_components/AnalyticsChart';
+import { AnalyticsChart } from './_components/AnalyticsChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getRecentActions } from '@/data/queries/actions';
