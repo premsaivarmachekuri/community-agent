@@ -99,7 +99,7 @@ async function ConversationDetail({
                     )}
                   </div>
                   <Card className={cn('max-w-[75%]', msg.role === 'assistant' && 'bg-muted/50')}>
-                    <CardContent className="px-4  text-sm whitespace-pre-wrap break-words">
+                    <CardContent className="px-4 py-2 text-sm whitespace-pre-wrap break-words">
                       {cleanSlackText(msg.content)}
                       {msg.timestamp && (
                         <div className="mt-1 text-xs text-muted-foreground">

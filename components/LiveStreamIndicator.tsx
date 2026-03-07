@@ -18,9 +18,10 @@ export function LiveStreamIndicator({ threadKey }: { threadKey: string }) {
       const entry = await fetchStream(threadKey);
       setStream(entry);
 
-      if (entry) {
+      if (entry && !hadStream) {
         hadStream = true;
-      } else if (hadStream) {
+        router.refresh();
+      } else if (!entry && hadStream) {
         hadStream = false;
         router.refresh();
       }
