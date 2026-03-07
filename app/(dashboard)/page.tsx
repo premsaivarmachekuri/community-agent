@@ -6,6 +6,8 @@ import {
   AlertTriangle,
   ArrowRight,
   ArrowRightLeft,
+  BookOpen,
+  ExternalLink,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
@@ -23,6 +25,23 @@ export default function OverviewPage() {
       <Header title="Overview" description={`${config.communityName} dashboard`} />
       <div className="flex-1 space-y-6 p-6">
         <DashboardLive />
+        {config.savoirApiUrl && (
+          <div className="flex items-center gap-2 rounded-lg border border-blue-500/20 bg-blue-500/5 px-4 py-2.5 text-sm">
+            <BookOpen className="h-3.5 w-3.5 text-blue-500" />
+            <span>
+              Knowledge base:{' '}
+              <a
+                href={config.savoirApiUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-blue-600 hover:underline dark:text-blue-400"
+              >
+                {config.savoirApiUrl.replace(/^https?:\/\//, '')}
+                <ExternalLink className="ml-1 inline h-3 w-3" />
+              </a>
+            </span>
+          </div>
+        )}
         <Suspense fallback={<StatsCardsSkeleton />}>
           <StatsCards />
         </Suspense>
