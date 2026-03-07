@@ -5,7 +5,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function cleanSlackText(text: string): string {
+export function cleanSlackText(text: string | null | undefined): string {
+  if (!text) return '';
   return text
     .replace(/<@[A-Z0-9]+>/g, '')
     .replace(/@U[A-Z0-9]{8,}/g, '')
@@ -15,7 +16,8 @@ export function cleanSlackText(text: string): string {
     .trim();
 }
 
-export function stripMarkdown(text: string): string {
+export function stripMarkdown(text: string | null | undefined): string {
+  if (!text) return '';
   return text
     .replace(/^#{1,6}\s+/gm, '')
     .replace(/\*\*(.+?)\*\*/g, '$1')

@@ -31,7 +31,12 @@ export function ActivitySearch() {
   return (
     <div className="relative">
       <Search className="absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+      <label htmlFor="activity-search" className="sr-only">
+        Search activity
+      </label>
       <Input
+        id="activity-search"
+        key={searchParams.get('q') || ''}
         type="search"
         placeholder="Search activity..."
         defaultValue={searchParams.get('q') || ''}

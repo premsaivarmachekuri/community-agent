@@ -32,11 +32,41 @@ const typeConfig: Record<
     bgColor: string;
   }
 > = {
-  answered: { icon: MessageSquare, label: 'Answered', variant: 'default', iconColor: 'text-blue-500', bgColor: 'bg-blue-500/10' },
-  routed: { icon: ArrowRightLeft, label: 'Routed', variant: 'outline', iconColor: 'text-orange-500', bgColor: 'bg-orange-500/10' },
-  welcomed: { icon: UserPlus, label: 'Welcomed', variant: 'secondary', iconColor: 'text-green-500', bgColor: 'bg-green-500/10' },
-  surfaced: { icon: Search, label: 'Surfaced', variant: 'outline', iconColor: 'text-purple-500', bgColor: 'bg-purple-500/10' },
-  flagged: { icon: AlertTriangle, label: 'Flagged', variant: 'destructive', iconColor: 'text-red-500', bgColor: 'bg-red-500/10' },
+  answered: {
+    icon: MessageSquare,
+    label: 'Answered',
+    variant: 'default',
+    iconColor: 'text-blue-500',
+    bgColor: 'bg-blue-500/10',
+  },
+  routed: {
+    icon: ArrowRightLeft,
+    label: 'Routed',
+    variant: 'outline',
+    iconColor: 'text-orange-500',
+    bgColor: 'bg-orange-500/10',
+  },
+  welcomed: {
+    icon: UserPlus,
+    label: 'Welcomed',
+    variant: 'secondary',
+    iconColor: 'text-green-500',
+    bgColor: 'bg-green-500/10',
+  },
+  surfaced: {
+    icon: Search,
+    label: 'Surfaced',
+    variant: 'outline',
+    iconColor: 'text-purple-500',
+    bgColor: 'bg-purple-500/10',
+  },
+  flagged: {
+    icon: AlertTriangle,
+    label: 'Flagged',
+    variant: 'destructive',
+    iconColor: 'text-red-500',
+    bgColor: 'bg-red-500/10',
+  },
 };
 
 export default function OverviewPage() {
@@ -135,7 +165,9 @@ async function StatsCards() {
                 <CardTitle className="text-xs font-medium text-muted-foreground sm:text-sm">
                   {stat.title}
                 </CardTitle>
-                <div className={`hidden h-7 w-7 items-center justify-center rounded-full sm:flex ${cfg.bgColor}`}>
+                <div
+                  className={`hidden h-7 w-7 items-center justify-center rounded-full sm:flex ${cfg.bgColor}`}
+                >
                   <cfg.icon className={`h-3.5 w-3.5 ${cfg.iconColor}`} />
                 </div>
               </CardHeader>
@@ -172,9 +204,7 @@ async function StatsCards() {
                 <TrendingUp className="h-3 w-3" />+{thisWeek.total} this week
               </p>
             ) : (
-              <p className="hidden text-xs text-muted-foreground sm:block">
-                No activity this week
-              </p>
+              <p className="hidden text-xs text-muted-foreground sm:block">No activity this week</p>
             )}
           </CardContent>
         </Card>
@@ -217,7 +247,9 @@ async function RecentActivityCard() {
                   href={href as any}
                   className="-mx-2 flex items-start gap-3 rounded-md px-2 py-2 transition-colors hover:bg-accent/50"
                 >
-                  <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${cfg.bgColor}`}>
+                  <div
+                    className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${cfg.bgColor}`}
+                  >
                     <Icon className={`h-3 w-3 ${cfg.iconColor}`} />
                   </div>
                   <div className="min-w-0 flex-1 text-sm">

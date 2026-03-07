@@ -96,7 +96,12 @@ async function ConversationDetail({ params }: Pick<PageProps<'/activity/[id]'>, 
                     <Bot className="h-4 w-4 text-muted-foreground" />
                   )}
                 </div>
-                <Card className={cn('max-w-[75%] gap-0 py-0', msg.role === 'assistant' && 'bg-muted/50')}>
+                <Card
+                  className={cn(
+                    'max-w-[75%] gap-0 py-0',
+                    msg.role === 'assistant' && 'bg-muted/50',
+                  )}
+                >
                   <CardContent className="px-4 py-2 text-sm wrap-break-word">
                     {msg.role === 'assistant' ? (
                       <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-headings:my-1 prose-headings:text-sm prose-headings:font-semibold">

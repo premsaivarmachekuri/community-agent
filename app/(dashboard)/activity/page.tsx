@@ -130,7 +130,8 @@ async function ActivityList({ searchParams }: Pick<PageProps<'/activity'>, 'sear
 
   const PAGE_SIZE = 20;
   const totalCount = actions.length;
-  const limit = limitParam ? Math.min(Number(limitParam), totalCount) : PAGE_SIZE;
+  const rawLimit = Array.isArray(limitParam) ? limitParam[0] : limitParam;
+  const limit = rawLimit ? Math.min(Number(rawLimit), totalCount) : PAGE_SIZE;
   const paginatedActions = actions.slice(0, limit);
 
   let lastSeen = 0;
@@ -279,11 +280,11 @@ async function ActivityFiltersWithCounts() {
 
 function ActivityFiltersSkeleton() {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1">
       {['All', 'Answered', 'Routed', 'Welcomed', 'Surfaced', 'Flagged'].map((label) => (
         <Skeleton
           key={label}
-          className="h-[30px] rounded-md"
+          className="h-8 rounded-md"
           style={{ width: `${label.length * 8 + 40}px` }}
         />
       ))}

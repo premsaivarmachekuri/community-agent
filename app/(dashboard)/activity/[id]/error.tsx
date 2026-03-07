@@ -20,7 +20,7 @@ export default function ConversationError({ error, reset }: ErrorProps) {
     <div className="p-6">
       <Button variant="ghost" size="sm" className="mb-4" asChild>
         <Link href="/activity">
-          <ArrowLeft className="mr-1 h-3 w-3" /> Back to Activity
+          <ArrowLeft className="mr-1 h-3 w-3" /> Activity
         </Link>
       </Button>
       <Card>

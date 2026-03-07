@@ -2,6 +2,7 @@
 
 import { useOptimistic, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
 
 const filters = [
@@ -24,14 +25,15 @@ export function ActivityFilters({ counts }: ActivityFiltersProps) {
   const [optimisticType, setOptimisticType] = useOptimistic(currentType);
   const [isPending, startTransition] = useTransition();
 
-  function filterAction(type: string) {
+  function handleValueChange(value: string) {
+    if (!value) return;
     startTransition(() => {
-      setOptimisticType(type);
+      setOptimisticType(value);
       const params = new URLSearchParams(searchParams);
-      if (type === 'all') {
+      if (value === 'all') {
         params.delete('type');
       } else {
-        params.set('type', type);
+        params.set('type', value);
       }
       params.delete('limit');
       const query = params.toString();
@@ -40,45 +42,43 @@ export function ActivityFilters({ counts }: ActivityFiltersProps) {
   }
 
   return (
-    <div className="flex flex-wrap gap-2" data-pending={isPending ? '' : undefined}>
+    <ToggleGroup
+      type="single"
+      value={optimisticType}
+      onValueChange={handleValueChange}
+      variant="outline"
+      size="sm"
+      spacing={1}
+      className="flex-wrap"
+      data-pending={isPending ? '' : undefined}
+    >
       {filters.map((filter) => {
         const count = counts?.[filter.value];
+        const isActive = optimisticType === filter.value;
         return (
-          <button
+          <ToggleGroupItem
             key={filter.value}
-            onClick={() => filterAction(filter.value)}
+            value={filter.value}
             className={cn(
-              'rounded-md border px-3 py-1.5 text-xs font-medium transition-colors',
-              optimisticType === filter.value
-                ? 'border-foreground/20 bg-foreground text-background'
-                : 'border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground',
+              'gap-1.5 text-xs',
+              isActive &&
+                'bg-foreground text-background hover:bg-foreground/90 hover:text-background',
             )}
           >
             {filter.color && (
               <span
                 className={cn(
-                  'mr-1.5 inline-block h-2 w-2 rounded-full',
+                  'inline-block h-2 w-2 rounded-full',
                   filter.color,
-                  optimisticType === filter.value && 'opacity-70',
+                  isActive && 'opacity-70',
                 )}
               />
             )}
             {filter.label}
-            {count !== undefined && (
-              <span
-                className={cn(
-                  'ml-1.5 tabular-nums',
-                  optimisticType === filter.value
-                    ? 'text-background/70'
-                    : 'text-muted-foreground/60',
-                )}
-              >
-                {count}
-              </span>
-            )}
-          </button>
+            {count !== undefined && <span className={cn('tabular-nums opacity-60')}>{count}</span>}
+          </ToggleGroupItem>
         );
       })}
-    </div>
+    </ToggleGroup>
   );
 }

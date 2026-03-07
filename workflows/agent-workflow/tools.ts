@@ -108,6 +108,9 @@ async function executeSuggestChannel({ topic }: { topic: string }) {
   scored.sort((a, b) => b.score - a.score);
 
   const best = scored[0];
+  if (!best) {
+    return { suggested: null, description: null, confidence: 'no_match', allChannels: '' };
+  }
   const allChannels = Object.values(channels)
     .map((ch) => `#${ch.name} — ${ch.description}`)
     .join('\n');
