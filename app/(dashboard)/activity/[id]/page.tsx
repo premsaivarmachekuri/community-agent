@@ -52,7 +52,6 @@ async function ConversationDetail({
   const messages = canViewDM ? await getConversation(actionId) : [];
 
   return (
-    <ViewTransition>
       <div className="space-y-4">
         <Card>
           <CardContent className="flex items-center justify-between py-3">
@@ -88,34 +87,34 @@ async function ConversationDetail({
         ) : (
           <div className="space-y-3">
             {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={cn('flex gap-3', msg.role === 'assistant' && 'flex-row-reverse')}
-              >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
-                  {msg.role === 'user' ? (
-                    <User className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <Bot className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </div>
-                <Card className={cn('max-w-[75%]', msg.role === 'assistant' && 'bg-muted/50')}>
-                  <CardContent className="py-3 text-sm whitespace-pre-wrap break-words">
-                    {cleanSlackText(msg.content)}
-                    {msg.timestamp && (
-                      <div className="mt-1 text-xs text-muted-foreground">
-                        <FormattedTime timestamp={msg.timestamp} />
-                      </div>
+              <ViewTransition key={i}>
+                <div
+                  className={cn('flex gap-3', msg.role === 'assistant' && 'flex-row-reverse')}
+                >
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
+                    {msg.role === 'user' ? (
+                      <User className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Bot className="h-4 w-4 text-muted-foreground" />
                     )}
-                  </CardContent>
-                </Card>
-              </div>
+                  </div>
+                  <Card className={cn('max-w-[75%]', msg.role === 'assistant' && 'bg-muted/50')}>
+                    <CardContent className="py-3 text-sm whitespace-pre-wrap break-words">
+                      {cleanSlackText(msg.content)}
+                      {msg.timestamp && (
+                        <div className="mt-1 text-xs text-muted-foreground">
+                          <FormattedTime timestamp={msg.timestamp} />
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              </ViewTransition>
             ))}
             {threadKey && <LiveStreamIndicator threadKey={threadKey} />}
           </div>
         )}
       </div>
-    </ViewTransition>
   );
 }
 

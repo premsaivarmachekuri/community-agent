@@ -16,12 +16,13 @@ Three layers work together:
 
 ## Tools
 
-Tools (`suggest_channel`, `unanswered`, `bash`, `bash_batch`, `webSearch`, `webFetch`, `flag_to_lead`) run as durable steps inside the workflow. Less-used tools use Claude's `deferLoading` so only relevant tools are loaded into context. Welcome messages for new members are handled directly in the route (no workflow needed).
+Tools (`suggest_channel`, `unanswered`, `bash`, `bash_batch`, `web_search`, `flag_to_lead`) run as durable steps inside the workflow. `web_search` wraps Claude's native search tool via a `generateText` sub-call. Less-used tools use Claude's `deferLoading` so only relevant tools are loaded into context. Welcome messages for new members are handled directly in the route (no workflow needed).
 
 ## Admin panel
 
 - Server-rendered dashboard built with shadcn/ui, Geist font, light/dark theme
 - `cacheComponents` and React Compiler enabled — pages are non-async, maximizing the static shell
+- **Live streaming**: client components poll Redis for active streams every 3 seconds. The overview page shows how many conversations the bot is handling, the activity page shows live cards per conversation, and the conversation detail page shows a "Bot is responding..." indicator. When streams end, `startTransition` batches the cleanup with `router.refresh()` so stats and action lists update seamlessly via ViewTransition
 - Bot actions and full conversations logged to Upstash Redis (30-day TTL)
 - Slack OAuth via Better Auth — only workspace members can sign in
 - Falls back to mock data when Redis is not configured — works out of the box
@@ -36,7 +37,7 @@ Tools (`suggest_channel`, `unanswered`, `bash`, `bash_batch`, `webSearch`, `webF
 | `lib/channels.ts`                   | Channel map — must match your Slack workspace                                                     |
 | `lib/welcome.ts`                    | Welcome message sent when members join                                                            |
 | `lib/auth.ts`                       | Better Auth config — Slack OAuth for admin panel                                                  |
-| `workflows/agent-workflow/tools.ts` | Agent tools (`suggest_channel`, `unanswered`, `bash`, `bash_batch`, `webSearch`, `webFetch`, `flag_to_lead`) |
+| `workflows/agent-workflow/tools.ts` | Agent tools (`suggest_channel`, `unanswered`, `bash`, `bash_batch`, `web_search`, `flag_to_lead`) |
 
 **How the bot works:**
 
@@ -51,5 +52,9 @@ Tools (`suggest_channel`, `unanswered`, `bash`, `bash_batch`, `webSearch`, `webF
 | `lib/savoir.ts`                     | Lightweight HTTP client for the Savoir sandbox API (`bash`, `bash_batch`)                                                                        |
 | `lib/store.ts`                      | Upstash Redis store — writes/reads bot actions, stats, and conversations (indexed by action ID with sorted-set fallback)                         |
 | `lib/logger.ts`                     | Structured logger — outputs to console (visible in Vercel dashboard)                                                                             |
+| `data/actions/stream.ts`            | Server Actions for polling active streams (`fetchActiveStreams`, `fetchStream`)                                                                   |
+| `components/ActiveStreams.tsx`       | Live streaming cards on the activity page — polls every 3s, refreshes on completion                                                              |
+| `components/LiveStreamIndicator.tsx` | "Bot is responding..." indicator inside conversation detail pages                                                                                 |
+| `components/DashboardLive.tsx`      | Active conversation count banner on the overview page — refreshes stats on completion                                                            |
 
 > **Workflow constraint:** Files using `'use step'` or `'use workflow'` must live inside the `workflows/` directory for the bundler to process them. Node.js-only packages (like `@slack/web-api`) must be dynamically imported inside step functions — they can't be used at the workflow top level.

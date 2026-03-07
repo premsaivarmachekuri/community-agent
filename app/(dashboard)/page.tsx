@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
+import { DashboardLive } from '@/components/DashboardLive';
 import { FormattedTime } from '@/components/FormattedTime';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ export default function OverviewPage() {
     <>
       <Header title="Overview" description={`${config.communityName} dashboard`} />
       <div className="flex-1 space-y-6 p-6">
+        <DashboardLive />
         <Suspense fallback={<StatsCardsSkeleton />}>
           <StatsCards />
         </Suspense>
