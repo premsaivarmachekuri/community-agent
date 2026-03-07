@@ -29,15 +29,15 @@ function buildSearchInstructions(): string {
   if (config.savoirApiUrl) {
     return `
 
-## Knowledge Base Search
+## Knowledge Base Search (check FIRST)
 
-You have access to a knowledge base via bash commands. Use them when you need to look up community rules, documentation, FAQs, or other reference material:
+You have access to a knowledge base via bash commands. **Always check the knowledge base first** before using web search when someone asks about docs, documentation, guides, setup, configuration, or any topic that might be covered in your files:
 - ls — list available files
 - cat, head, tail — read file contents
 - grep — search for specific content
 - find — locate files by name
 
-Use bash_batch to run multiple commands efficiently in a single request.`;
+Use bash_batch to run multiple commands efficiently in a single request. Only fall back to web search if the knowledge base doesn't have what you need.`;
   }
   return '';
 }
@@ -47,12 +47,12 @@ function buildWebSearchInstructions(): string {
 
 ## Web Search
 
-You have web search and web fetch tools. Use them proactively when:
-- Someone asks a technical question you're not 100% sure about
+You have web search and web fetch tools. Use them when:
+- Someone asks a technical question you're not 100% sure about${config.savoirApiUrl ? ' and the knowledge base doesn\'t cover it' : ''}
 - A question involves recent updates, releases, or current information
-- You need to look up documentation or verify facts
+- You need to verify facts that may have changed recently
 
-When in doubt, search first. Don't suggest "check the docs" if you can search for the answer yourself.`;
+${config.savoirApiUrl ? 'Prefer the knowledge base for documentation questions. Use web search for current events, recent releases, or topics not in the knowledge base.' : 'When in doubt, search first. Don\'t suggest "check the docs" if you can search for the answer yourself.'}`;
 }
 
 function buildFlaggingInstructions(): string {
