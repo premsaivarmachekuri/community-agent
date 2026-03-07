@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useTransition } from 'react';
 import { ChevronDown, ChevronUp, MessageCircle } from 'lucide-react';
 import { fetchConversationPreview } from '@/data/actions/conversation';
 import type { ConversationMessage } from '@/lib/types';
-import { cn, cleanSlackText } from '@/lib/utils';
+import { cn, cleanSlackText, stripMarkdown } from '@/lib/utils';
 
 type PreviewState = {
   isOpen: boolean;
@@ -73,7 +73,7 @@ export function ConversationPreviewContent() {
   return (
     <div className="divide-y rounded-md border bg-muted/30">
       {messages.slice(0, 4).map((msg, i) => {
-        const cleaned = cleanSlackText(msg.content);
+        const cleaned = stripMarkdown(cleanSlackText(msg.content));
         const truncated = cleaned.length > 200 ? `${cleaned.slice(0, 200)}...` : cleaned;
         return (
           <div key={i} className="flex gap-2 px-3 py-2 text-xs">

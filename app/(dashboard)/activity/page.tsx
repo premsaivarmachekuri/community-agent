@@ -86,7 +86,6 @@ export default function ActivityPage({ searchParams }: PageProps<'/activity'>) {
       <Header title="Activity" description="Recent bot actions across your community" />
       <div className="flex-1 space-y-4 p-6">
         <ActiveStreamsProvider>
-          <ActiveStreams />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <Suspense fallback={<ActivityFiltersSkeleton />}>
               <ActivityFiltersWithCounts />
@@ -95,6 +94,7 @@ export default function ActivityPage({ searchParams }: PageProps<'/activity'>) {
               <ActivitySearch />
             </Suspense>
           </div>
+          <ActiveStreams />
           <Suspense fallback={<ActivityListSkeleton />}>
             <ActivityList searchParams={searchParams} />
           </Suspense>
