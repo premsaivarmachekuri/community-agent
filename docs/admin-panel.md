@@ -39,7 +39,7 @@ The activity page supports `?type=answered`, `?q=search`, and `?limit=40` search
 
 Uses `recharts` to visualize activity trends. A `LineChart` (not stacked `AreaChart` — stacking made low-count types appear visually dominant) shows one line per action type at its actual value. The date range adapts to the data — buckets span from the earliest action to today, aligned to calendar-day boundaries via `startOfDay()`. Below the chart, a "Breakdown by Type" card shows each type with a colored icon, progress bar, count, and percentage, sorted by count descending.
 
-Data is prepared server-side in `AnalyticsContent` (async Server Component) and passed as pre-bucketed props to `AnalyticsChart` (client component).
+Data is fetched and bucketed via `getAnalyticsData()` in the data layer (`data/queries/actions.ts`), cached with `'use cache: remote'` and `cacheLife('days')`. `AnalyticsContent` passes the pre-bucketed result as props to `AnalyticsChart` (client component).
 
 ### Settings
 

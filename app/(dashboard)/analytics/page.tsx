@@ -10,7 +10,7 @@ import { Header } from '@/components/Header';
 import { AnalyticsChart } from './_components/AnalyticsChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getRecentActions } from '@/data/queries/actions';
+import { getAnalyticsData } from '@/data/queries/actions';
 import type { BotAction } from '@/lib/types';
 
 const typeConfig: Record<
@@ -63,57 +63,7 @@ export default function AnalyticsPage() {
 }
 
 async function AnalyticsContent() {
-  const actions = await getRecentActions();
-
-  const dayMs = 24 * 60 * 60 * 1000;
-  const now = Date.now();
-
-  function startOfDay(ts: number) {
-    const d = new Date(ts);
-    d.setHours(0, 0, 0, 0);
-    return d.getTime();
-  }
-
-  const todayStart = startOfDay(now);
-  const earliest = actions.length > 0
-    ? Math.min(...actions.map((a) => a.timestamp))
-    : now;
-  const earliestDayStart = startOfDay(earliest);
-  const spanDays = Math.max(Math.round((todayStart - earliestDayStart) / dayMs) + 1, 2);
-
-  type Bucket = {
-    date: string;
-    answered: number;
-    routed: number;
-    welcomed: number;
-    surfaced: number;
-    flagged: number;
-  };
-  const buckets: Bucket[] = [];
-
-  for (let i = 0; i < spanDays; i++) {
-    const d = new Date(earliestDayStart + i * dayMs);
-    buckets.push({
-      date: `${d.getMonth() + 1}/${d.getDate()}`,
-      answered: 0,
-      routed: 0,
-      welcomed: 0,
-      surfaced: 0,
-      flagged: 0,
-    });
-  }
-
-  const typeCounts: Record<string, number> = {};
-
-  for (const action of actions) {
-    typeCounts[action.type] = (typeCounts[action.type] || 0) + 1;
-
-    const actionDayStart = startOfDay(action.timestamp);
-    const idx = Math.round((actionDayStart - earliestDayStart) / dayMs);
-    if (idx >= 0 && idx < spanDays) {
-      buckets[idx][action.type]++;
-    }
-  }
+  const { buckets, typeCounts, totalActions } = await getAnalyticsData();
 
   const sortedTypes = (Object.keys(typeConfig) as BotAction['type'][])
     .map((type) => ({
@@ -123,12 +73,9 @@ async function AnalyticsContent() {
     }))
     .sort((a, b) => b.count - a.count);
 
-  const totalActions = actions.length;
-
   return (
     <>
       <AnalyticsChart data={buckets} />
-
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Breakdown by Type</CardTitle>
