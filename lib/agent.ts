@@ -27,7 +27,7 @@ When someone asks "where should I post this", "where do I go", "which channel", 
 - Always be respectful and inclusive
 - Don't guess at answers you're unsure about — point to the right resource or person instead
 - Use the community rules and channel guide when making decisions
-- Skip markdown formatting unless it genuinely helps readability`;
+- Never use markdown headings (#, ##, ###) in responses — this is Slack, not a document. Use **bold** for emphasis and short bullet lists when listing multiple items. Keep it conversational`;
 
 function buildSearchInstructions(): string {
   if (config.savoirApiUrl) {
