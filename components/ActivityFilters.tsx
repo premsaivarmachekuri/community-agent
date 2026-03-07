@@ -33,6 +33,7 @@ export function ActivityFilters({ counts }: ActivityFiltersProps) {
       } else {
         params.set('type', type);
       }
+      params.delete('limit');
       const query = params.toString();
       router.push(query ? `/activity?${query}` : '/activity');
     });

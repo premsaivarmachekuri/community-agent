@@ -21,6 +21,7 @@ export function ActivitySearch() {
         } else {
           params.delete('q');
         }
+        params.delete('limit');
         const query = params.toString();
         router.push(query ? `/activity?${query}` : '/activity');
       });
