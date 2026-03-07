@@ -39,7 +39,7 @@ export function LiveStreamIndicator({ threadKey }: { threadKey: string }) {
         <Bot className="h-4 w-4 text-green-500" />
       </div>
       <Card className="max-w-[75%] border-green-500/20 bg-green-500/5">
-        <CardContent className="flex items-center gap-2 py-3 text-sm text-muted-foreground">
+        <CardContent className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground">
           <Loader2 className="h-3.5 w-3.5 animate-spin text-green-500" />
           Bot is responding&hellip;
         </CardContent>
