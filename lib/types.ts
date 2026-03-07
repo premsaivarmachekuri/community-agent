@@ -43,6 +43,7 @@ export type BotAction = {
   metadata?: Record<string, string>;
   timestamp: number;
   lastUpdated?: number;
+  threadKey?: string;
 };
 
 /** A message in a stored conversation */

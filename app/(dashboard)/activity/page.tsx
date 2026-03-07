@@ -92,7 +92,7 @@ async function ActivityList() {
         const isNew = lastSeen > 0 && action.timestamp > lastSeen;
 
         return (
-          <ViewTransition key={action.id}>
+          <ViewTransition key={action.threadKey ?? action.id}>
             <Card className={isNew ? 'animate-new-glow' : ''}>
               <CardContent className="flex items-start gap-3 py-3 sm:gap-4 sm:py-4">
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted sm:h-9 sm:w-9">

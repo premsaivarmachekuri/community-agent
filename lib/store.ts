@@ -67,6 +67,7 @@ export async function logAction(
     ...action,
     id,
     timestamp: Date.now(),
+    ...(threadKey ? { threadKey } : {}),
   };
 
   try {

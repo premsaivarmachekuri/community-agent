@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, startTransition, ViewTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Radio } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,13 +16,18 @@ export function ActiveStreams() {
   useEffect(() => {
     async function poll() {
       const entries = await fetchActiveStreams();
-      setStreams(entries);
 
       if (entries.length > 0) {
+        setStreams(entries);
         hadStreamsRef.current = true;
       } else if (hadStreamsRef.current) {
         hadStreamsRef.current = false;
-        router.refresh();
+        startTransition(() => {
+          setStreams([]);
+          router.refresh();
+        });
+      } else {
+        setStreams(entries);
       }
     }
 
@@ -40,7 +45,8 @@ export function ActiveStreams() {
         Live
       </div>
       {streams.map((stream) => (
-        <Card key={stream.threadId} className="border-green-500/20 bg-green-500/5">
+        <ViewTransition key={stream.threadId}>
+        <Card className="border-green-500/20 bg-green-500/5">
           <CardContent className="flex items-start gap-3 py-3 sm:gap-4 sm:py-4">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-green-500/10 sm:h-9 sm:w-9">
               <Loader2 className="h-3.5 w-3.5 animate-spin text-green-500 sm:h-4 sm:w-4" />
@@ -57,6 +63,7 @@ export function ActiveStreams() {
             </Badge>
           </CardContent>
         </Card>
+        </ViewTransition>
       ))}
     </div>
   );

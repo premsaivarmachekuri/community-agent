@@ -63,10 +63,11 @@ export async function workflowAgent(input: AgentInput): Promise<AgentResult> {
     const messages = [...(input.history || []), { role: 'user' as const, content: input.prompt }];
 
     if (streamThreadId && input.slack) {
+      const streamChannelName = await stepResolveChannelName(input.slack.channelId);
       await stepStartStream({
         threadId: streamThreadId,
-        channel: input.slack.channelId,
-        prompt: input.prompt,
+        channel: streamChannelName,
+        prompt: input.prompt.replace(/<@[A-Z0-9]+>/g, '').trim(),
         text: '',
         status: 'streaming',
         timestamp: Date.now(),
