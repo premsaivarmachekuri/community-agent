@@ -146,11 +146,17 @@ export async function workflowAgent(input: AgentInput): Promise<AgentResult> {
 
       const threadKey = `${input.slack.channelId}:${input.slack.threadTs}`;
 
+      const cleanPrompt = input.prompt
+        .replace(/<@[A-Z0-9]+>/g, '')
+        .replace(/@U[A-Z0-9]{8,}/g, '')
+        .trim();
+      const preview = cleanPrompt.length > 120 ? `${cleanPrompt.slice(0, 120)}…` : cleanPrompt;
+
       await stepLogAction(
         {
           type: 'answered',
           channel: channelName,
-          description: 'Answered a community question',
+          description: preview || 'Answered a community question',
           metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
         },
         conversation,
