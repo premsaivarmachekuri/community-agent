@@ -134,6 +134,28 @@ async function updateConversation(
   }
 }
 
+export async function appendToConversation(
+  threadKey: string,
+  messages: ConversationMessage[],
+): Promise<void> {
+  const client = getRedis();
+  if (!client || messages.length === 0) return;
+
+  try {
+    const actionId = await client.get<string>(`${THREAD_ACTION_PREFIX}${threadKey}`);
+    if (!actionId) return;
+
+    const raw = await client.get<string>(`${CONVERSATIONS_PREFIX}${actionId}`);
+    const existing = raw ? parseEntry<ConversationMessage[]>(raw) : [];
+    const updated = [...existing, ...messages];
+    await client.set(`${CONVERSATIONS_PREFIX}${actionId}`, JSON.stringify(updated), {
+      ex: TTL_30_DAYS,
+    });
+  } catch (error) {
+    logger.error('Failed to append to conversation', { error: safeErrorMessage(error) });
+  }
+}
+
 export async function getConversation(actionId: string): Promise<ConversationMessage[]> {
   const client = getRedis();
   if (!client) return [];

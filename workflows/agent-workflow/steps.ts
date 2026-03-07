@@ -58,6 +58,16 @@ export async function stepLogAction(
   await logAction(action, conversation, threadKey);
 }
 
+export async function stepSaveUserMessage(
+  threadKey: string,
+  messages: ConversationMessage[],
+): Promise<void> {
+  'use step';
+
+  const { appendToConversation } = await import('@/lib/store');
+  await appendToConversation(threadKey, messages);
+}
+
 export async function stepStartStream(entry: StreamEntry): Promise<void> {
   'use step';
 

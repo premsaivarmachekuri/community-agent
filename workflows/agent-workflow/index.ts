@@ -12,6 +12,7 @@ import {
   stepResolveChannelName,
   stepGetPermalink,
   stepLogAction,
+  stepSaveUserMessage,
   stepStartStream,
   stepEndStream,
 } from './steps';
@@ -75,6 +76,12 @@ export async function workflowAgent(input: AgentInput): Promise<AgentResult> {
         status: 'streaming',
         timestamp: Date.now(),
       });
+
+      if (input.history?.length) {
+        await stepSaveUserMessage(streamThreadId, [
+          { role: 'user', content: input.prompt, timestamp: Date.now() },
+        ]);
+      }
     }
 
     result = await agent.stream({
