@@ -47,23 +47,24 @@ export function ActiveStreams() {
   return (
     <ViewTransition>
       <Card
-        className={
+        className={cn(
+          'gap-0 py-0',
           isActive
             ? 'border-green-500/20 bg-green-500/5'
-            : 'border-dashed'
-        }
+            : 'border-dashed',
+        )}
       >
-        <CardContent className="flex items-center gap-3 py-3 sm:gap-4 sm:py-4">
+        <CardContent className="flex items-center gap-3 py-2.5">
           <div
             className={cn(
-              'flex h-7 w-7 shrink-0 items-center justify-center rounded-full sm:h-9 sm:w-9',
+              'flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
               isActive ? 'bg-green-500/10' : 'bg-muted',
             )}
           >
             {isActive ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin text-green-500 sm:h-4 sm:w-4" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-green-500" />
             ) : (
-              <Radio className="h-3.5 w-3.5 text-muted-foreground/40 sm:h-4 sm:w-4" />
+              <Radio className="h-3.5 w-3.5 text-muted-foreground/40" />
             )}
           </div>
           <div className="min-w-0 flex-1">
