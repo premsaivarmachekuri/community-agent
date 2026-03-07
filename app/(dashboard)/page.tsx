@@ -14,7 +14,6 @@ import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { DashboardLive } from './_components/DashboardLive';
 import { FormattedTime } from '@/components/FormattedTime';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -160,19 +159,19 @@ async function StatsCards() {
         const cfg = typeConfig[stat.type];
         return (
           <Link key={stat.title} href={stat.href as any}>
-            <Card className="gap-2 py-3 transition-colors hover:bg-accent/50 sm:gap-6 sm:py-6">
-              <CardHeader className="flex flex-row items-center justify-between px-3 pb-0 sm:px-6 sm:pb-2">
+            <Card className="gap-1 py-3 transition-colors hover:bg-accent/50 sm:gap-2 sm:py-4">
+              <CardHeader className="flex flex-row items-center justify-between px-3 pb-0 sm:px-4">
                 <CardTitle className="text-xs font-medium text-muted-foreground sm:text-sm">
                   {stat.title}
                 </CardTitle>
                 <div
-                  className={`hidden h-7 w-7 items-center justify-center rounded-full sm:flex ${cfg.bgColor}`}
+                  className={`hidden h-6 w-6 items-center justify-center rounded-full sm:flex ${cfg.bgColor}`}
                 >
-                  <cfg.icon className={`h-3.5 w-3.5 ${cfg.iconColor}`} />
+                  <cfg.icon className={`h-3 w-3 ${cfg.iconColor}`} />
                 </div>
               </CardHeader>
-              <CardContent className="px-3 sm:px-6">
-                <div className="text-2xl font-bold sm:text-3xl">{stat.value}</div>
+              <CardContent className="px-3 sm:px-4">
+                <div className="text-2xl font-bold">{stat.value}</div>
                 {stat.weekly > 0 ? (
                   <p className="hidden items-center gap-1 text-xs text-emerald-600 sm:flex dark:text-emerald-400">
                     <TrendingUp className="h-3 w-3" />+{stat.weekly} this week
@@ -188,17 +187,17 @@ async function StatsCards() {
         );
       })}
       <Link href="/activity">
-        <Card className="gap-2 py-3 transition-colors hover:bg-accent/50 sm:gap-6 sm:py-6">
-          <CardHeader className="flex flex-row items-center justify-between px-3 pb-0 sm:px-6 sm:pb-2">
+        <Card className="gap-1 py-3 transition-colors hover:bg-accent/50 sm:gap-2 sm:py-4">
+          <CardHeader className="flex flex-row items-center justify-between px-3 pb-0 sm:px-4">
             <CardTitle className="text-xs font-medium text-muted-foreground sm:text-sm">
               Total Actions
             </CardTitle>
-            <div className="hidden h-7 w-7 items-center justify-center rounded-full bg-muted sm:flex">
-              <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
+            <div className="hidden h-6 w-6 items-center justify-center rounded-full bg-muted sm:flex">
+              <MessageSquare className="h-3 w-3 text-muted-foreground" />
             </div>
           </CardHeader>
-          <CardContent className="px-3 sm:px-6">
-            <div className="text-2xl font-bold sm:text-3xl">{String(stats.total)}</div>
+          <CardContent className="px-3 sm:px-4">
+            <div className="text-2xl font-bold">{String(stats.total)}</div>
             {thisWeek.total > 0 ? (
               <p className="hidden items-center gap-1 text-xs text-emerald-600 sm:flex dark:text-emerald-400">
                 <TrendingUp className="h-3 w-3" />+{thisWeek.total} this week
@@ -258,9 +257,6 @@ async function RecentActivityCard() {
                       {action.channel} &middot; <FormattedTime timestamp={action.timestamp} />
                     </p>
                   </div>
-                  <Badge variant={cfg.variant} className="hidden shrink-0 sm:inline-flex">
-                    {cfg.label}
-                  </Badge>
                 </Link>
               );
             })}
@@ -286,7 +282,6 @@ function RecentActivitySkeleton() {
               <Skeleton className="h-4 w-3/4" />
               <Skeleton className="h-3 w-1/3" />
             </div>
-            <Skeleton className="hidden h-5 w-16 sm:block" />
           </div>
         ))}
       </CardContent>
@@ -298,13 +293,13 @@ function StatsCardsSkeleton() {
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-3">
       {[1, 2, 3, 4, 5, 6].map((i) => (
-        <Card key={i} className="gap-2 py-3 sm:gap-6 sm:py-6">
-          <CardHeader className="flex flex-row items-center justify-between px-3 pb-0 sm:px-6 sm:pb-2">
+        <Card key={i} className="gap-2 py-4 sm:gap-2 sm:py-4">
+          <CardHeader className="flex flex-row items-center justify-between px-3 pb-0 sm:px-4">
             <Skeleton className="h-3 w-16 sm:h-4 sm:w-24" />
-            <Skeleton className="hidden h-7 w-7 rounded-full sm:block" />
+            <Skeleton className="hidden h-6 w-6 rounded-full sm:block" />
           </CardHeader>
-          <CardContent className="px-3 sm:px-6">
-            <Skeleton className="mb-1 h-7 w-10 sm:h-9 sm:w-12" />
+          <CardContent className="px-3 sm:px-4">
+            <Skeleton className="mb-2 h-7 w-10" />
             <Skeleton className="hidden h-3 w-24 sm:block" />
           </CardContent>
         </Card>

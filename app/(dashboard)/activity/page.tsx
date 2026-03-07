@@ -23,7 +23,6 @@ import {
 } from './_components/ConversationPreview';
 import { FormattedTime } from '@/components/FormattedTime';
 import { ShowMoreButton } from './_components/ShowMoreButton';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getRecentActions } from '@/data/queries/actions';
@@ -186,16 +185,6 @@ async function ActivityList({ searchParams }: Pick<PageProps<'/activity'>, 'sear
                 <Icon className={cn('h-3.5 w-3.5 sm:h-4 sm:w-4', config.iconColor)} />
               </div>
               <div className="min-w-0 flex-1 space-y-1">
-                <div className="flex items-center gap-2">
-                  <Badge variant={config.variant} className="shrink-0 sm:hidden">
-                    {config.label}
-                  </Badge>
-                  {isNew && (
-                    <Badge variant="secondary" className="shrink-0 text-[10px] sm:hidden">
-                      New
-                    </Badge>
-                  )}
-                </div>
                 <p className="text-sm">{action.description}</p>
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                   <FormattedTime timestamp={action.timestamp} />
@@ -237,10 +226,6 @@ async function ActivityList({ searchParams }: Pick<PageProps<'/activity'>, 'sear
                   </div>
                 )}
                 {action.type === 'answered' && <ConversationPreviewContent />}
-              </div>
-              <div className="hidden items-center gap-2 sm:flex">
-                {isNew && <Badge variant="secondary">New</Badge>}
-                <Badge variant={config.variant}>{config.label}</Badge>
               </div>
             </CardContent>
           </Card>
@@ -297,14 +282,12 @@ function ActivityListSkeleton() {
     <div className="space-y-3">
       {[1, 2, 3, 4, 5].map((i) => (
         <Card key={i}>
-          <CardContent className="flex items-start gap-4 py-4">
-            <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
-            <div className="flex-1 space-y-1.5">
+          <CardContent className="flex items-start gap-3 py-3 sm:gap-4 sm:py-4">
+            <Skeleton className="h-7 w-7 shrink-0 rounded-full sm:h-9 sm:w-9" />
+            <div className="flex-1 space-y-2.5">
               <Skeleton className="h-4 w-64" />
-              <Skeleton className="h-4 w-36" />
-              <Skeleton className="h-7 w-24" />
+              <Skeleton className="h-3.5 w-36" />
             </div>
-            <Skeleton className="h-6 w-16" />
           </CardContent>
         </Card>
       ))}
