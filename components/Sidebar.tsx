@@ -1,6 +1,6 @@
 'use client';
 
-import { Bot, LayoutDashboard, Activity, LogOut } from 'lucide-react';
+import { Bot, LayoutDashboard, Activity, BarChart3, Settings, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
@@ -21,6 +21,8 @@ import {
 const navItems = [
   { href: '/' as const, label: 'Overview', icon: LayoutDashboard },
   { href: '/activity' as const, label: 'Activity', icon: Activity },
+  { href: '/analytics' as const, label: 'Analytics', icon: BarChart3 },
+  { href: '/settings' as const, label: 'Settings', icon: Settings },
 ];
 
 export function Sidebar({ communityName }: { communityName: string }) {

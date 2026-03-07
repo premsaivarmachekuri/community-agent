@@ -9,10 +9,12 @@ import {
   type ActionStats,
 } from '@/lib/store';
 import { mockActions, mockStats, mockConversations } from '@/data/mock/actions';
+import { requireSession } from './auth';
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export const getRecentActions = cache(async (): Promise<BotAction[]> => {
+  await requireSession();
   if (!isStoreConfigured()) {
     await delay(2000);
     return [...mockActions].sort(
@@ -23,6 +25,7 @@ export const getRecentActions = cache(async (): Promise<BotAction[]> => {
 });
 
 export const getActionById = cache(async (id: string): Promise<BotAction | null> => {
+  await requireSession();
   if (!isStoreConfigured()) {
     await delay(500);
     return mockActions.find((a) => a.id === id) ?? null;
@@ -31,6 +34,7 @@ export const getActionById = cache(async (id: string): Promise<BotAction | null>
 });
 
 export const getDashboardStats = cache(async (): Promise<ActionStats> => {
+  await requireSession();
   if (!isStoreConfigured()) {
     await delay(2000);
     return mockStats;
@@ -39,6 +43,7 @@ export const getDashboardStats = cache(async (): Promise<ActionStats> => {
 });
 
 export const getConversation = cache(async (actionId: string): Promise<ConversationMessage[]> => {
+  await requireSession();
   if (!isStoreConfigured()) {
     await delay(500);
     return mockConversations[actionId] || [];

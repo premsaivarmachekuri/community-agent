@@ -7,10 +7,12 @@ import {
   hasActionForThread,
   isStoreConfigured,
 } from '@/lib/store';
+import { requireSession } from '@/data/queries/auth';
 
 export type AnnotatedStream = StreamEntry & { isFollowUp: boolean };
 
 export async function fetchActiveStreams(): Promise<AnnotatedStream[]> {
+  await requireSession();
   if (!isStoreConfigured()) return [];
   const streams = await getActiveStreams();
   const results = await Promise.all(
@@ -23,6 +25,7 @@ export async function fetchActiveStreams(): Promise<AnnotatedStream[]> {
 }
 
 export async function fetchStream(threadKey: string): Promise<StreamEntry | null> {
+  await requireSession();
   if (!isStoreConfigured()) return null;
   return getStreamByThreadKey(threadKey);
 }
