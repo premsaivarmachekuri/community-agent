@@ -37,7 +37,6 @@ For the full Slack bot setup, see [docs/setup.md](docs/setup.md).
 | Agent tools     | `workflows/agent-workflow/tools.ts` | Add, remove, or modify tools                |
 | Auth config     | `lib/auth.ts`                       | Slack OAuth for the admin panel             |
 | Action type UI  | `config/type-config.ts`             | Icons, labels, and colors per action type   |
-| Data queries    | `data/queries/activity.ts`          | All dashboard data fetching and aggregation |
 
 ### Knowledge Base
 
