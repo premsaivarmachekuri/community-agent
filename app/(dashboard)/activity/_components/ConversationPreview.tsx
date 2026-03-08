@@ -24,19 +24,22 @@ export function ConversationPreviewProvider({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ConversationMessage[] | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isPending, startFetchTransition] = useTransition();
+  const [, startToggleTransition] = useTransition();
 
   function toggle() {
     if (!isOpen && !messages) {
-      startTransition(async () => {
+      startFetchTransition(async () => {
         const result = await fetchConversationPreview(actionId);
-        startTransition(() => {
+        startFetchTransition(() => {
           setMessages(result);
           setIsOpen(true);
         });
       });
     } else {
-      setIsOpen(!isOpen);
+      startToggleTransition(() => {
+        setIsOpen(!isOpen);
+      });
     }
   }
 
