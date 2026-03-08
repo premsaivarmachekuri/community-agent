@@ -1,14 +1,7 @@
 import { Suspense } from 'react';
 import { headers } from 'next/headers';
 import { after } from 'next/server';
-import {
-  AlertTriangle,
-  ArrowRightLeft,
-  ExternalLink,
-  MessageSquare,
-  Search,
-  UserPlus,
-} from 'lucide-react';
+import { ExternalLink, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { ActiveStreams } from './_components/ActiveStreams';
@@ -29,55 +22,9 @@ import { getRecentActions } from '@/data/queries/actions';
 import { auth } from '@/lib/auth';
 import { getLastSeen, setLastSeen } from '@/lib/store';
 import type { BotAction } from '@/lib/types';
+import { typeConfig } from '@/lib/type-config';
 import { cn } from '@/lib/utils';
 import { ViewTransition } from 'react';
-
-const typeConfig: Record<
-  BotAction['type'],
-  {
-    icon: typeof ArrowRightLeft;
-    label: string;
-    variant: 'default' | 'secondary' | 'outline' | 'destructive';
-    iconColor: string;
-    bgColor: string;
-  }
-> = {
-  routed: {
-    icon: ArrowRightLeft,
-    label: 'Routed',
-    variant: 'outline',
-    iconColor: 'text-type-routed',
-    bgColor: 'bg-type-routed/10',
-  },
-  welcomed: {
-    icon: UserPlus,
-    label: 'Welcomed',
-    variant: 'secondary',
-    iconColor: 'text-type-welcomed',
-    bgColor: 'bg-type-welcomed/10',
-  },
-  surfaced: {
-    icon: Search,
-    label: 'Surfaced',
-    variant: 'outline',
-    iconColor: 'text-type-surfaced',
-    bgColor: 'bg-type-surfaced/10',
-  },
-  answered: {
-    icon: MessageSquare,
-    label: 'Answered',
-    variant: 'default',
-    iconColor: 'text-type-answered',
-    bgColor: 'bg-type-answered/10',
-  },
-  flagged: {
-    icon: AlertTriangle,
-    label: 'Flagged',
-    variant: 'destructive',
-    iconColor: 'text-type-flagged',
-    bgColor: 'bg-type-flagged/10',
-  },
-};
 
 export default function ActivityPage({ searchParams }: PageProps<'/activity'>) {
   return (

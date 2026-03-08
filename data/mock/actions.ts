@@ -319,15 +319,6 @@ export const mockActions: BotAction[] = [
   },
 ];
 
-export const mockStats = {
-  answered: 19,
-  routed: 5,
-  welcomed: 6,
-  surfaced: 3,
-  flagged: 1,
-  total: 34,
-};
-
 export const mockConversations: Record<string, ConversationMessage[]> = {
   'mock-1': [
     {

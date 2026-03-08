@@ -1,15 +1,5 @@
 import { Suspense } from 'react';
-import {
-  AlertTriangle,
-  ArrowRight,
-  ArrowRightLeft,
-  BookOpen,
-  ExternalLink,
-  MessageSquare,
-  Search,
-  TrendingUp,
-  UserPlus,
-} from 'lucide-react';
+import { ArrowRight, BookOpen, ExternalLink, MessageSquare, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { DashboardLive } from './_components/DashboardLive';
@@ -19,54 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getRecentActions } from '@/data/queries/actions';
 import { config } from '@/lib/config';
-import type { BotAction } from '@/lib/types';
-
-const typeConfig: Record<
-  BotAction['type'],
-  {
-    icon: typeof ArrowRightLeft;
-    label: string;
-    variant: 'default' | 'secondary' | 'outline' | 'destructive';
-    iconColor: string;
-    bgColor: string;
-  }
-> = {
-  answered: {
-    icon: MessageSquare,
-    label: 'Answered',
-    variant: 'default',
-    iconColor: 'text-type-answered',
-    bgColor: 'bg-type-answered/10',
-  },
-  routed: {
-    icon: ArrowRightLeft,
-    label: 'Routed',
-    variant: 'outline',
-    iconColor: 'text-type-routed',
-    bgColor: 'bg-type-routed/10',
-  },
-  welcomed: {
-    icon: UserPlus,
-    label: 'Welcomed',
-    variant: 'secondary',
-    iconColor: 'text-type-welcomed',
-    bgColor: 'bg-type-welcomed/10',
-  },
-  surfaced: {
-    icon: Search,
-    label: 'Surfaced',
-    variant: 'outline',
-    iconColor: 'text-type-surfaced',
-    bgColor: 'bg-type-surfaced/10',
-  },
-  flagged: {
-    icon: AlertTriangle,
-    label: 'Flagged',
-    variant: 'destructive',
-    iconColor: 'text-type-flagged',
-    bgColor: 'bg-type-flagged/10',
-  },
-};
+import { typeConfig } from '@/lib/type-config';
 
 export default function OverviewPage() {
   return (

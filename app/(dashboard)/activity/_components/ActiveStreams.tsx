@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, ViewTransition } from 'react';
+import { useEffect, useState, ViewTransition } from 'react';
 import { Loader2, Radio } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,21 +10,13 @@ import { useActiveStreams } from './ActiveStreamsContext';
 
 export function ActiveStreams() {
   const [streams, setStreams] = useState<AnnotatedStream[]>([]);
-  const hadStreamsRef = useRef(false);
   const { setActiveThreadKeys } = useActiveStreams();
 
   useEffect(() => {
     async function poll() {
       const entries = await fetchActiveStreams();
-
       setActiveThreadKeys(entries.filter((e) => e.isFollowUp).map((e) => e.threadId));
       setStreams(entries);
-
-      if (entries.length > 0) {
-        hadStreamsRef.current = true;
-      } else if (hadStreamsRef.current) {
-        hadStreamsRef.current = false;
-      }
     }
 
     poll();

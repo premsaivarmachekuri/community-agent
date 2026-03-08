@@ -76,7 +76,7 @@ export function AnalyticsChart({ data }: { data: DayBucket[] }) {
   const hasData = data.some((d) => d.answered + d.routed + d.welcomed + d.surfaced + d.flagged > 0);
 
   const days = data.length;
-  const subtitle = days <= 1 ? 'Today' : `Last ${days} day${days === 1 ? '' : 's'}`;
+  const subtitle = days <= 1 ? 'Today' : `Last ${days} days`;
 
   return (
     <Card>

@@ -1,47 +1,11 @@
 import { Suspense } from 'react';
-import { AlertTriangle, ArrowRightLeft, MessageSquare, Search, UserPlus } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { AnalyticsChart } from './_components/AnalyticsChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getAnalyticsData } from '@/data/queries/actions';
 import type { BotAction } from '@/lib/types';
-
-const typeConfig: Record<
-  BotAction['type'],
-  { icon: typeof MessageSquare; label: string; color: string; bgColor: string }
-> = {
-  answered: {
-    icon: MessageSquare,
-    label: 'Answered',
-    color: 'text-type-answered',
-    bgColor: 'bg-type-answered/10',
-  },
-  routed: {
-    icon: ArrowRightLeft,
-    label: 'Routed',
-    color: 'text-type-routed',
-    bgColor: 'bg-type-routed/10',
-  },
-  welcomed: {
-    icon: UserPlus,
-    label: 'Welcomed',
-    color: 'text-type-welcomed',
-    bgColor: 'bg-type-welcomed/10',
-  },
-  surfaced: {
-    icon: Search,
-    label: 'Surfaced',
-    color: 'text-type-surfaced',
-    bgColor: 'bg-type-surfaced/10',
-  },
-  flagged: {
-    icon: AlertTriangle,
-    label: 'Flagged',
-    color: 'text-type-flagged',
-    bgColor: 'bg-type-flagged/10',
-  },
-};
+import { typeConfig } from '@/lib/type-config';
 
 export default function AnalyticsPage() {
   return (
@@ -76,14 +40,14 @@ async function AnalyticsContent() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {sortedTypes.map(({ type, count, icon: Icon, label, color, bgColor }) => {
+            {sortedTypes.map(({ type, count, icon: Icon, label, iconColor, bgColor }) => {
               const pct = totalActions > 0 ? Math.round((count / totalActions) * 100) : 0;
               return (
                 <div key={type} className="flex items-center gap-3">
                   <div
                     className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${bgColor}`}
                   >
-                    <Icon className={`h-3.5 w-3.5 ${color}`} />
+                    <Icon className={`h-3.5 w-3.5 ${iconColor}`} />
                   </div>
                   <div className="min-w-[80px] text-sm font-medium">{label}</div>
                   <div className="flex-1">

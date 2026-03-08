@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type FormattedTimeProps = {
   timestamp: number;
@@ -36,15 +36,12 @@ function getRefreshInterval(timestamp: number): number {
 
 export function FormattedTime({ timestamp }: FormattedTimeProps) {
   const [relative, setRelative] = useState(() => getRelativeTime(timestamp));
-  const intervalRef = useRef<ReturnType<typeof setInterval>>(null);
 
   useEffect(() => {
-    intervalRef.current = setInterval(() => {
+    const id = setInterval(() => {
       setRelative(getRelativeTime(timestamp));
     }, getRefreshInterval(timestamp));
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
+    return () => clearInterval(id);
   }, [timestamp]);
 
   return (
