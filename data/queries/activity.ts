@@ -13,6 +13,7 @@ import {
   getActionById as storeGetActionById,
   getConversation as storeGetConversation,
   getLastSeen,
+  getStats as storeGetStats,
   getThreadKeyForAction,
   isStoreConfigured,
 } from '@/lib/store';
@@ -129,14 +130,13 @@ export const getAnalyticsData = cache(async (): Promise<AnalyticsData> => {
 });
 
 export const getDashboardStats = cache(async (): Promise<DashboardStats> => {
-  const actions = await getRecentActions();
+  const [actions, stats] = await Promise.all([getRecentActions(), storeGetStats()]);
 
-  const counts: Record<string, number> = { total: actions.length };
+  const counts: Record<string, number> = { ...stats };
   const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
   const thisWeek: Record<string, number> = { total: 0 };
 
   for (const action of actions) {
-    counts[action.type] = (counts[action.type] || 0) + 1;
     if (action.timestamp >= weekAgo) {
       thisWeek[action.type] = (thisWeek[action.type] || 0) + 1;
       thisWeek.total++;
