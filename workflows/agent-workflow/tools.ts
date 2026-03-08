@@ -62,7 +62,7 @@ async function executeWebSearch({ query }: { query: string }) {
   'use step';
 
   const { generateText, stepCountIs } = await import('ai');
-  const { anthropic } = await import('@ai-sdk/anthropic');
+  const { anthropic } = await import('@/lib/ai');
 
   const result = await generateText({
     model: anthropic('claude-sonnet-4-20250514'),

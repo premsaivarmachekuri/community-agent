@@ -75,13 +75,13 @@ Add these in your Vercel project settings (or `.env.local` for local dev):
 | `SLACK_BOT_TOKEN`          | For Slack | Bot token from your Slack app (`xoxb-...`)                                                                                                         |
 | `SLACK_SIGNING_SECRET`     | For Slack | Signing secret from Slack app settings                                                                                                             |
 | `REDIS_URL`                | For Slack | Redis for conversation state (`redis://...`)                                                                                                       |
-| `ANTHROPIC_API_KEY`        | For AI    | Anthropic API key from [console.anthropic.com](https://console.anthropic.com/settings/keys)                                                        |
+| `AI_GATEWAY_API_KEY`       | For AI    | [AI Gateway](https://vercel.com/docs/ai-gateway) API key (recommended — auto-authenticated on Vercel via OIDC)                                     |
+| `ANTHROPIC_API_KEY`        | For AI    | Direct Anthropic API key — fallback if not using AI Gateway                                                                                        |
 | `COMMUNITY_NAME`           | No        | Name shown in bot responses (default: "Your Community")                                                                                            |
 | `AI_MODEL`                 | No        | AI model (default: `anthropic/claude-sonnet-4-20250514`). Uses [AI Gateway](https://vercel.com/docs/ai-gateway) for routing                        |
 | `UPSTASH_REDIS_REST_URL`   | No        | Upstash Redis REST URL (or use `KV_REST_API_URL` from Vercel Marketplace)                                                                          |
 | `UPSTASH_REDIS_REST_TOKEN` | No        | Upstash Redis REST token (or use `KV_REST_API_TOKEN` from Vercel Marketplace)                                                                      |
 | `SLACK_WORKSPACE_URL`      | No        | Slack workspace URL — adds an "Open Slack" link to the admin panel                                                                                 |
-| `AI_GATEWAY_API_KEY`       | No        | AI Gateway API key (auto-authenticated on Vercel via OIDC)                                                                                         |
 | `SAVOIR_API_URL`           | No        | [Knowledge Agent Template](https://github.com/vercel-labs/knowledge-agent-template) API URL for sandboxed bash execution                           |
 | `SAVOIR_API_KEY`           | No        | Savoir API key (if the instance requires auth)                                                                                                     |
 | `SEARCH_DOMAINS`           | No        | Comma-separated domains for Claude's web search/fetch tools (e.g. `docs.example.com,partner.com`). When set, the bot can only search these domains |
