@@ -1,9 +1,11 @@
 'use client';
 
+import { Suspense } from 'react';
 import { Bot, LayoutDashboard, Activity, BarChart3, Settings, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Sidebar as SidebarRoot,
   SidebarContent,
@@ -26,8 +28,6 @@ const navItems = [
 ];
 
 export function Sidebar({ communityName }: { communityName: string }) {
-  const pathname = usePathname();
-  const { data: session } = authClient.useSession();
   const { setOpenMobile } = useSidebar();
 
   return (
@@ -46,25 +46,9 @@ export function Sidebar({ communityName }: { communityName: string }) {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => {
-                const isActive =
-                  item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive}
-                      tooltip={item.label}
-                      onClick={() => setOpenMobile(false)}
-                    >
-                      <Link href={item.href}>
-                        <item.icon />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+              <Suspense>
+                <NavItems onNavigate={() => setOpenMobile(false)} />
+              </Suspense>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -72,17 +56,9 @@ export function Sidebar({ communityName }: { communityName: string }) {
       <SidebarSeparator className="mx-0" />
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              className="cursor-default hover:bg-transparent active:bg-transparent"
-            >
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sidebar-accent text-xs font-medium">
-                {session?.user?.name?.charAt(0)?.toUpperCase() || '?'}
-              </div>
-              <span className="truncate font-medium">{session?.user?.name}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          <Suspense fallback={<UserProfileSkeleton />}>
+            <UserProfile />
+          </Suspense>
           <SidebarMenuItem>
             <SidebarMenuButton
               size="sm"
@@ -104,5 +80,52 @@ export function Sidebar({ communityName }: { communityName: string }) {
         </SidebarMenu>
       </SidebarFooter>
     </SidebarRoot>
+  );
+}
+
+function NavItems({ onNavigate }: { onNavigate: () => void }) {
+  const pathname = usePathname();
+
+  return navItems.map((item) => {
+    const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+    return (
+      <SidebarMenuItem key={item.href}>
+        <SidebarMenuButton asChild isActive={isActive} tooltip={item.label} onClick={onNavigate}>
+          <Link href={item.href}>
+            <item.icon />
+            <span>{item.label}</span>
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    );
+  });
+}
+
+function UserProfile() {
+  const { data: session } = authClient.useSession();
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        size="lg"
+        className="cursor-default hover:bg-transparent active:bg-transparent"
+      >
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sidebar-accent text-xs font-medium">
+          {session?.user?.name?.charAt(0)?.toUpperCase() || '?'}
+        </div>
+        <span className="truncate font-medium">{session?.user?.name}</span>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  );
+}
+
+function UserProfileSkeleton() {
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton size="lg" className="cursor-default">
+        <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
+        <Skeleton className="h-4 w-24" />
+      </SidebarMenuButton>
+    </SidebarMenuItem>
   );
 }
