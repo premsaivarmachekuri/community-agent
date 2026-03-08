@@ -4,9 +4,9 @@ The admin panel is a server-rendered Next.js dashboard that provides real-time v
 
 ## Rendering
 
-Pages are non-async — they render a static shell (header, sidebar, layout) and delegate data fetching to async server components wrapped in `<Suspense>` boundaries. The static shell streams immediately while dynamic content fills in. `cacheComponents` and React Compiler are both enabled.
+Pages are non-async — they render a static shell (header, sidebar, layout) and delegate data fetching to async Server Components wrapped in `<Suspense>` boundaries. The static shell streams immediately while dynamic content fills in. `cacheComponents` and React Compiler are both enabled.
 
-Client-side hooks like `usePathname` and `useSession` are isolated in their own `<Suspense>`-wrapped components so they don't force their parent into dynamic rendering.
+Client Component hooks like `usePathname` and `useSession` are isolated in their own `<Suspense>`-wrapped components so they don't force their parent into dynamic rendering.
 
 ## Data layer
 
@@ -18,7 +18,7 @@ When Upstash Redis is not configured, queries fall back to `data/mock/` so the p
 
 ## Streaming
 
-The workflow writes a stream entry to Redis when the bot starts processing a message and clears it when done. Client components poll for active streams via server actions every 3 seconds. A React context provider shares the set of active thread keys across the activity page so the status card, activity card highlights, and conversation detail indicators all react to the same polling loop without duplicating requests.
+The workflow writes a stream entry to Redis when the bot starts processing a message and clears it when done. Client Components poll for active streams via Server Functions every 3 seconds. A React context provider shares the set of active thread keys across the activity page so the status card, activity card highlights, and conversation detail indicators all react to the same polling loop without duplicating requests.
 
 ## Search params
 
@@ -32,7 +32,7 @@ Color tokens are defined as CSS custom properties in oklch with light/dark varia
 
 | Page         | URL              | Description                                                     |
 | ------------ | ---------------- | --------------------------------------------------------------- |
-| Overview     | `/`              | Stats, trends, activity chart, breakdown, and live bot status   |
+| Overview     | `/`              | Stats, weekly trends, activity chart, recent activity, live bot status |
 | Activity     | `/activity`      | Filterable timeline with search, pagination, and previews       |
 | Conversation | `/activity/[id]` | Full conversation thread with markdown rendering                |
 | Settings     | `/settings`      | Read-only config values and channel overview with action counts |
