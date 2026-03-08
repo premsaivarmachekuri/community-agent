@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, startTransition, ViewTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, useRef, ViewTransition } from 'react';
 import { Loader2, Radio } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +11,6 @@ import { useActiveStreams } from './ActiveStreamsContext';
 export function ActiveStreams() {
   const [streams, setStreams] = useState<AnnotatedStream[]>([]);
   const hadStreamsRef = useRef(false);
-  const router = useRouter();
   const { setActiveThreadKeys } = useActiveStreams();
 
   useEffect(() => {
@@ -20,25 +18,19 @@ export function ActiveStreams() {
       const entries = await fetchActiveStreams();
 
       setActiveThreadKeys(entries.filter((e) => e.isFollowUp).map((e) => e.threadId));
+      setStreams(entries);
 
       if (entries.length > 0) {
-        setStreams(entries);
         hadStreamsRef.current = true;
       } else if (hadStreamsRef.current) {
         hadStreamsRef.current = false;
-        startTransition(() => {
-          setStreams([]);
-          router.refresh();
-        });
-      } else {
-        setStreams(entries);
       }
     }
 
     poll();
     const interval = setInterval(poll, 3000);
     return () => clearInterval(interval);
-  }, [router, setActiveThreadKeys]);
+  }, [setActiveThreadKeys]);
 
   const newStreams = streams.filter((s) => !s.isFollowUp);
 

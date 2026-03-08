@@ -26,7 +26,7 @@ Answered actions expand inline to show the conversation thread. A React context 
 
 ## Live streaming
 
-Client components poll Redis for active streams every 3 seconds. New conversations get a standalone streaming card; follow-up messages in existing threads highlight the existing activity card with a ring and an absolutely-positioned "Bot is responding..." indicator (no layout shift). When streams end, `startTransition` batches the cleanup with `router.refresh()` so stats and action lists update seamlessly.
+Client components poll Redis for active streams every 3 seconds. New conversations get a standalone streaming card; follow-up messages in existing threads highlight the existing activity card with a ring and an absolutely-positioned "Bot is responding..." indicator (no layout shift). All streaming state is managed locally. Server-rendered data refreshes naturally on navigation.
 
 ## Theming
 

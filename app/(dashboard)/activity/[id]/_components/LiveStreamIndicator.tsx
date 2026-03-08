@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Bot, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { fetchStream } from '@/data/actions/stream';
@@ -9,28 +8,17 @@ import type { StreamEntry } from '@/lib/types';
 
 export function LiveStreamIndicator({ threadKey }: { threadKey: string }) {
   const [stream, setStream] = useState<StreamEntry | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
-    let hadStream = false;
-
     async function poll() {
       const entry = await fetchStream(threadKey);
       setStream(entry);
-
-      if (entry && !hadStream) {
-        hadStream = true;
-        router.refresh();
-      } else if (!entry && hadStream) {
-        hadStream = false;
-        router.refresh();
-      }
     }
 
     poll();
     const interval = setInterval(poll, 3000);
     return () => clearInterval(interval);
-  }, [threadKey, router]);
+  }, [threadKey]);
 
   if (!stream) return null;
 

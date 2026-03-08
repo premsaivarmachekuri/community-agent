@@ -1,38 +1,23 @@
 'use client';
 
-import { useEffect, useState, useRef, startTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { Loader2, Radio } from 'lucide-react';
 import { fetchActiveStreams } from '@/data/actions/stream';
 import { cn } from '@/lib/utils';
 
 export function DashboardLive() {
   const [count, setCount] = useState(0);
-  const hadStreamsRef = useRef(false);
-  const router = useRouter();
 
   useEffect(() => {
     async function poll() {
       const entries = await fetchActiveStreams();
-
-      if (entries.length > 0) {
-        setCount(entries.length);
-        hadStreamsRef.current = true;
-      } else if (hadStreamsRef.current) {
-        hadStreamsRef.current = false;
-        startTransition(() => {
-          setCount(0);
-          router.refresh();
-        });
-      } else {
-        setCount(0);
-      }
+      setCount(entries.length);
     }
 
     poll();
     const interval = setInterval(poll, 3000);
     return () => clearInterval(interval);
-  }, [router]);
+  }, []);
 
   return (
     <div
