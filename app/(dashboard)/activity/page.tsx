@@ -1,5 +1,4 @@
 import { Suspense } from 'react';
-import { headers } from 'next/headers';
 import { after } from 'next/server';
 import { ExternalLink, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
@@ -18,11 +17,11 @@ import { FormattedTime } from '@/components/FormattedTime';
 import { ShowMoreButton } from './_components/ShowMoreButton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getRecentActions } from '@/data/queries/actions';
-import { auth } from '@/lib/auth';
-import { getLastSeen, setLastSeen } from '@/lib/store';
+import { getActionCounts, getRecentActions, getLastSeenTimestamp } from '@/data/queries/activity';
+import { setLastSeen } from '@/lib/store';
+import { requireSession } from '@/data/queries/auth';
 import type { BotAction } from '@/lib/types';
-import { typeConfig } from '@/lib/type-config';
+import { typeConfig } from '@/config/type-config';
 import { cn } from '@/lib/utils';
 import { ViewTransition } from 'react';
 
@@ -51,12 +50,11 @@ export default function ActivityPage({ searchParams }: PageProps<'/activity'>) {
 }
 
 async function ActivityList({ searchParams }: Pick<PageProps<'/activity'>, 'searchParams'>) {
-  const [{ type, q, limit: limitParam }, allActions, session] = await Promise.all([
+  const [{ type, q, limit: limitParam }, allActions, session, lastSeen] = await Promise.all([
     searchParams,
     getRecentActions(),
-    auth.api.getSession({ headers: await headers() }).catch(() => {
-      return null;
-    }),
+    requireSession(),
+    getLastSeenTimestamp(),
   ] as const);
 
   let actions: BotAction[] = type
@@ -80,11 +78,6 @@ async function ActivityList({ searchParams }: Pick<PageProps<'/activity'>, 'sear
   const limit = rawLimit ? Math.min(Number(rawLimit), totalCount) : PAGE_SIZE;
   const paginatedActions = actions.slice(0, limit);
 
-  let lastSeen = 0;
-  if (session?.user?.id) {
-    lastSeen = await getLastSeen(session.user.id);
-  }
-
   if (actions.length === 0) {
     const filterLabel = type ? typeConfig[type as BotAction['type']]?.label : null;
     const hasFilters = type || searchQuery;
@@ -107,11 +100,9 @@ async function ActivityList({ searchParams }: Pick<PageProps<'/activity'>, 'sear
     );
   }
 
-  if (session?.user?.id) {
-    const userId = session.user.id;
-    // eslint-disable-next-line react-hooks/purity -- after() runs post-response, not during render
-    after(() => setLastSeen(userId, Date.now()));
-  }
+  const userId = session.user.id;
+  // eslint-disable-next-line react-hooks/purity -- after() runs post-response, not during render
+  after(() => setLastSeen(userId, Date.now()));
 
   return (
     <div className="space-y-3">
@@ -202,11 +193,7 @@ async function ActivityList({ searchParams }: Pick<PageProps<'/activity'>, 'sear
 }
 
 async function ActivityFiltersWithCounts() {
-  const actions = await getRecentActions();
-  const counts: Record<string, number> = { all: actions.length };
-  for (const action of actions) {
-    counts[action.type] = (counts[action.type] || 0) + 1;
-  }
+  const counts = await getActionCounts();
   return <ActivityFilters counts={counts} />;
 }
 

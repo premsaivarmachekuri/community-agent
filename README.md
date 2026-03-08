@@ -29,13 +29,15 @@ For the full Slack bot setup, see [docs/setup.md](docs/setup.md).
 
 ## Customization
 
-| What to change  | File                                | Details                         |
-| --------------- | ----------------------------------- | ------------------------------- |
-| Bot personality | `lib/agent.ts`                      | System prompt and instructions  |
-| Channel map     | `lib/channels.ts`                   | Must match your Slack workspace |
-| Welcome message | `lib/welcome.ts`                    | Sent when new members join      |
-| Agent tools     | `workflows/agent-workflow/tools.ts` | Add, remove, or modify tools    |
-| Auth config     | `lib/auth.ts`                       | Slack OAuth for the admin panel |
+| What to change  | File                                | Details                                     |
+| --------------- | ----------------------------------- | ------------------------------------------- |
+| Bot personality | `lib/agent.ts`                      | System prompt and instructions              |
+| Channel map     | `lib/channels.ts`                   | Must match your Slack workspace             |
+| Welcome message | `lib/welcome.ts`                    | Sent when new members join                  |
+| Agent tools     | `workflows/agent-workflow/tools.ts` | Add, remove, or modify tools                |
+| Auth config     | `lib/auth.ts`                       | Slack OAuth for the admin panel             |
+| Action type UI  | `config/type-config.ts`             | Icons, labels, and colors per action type   |
+| Data queries    | `data/queries/activity.ts`          | All dashboard data fetching and aggregation |
 
 ### Knowledge Base
 

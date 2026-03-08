@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { config } from '@/lib/config';
 import { channels } from '@/lib/channels';
-import { getRecentActions } from '@/data/queries/actions';
+import { getChannelCounts } from '@/data/queries/activity';
 
 export default function SettingsPage() {
   return (
@@ -90,16 +90,7 @@ function ConfigSection() {
 }
 
 async function ChannelOverview() {
-  const actions = await getRecentActions();
-
-  const channelCounts: Record<string, number> = {};
-  for (const action of actions) {
-    if (action.channel) {
-      const name = action.channel.replace(/^#/, '');
-      channelCounts[name] = (channelCounts[name] || 0) + 1;
-    }
-  }
-
+  const channelCounts = await getChannelCounts();
   const channelEntries = Object.entries(channels);
 
   return (

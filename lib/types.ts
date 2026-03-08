@@ -68,3 +68,34 @@ export type StreamEntry = {
   status: 'streaming' | 'done';
   timestamp: number;
 };
+
+/** Full conversation detail returned from the data layer */
+export type ConversationDetail = {
+  action: BotAction;
+  messages: ConversationMessage[];
+  threadKey: string | null;
+  dmRestricted: boolean;
+};
+
+/** Aggregated dashboard statistics */
+export type DashboardStats = {
+  counts: Record<string, number>;
+  thisWeek: Record<string, number>;
+};
+
+/** Analytics time-series bucket */
+export type AnalyticsBucket = {
+  date: string;
+  answered: number;
+  routed: number;
+  welcomed: number;
+  surfaced: number;
+  flagged: number;
+};
+
+/** Analytics data with bucketed trends and type breakdown */
+export type AnalyticsData = {
+  buckets: AnalyticsBucket[];
+  typeCounts: Record<string, number>;
+  totalActions: number;
+};

@@ -7,9 +7,9 @@ import { FormattedTime } from '@/components/FormattedTime';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getRecentActions } from '@/data/queries/actions';
+import { getDashboardStats, getRecentActions } from '@/data/queries/activity';
 import { config } from '@/lib/config';
-import { typeConfig } from '@/lib/type-config';
+import { typeConfig } from '@/config/type-config';
 
 export default function OverviewPage() {
   return (
@@ -46,19 +46,7 @@ export default function OverviewPage() {
 }
 
 async function StatsCards() {
-  const actions = await getRecentActions();
-
-  const counts: Record<string, number> = { total: actions.length };
-  // eslint-disable-next-line react-hooks/purity -- needed to compute "this week" from action timestamps
-  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  const thisWeek: Record<string, number> = { total: 0 };
-  for (const action of actions) {
-    counts[action.type] = (counts[action.type] || 0) + 1;
-    if (action.timestamp >= weekAgo) {
-      thisWeek[action.type] = (thisWeek[action.type] || 0) + 1;
-      thisWeek.total++;
-    }
-  }
+  const { counts, thisWeek } = await getDashboardStats();
 
   const cards = [
     {

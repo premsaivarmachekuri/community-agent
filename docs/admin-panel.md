@@ -1,48 +1,38 @@
 # Admin Panel
 
-Frontend architecture and design decisions for the Next.js admin dashboard. For the bot and workflow architecture, see [Architecture](architecture.md).
+The admin panel is a server-rendered Next.js dashboard that provides real-time visibility into the bot's activity. Slack OAuth via Better Auth restricts access to workspace members. For the bot and workflow architecture, see [Architecture](architecture.md).
 
-## Rendering strategy
+## Rendering
 
-Every page component is **non-async**. Data-fetching server components (activity lists, channel overviews) are placed inside `<Suspense>` boundaries so the static shell streams instantly and dynamic content fills in. `cacheComponents` and React Compiler are both enabled.
+Pages are non-async — they render a static shell (header, sidebar, layout) and delegate data fetching to async server components wrapped in `<Suspense>` boundaries. The static shell streams immediately while dynamic content fills in. `cacheComponents` and React Compiler are both enabled.
 
-The `searchParams` promise is passed directly to the async child — the page itself never awaits it. This keeps the outer layout and header in the static shell.
+Client-side hooks like `usePathname` and `useSession` are isolated in their own `<Suspense>`-wrapped components so they don't force their parent into dynamic rendering.
 
 ## Data layer
 
-All data fetching lives in `data/queries/`. Each query calls `requireSession()` before touching the store, so auth is enforced at the data layer regardless of which page or server action triggers it.
+All data fetching lives in `data/queries/`. Every query enforces auth via `requireSession()` and is wrapped with React `cache()` to deduplicate calls within a request. Page components call a single composite query that handles fetching, authorization, and aggregation — the page receives exactly the data it needs to render.
 
-Analytics data uses `'use cache: remote'` with `cacheLife('days')` — bucketed once per day, not on every request. The bucketing logic (grouping actions into calendar-day bins) also lives in the data layer, not in the page component.
+Analytics data uses `'use cache: remote'` with `cacheLife('days')` so time-series buckets are computed once per day.
 
-When Upstash Redis is not configured, queries fall back to the mock dataset in `data/mock/`. The entire panel remains functional with realistic sample data so you can develop the UI without external services.
+When Upstash Redis is not configured, queries fall back to `data/mock/` so the panel works without external services.
 
-## Search params and filtering
+## Streaming
 
-The activity page uses URL search params (`?type=`, `?q=`, `?limit=`) as the source of truth for filters, search, and pagination. Filter changes use `useOptimistic` + `startTransition` for instant UI feedback while the server re-renders. Both filters and search reset pagination when changed. "Show more" increments via the `limit` param with `router.push({ scroll: false })` to preserve scroll position.
+The workflow writes a stream entry to Redis when the bot starts processing a message and clears it when done. Client components poll for active streams via server actions every 3 seconds. A React context provider shares the set of active thread keys across the activity page so the status card, activity card highlights, and conversation detail indicators all react to the same polling loop without duplicating requests.
 
-## Conversation previews
+## Search params
 
-Answered actions expand inline to show the conversation thread. A React context provider splits the toggle button (in the action row) from the expandable content (below the row) so they can live in separate DOM positions without prop drilling. Messages are fetched lazily via a server action on first expand.
-
-## Live streaming
-
-Client components poll Redis for active streams every 3 seconds. New conversations get a standalone streaming card; follow-up messages in existing threads highlight the existing activity card with a ring and an absolutely-positioned "Bot is responding..." indicator (no layout shift). All streaming state is managed locally. Server-rendered data refreshes naturally on navigation.
+The activity page uses URL search params (`?type=`, `?q=`, `?limit=`) as the source of truth for filters, search, and pagination. Filter changes use `useOptimistic` + `startTransition` for instant UI feedback while the server re-renders.
 
 ## Theming
 
-Action types each have a CSS custom property (`--type-answered`, `--type-routed`, etc.) defined in oklch with light/dark variants. These are registered as Tailwind colors in `@theme inline` so they work with opacity modifiers (`bg-type-answered/10`). Functional colors (`--success`, `--info`, `--destructive`) follow the same pattern. All color tokens live in `app/globals.css` — no hardcoded Tailwind color classes for semantic meanings.
-
-Charts use `var(--type-*)` references directly so they stay in sync with the rest of the UI across themes.
-
-## Charts
-
-Analytics uses `recharts` with a stacked `AreaChart` (monotone curves, gradient fills). The chart is a client component that receives pre-bucketed data as props — no data fetching or transformation happens on the client. Date labels use `toLocaleDateString` for locale-aware formatting.
+Color tokens are defined as CSS custom properties in oklch with light/dark variants (`app/globals.css`) and registered as Tailwind colors via `@theme inline`. Charts reference the same tokens so they stay in sync across themes.
 
 ## Pages
 
 | Page         | URL              | Description                                                     |
 | ------------ | ---------------- | --------------------------------------------------------------- |
-| Overview     | `/`              | Stats tiles, weekly trends, recent activity, live bot count     |
+| Overview     | `/`              | Stats tiles, weekly trends, recent activity, live bot status    |
 | Activity     | `/activity`      | Filterable timeline with search, pagination, and previews       |
 | Conversation | `/activity/[id]` | Full conversation thread with markdown rendering                |
 | Analytics    | `/analytics`     | Stacked area chart and breakdown by type                        |

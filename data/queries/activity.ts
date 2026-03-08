@@ -1,13 +1,24 @@
 import { cache } from 'react';
 import { cacheLife } from 'next/cache';
-import type { BotAction, ConversationMessage } from '@/lib/types';
+import { headers } from 'next/headers';
+import type {
+  AnalyticsBucket,
+  AnalyticsData,
+  BotAction,
+  ConversationDetail,
+  ConversationMessage,
+  DashboardStats,
+} from '@/lib/types';
 import {
   getRecentActions as storeGetRecentActions,
   getActionById as storeGetActionById,
   getConversation as storeGetConversation,
+  getLastSeen,
+  getThreadKeyForAction,
   isStoreConfigured,
 } from '@/lib/store';
-import { mockActions, mockConversations } from '@/data/mock/actions';
+import { auth, isCurrentUserLead } from '@/lib/auth';
+import { mockActions, mockConversations } from '@/data/mock/activity';
 import { requireSession } from './auth';
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -41,20 +52,24 @@ export const getConversation = cache(async (actionId: string): Promise<Conversat
   return storeGetConversation(actionId);
 });
 
-export type AnalyticsData = {
-  buckets: AnalyticsBucket[];
-  typeCounts: Record<string, number>;
-  totalActions: number;
-};
+export const getConversationDetail = cache(
+  async (actionId: string): Promise<ConversationDetail | null> => {
+    await requireSession();
 
-export type AnalyticsBucket = {
-  date: string;
-  answered: number;
-  routed: number;
-  welcomed: number;
-  surfaced: number;
-  flagged: number;
-};
+    const action = await getActionById(actionId);
+    if (!action) return null;
+
+    const isDM = action.channel === 'DM';
+    const [canViewDM, threadKey] = await Promise.all([
+      isDM ? isCurrentUserLead() : true,
+      getThreadKeyForAction(actionId),
+    ]);
+
+    const messages = canViewDM ? await getConversation(actionId) : [];
+
+    return { action, messages, threadKey, dmRestricted: isDM && !canViewDM };
+  },
+);
 
 async function fetchAnalyticsData(): Promise<AnalyticsData> {
   'use cache: remote';
@@ -112,7 +127,52 @@ async function fetchAnalyticsData(): Promise<AnalyticsData> {
   return { buckets, typeCounts, totalActions: actions.length };
 }
 
-export async function getAnalyticsData(): Promise<AnalyticsData> {
+export const getAnalyticsData = cache(async (): Promise<AnalyticsData> => {
   await requireSession();
   return fetchAnalyticsData();
-}
+});
+
+export const getDashboardStats = cache(async (): Promise<DashboardStats> => {
+  const actions = await getRecentActions();
+
+  const counts: Record<string, number> = { total: actions.length };
+  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const thisWeek: Record<string, number> = { total: 0 };
+
+  for (const action of actions) {
+    counts[action.type] = (counts[action.type] || 0) + 1;
+    if (action.timestamp >= weekAgo) {
+      thisWeek[action.type] = (thisWeek[action.type] || 0) + 1;
+      thisWeek.total++;
+    }
+  }
+
+  return { counts, thisWeek };
+});
+
+export const getActionCounts = cache(async (): Promise<Record<string, number>> => {
+  const actions = await getRecentActions();
+  const counts: Record<string, number> = { all: actions.length };
+  for (const action of actions) {
+    counts[action.type] = (counts[action.type] || 0) + 1;
+  }
+  return counts;
+});
+
+export const getChannelCounts = cache(async (): Promise<Record<string, number>> => {
+  const actions = await getRecentActions();
+  const counts: Record<string, number> = {};
+  for (const action of actions) {
+    if (action.channel) {
+      const name = action.channel.replace(/^#/, '');
+      counts[name] = (counts[name] || 0) + 1;
+    }
+  }
+  return counts;
+});
+
+export const getLastSeenTimestamp = cache(async (): Promise<number> => {
+  const session = await auth.api.getSession({ headers: await headers() }).catch(() => null);
+  if (!session?.user?.id) return 0;
+  return getLastSeen(session.user.id);
+});

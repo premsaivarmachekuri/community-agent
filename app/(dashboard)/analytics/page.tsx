@@ -3,9 +3,9 @@ import { Header } from '@/components/Header';
 import { AnalyticsChart } from './_components/AnalyticsChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getAnalyticsData } from '@/data/queries/actions';
+import { getAnalyticsData } from '@/data/queries/activity';
 import type { BotAction } from '@/lib/types';
-import { typeConfig } from '@/lib/type-config';
+import { typeConfig } from '@/config/type-config';
 
 export default function AnalyticsPage() {
   return (

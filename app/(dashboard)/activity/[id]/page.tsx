@@ -10,9 +10,7 @@ import { LiveStreamIndicator } from './_components/LiveStreamIndicator';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getActionById, getConversation } from '@/data/queries/actions';
-import { isCurrentUserLead } from '@/lib/auth';
-import { getThreadKeyForAction } from '@/lib/store';
+import { getConversationDetail } from '@/data/queries/activity';
 import { cn, cleanSlackText } from '@/lib/utils';
 
 export default function ConversationPage({ params }: PageProps<'/activity/[id]'>) {
@@ -37,16 +35,10 @@ async function ConversationDetail({ params }: Pick<PageProps<'/activity/[id]'>, 
   await connection();
   const { id: actionId } = await params;
 
-  const action = await getActionById(actionId);
-  if (!action) notFound();
+  const detail = await getConversationDetail(actionId);
+  if (!detail) notFound();
 
-  const isDM = action.channel === 'DM';
-  const [canViewDM, threadKey] = await Promise.all([
-    isDM ? isCurrentUserLead() : true,
-    getThreadKeyForAction(actionId),
-  ]);
-
-  const messages = canViewDM ? await getConversation(actionId) : [];
+  const { action, messages, threadKey, dmRestricted } = detail;
 
   return (
     <div className="space-y-4">
@@ -69,7 +61,7 @@ async function ConversationDetail({ params }: Pick<PageProps<'/activity/[id]'>, 
           )}
         </CardContent>
       </Card>
-      {isDM && !canViewDM ? (
+      {dmRestricted ? (
         <Card>
           <CardContent className="flex items-center justify-center gap-3 py-8 text-muted-foreground">
             <Lock className="h-4 w-4" />

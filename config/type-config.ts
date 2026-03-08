@@ -1,5 +1,5 @@
 import { AlertTriangle, ArrowRightLeft, MessageSquare, Search, UserPlus } from 'lucide-react';
-import type { BotAction } from './types';
+import type { BotAction } from '@/lib/types';
 
 export type TypeConfigEntry = {
   icon: typeof MessageSquare;
