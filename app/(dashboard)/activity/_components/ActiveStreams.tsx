@@ -1,31 +1,36 @@
 'use client';
 
-import { useEffect, useState, ViewTransition } from 'react';
+import { useEffect, useRef, ViewTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { Loader2, Radio } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { fetchActiveStreams, type AnnotatedStream } from '@/data/actions/stream';
+import { useActiveStreams as useActiveStreamsSWR } from '@/hooks/use-streams';
 import { cn } from '@/lib/utils';
 import { useActiveStreams } from './ActiveStreamsContext';
 
 export function ActiveStreams() {
-  const [streams, setStreams] = useState<AnnotatedStream[]>([]);
+  const { data: streams } = useActiveStreamsSWR();
   const { setActiveThreadKeys } = useActiveStreams();
+  const router = useRouter();
+  const prevStreamIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    async function poll() {
-      const entries = await fetchActiveStreams();
-      setActiveThreadKeys(entries.filter((e) => e.isFollowUp).map((e) => e.threadId));
-      setStreams(entries);
+    if (!streams) return;
+
+    setActiveThreadKeys(streams.filter((e) => e.isFollowUp).map((e) => e.threadId));
+
+    const currentIds = new Set(streams.map((s) => s.threadId));
+    const hadStreams = prevStreamIds.current.size > 0;
+    const streamEnded = hadStreams && [...prevStreamIds.current].some((id) => !currentIds.has(id));
+    prevStreamIds.current = currentIds;
+
+    if (streamEnded) {
+      router.refresh();
     }
+  }, [streams, setActiveThreadKeys, router]);
 
-    poll();
-    const interval = setInterval(poll, 3000);
-    return () => clearInterval(interval);
-  }, [setActiveThreadKeys]);
-
-  const newStreams = streams.filter((s) => !s.isFollowUp);
-
+  const newStreams = (streams ?? []).filter((s) => !s.isFollowUp);
   const isActive = newStreams.length > 0;
 
   return (

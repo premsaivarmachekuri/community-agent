@@ -1,24 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Bot, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { fetchStream } from '@/data/actions/stream';
-import type { StreamEntry } from '@/lib/types';
+import { useStream } from '@/hooks/use-streams';
 
 export function LiveStreamIndicator({ threadKey }: { threadKey: string }) {
-  const [stream, setStream] = useState<StreamEntry | null>(null);
-
-  useEffect(() => {
-    async function poll() {
-      const entry = await fetchStream(threadKey);
-      setStream(entry);
-    }
-
-    poll();
-    const interval = setInterval(poll, 3000);
-    return () => clearInterval(interval);
-  }, [threadKey]);
+  const { data: stream } = useStream(threadKey);
 
   if (!stream) return null;
 

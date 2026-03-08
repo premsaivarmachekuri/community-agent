@@ -18,7 +18,7 @@ When Upstash Redis is not configured, queries fall back to `data/mock/` so the p
 
 ## Streaming
 
-The workflow writes a stream entry to Redis when the bot starts processing a message and clears it when done. Client Components poll for active streams via Server Functions every 3 seconds. A React context provider shares the set of active thread keys across the activity page so the status card, activity card highlights, and conversation detail indicators all react to the same polling loop without duplicating requests.
+The workflow writes a stream entry to Redis when the bot starts processing a message and clears it when done. Client Components poll for active streams via SWR (`refreshInterval: 3000`) against GET API routes (`/api/streams`, `/api/streams/[threadKey]`). SWR handles deduplication, `keepPreviousData` to prevent flicker, and `revalidateOnFocus` for instant updates when tabbing back. A React context provider shares the set of active thread keys across the activity page so the status card, activity card highlights, and conversation detail indicators all react to the same data.
 
 ## Search params
 

@@ -102,7 +102,7 @@ Tools (`suggest_channel`, `unanswered`, `bash`, `bash_batch`, `web_search`, `fla
 
 ## Admin panel
 
-Server-rendered dashboard with live streaming, activity feed, conversation history, and bot configuration. Slack OAuth via Better Auth restricts access to workspace members. Every data query and Server Function enforces auth via `requireSession()` as defense-in-depth. Falls back to mock data when Redis is not configured. See [Admin panel](admin-panel.md) for Next.js implementation details.
+Server-rendered dashboard with live streaming, activity feed, conversation history, and bot configuration. Slack OAuth via Better Auth restricts access to workspace members. Data queries enforce auth via `requireSession()`; stream polling uses authenticated GET API routes (`/api/streams`). Falls back to mock data when Redis is not configured. See [Admin panel](admin-panel.md) for Next.js implementation details.
 
 ## Customize
 
