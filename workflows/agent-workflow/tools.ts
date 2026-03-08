@@ -115,14 +115,14 @@ async function executeSuggestChannel({ topic }: { topic: string }) {
     .map((ch) => `#${ch.name} — ${ch.description}`)
     .join('\n');
 
-  if (best.score > 0) {
-    await logAction({
-      type: 'routed',
-      channel: `#${best.channel.name}`,
-      description: `Suggested routing question to #${best.channel.name}`,
-      metadata: { topic },
-    });
-  }
+  await logAction({
+    type: 'routed',
+    channel: best.score > 0 ? `#${best.channel.name}` : '#general',
+    description: best.score > 0
+      ? `Suggested routing question to #${best.channel.name}`
+      : `Helped with channel routing (topic: ${topic})`,
+    metadata: { topic },
+  });
 
   return {
     suggested: best.score > 0 ? `#${best.channel.name}` : null,

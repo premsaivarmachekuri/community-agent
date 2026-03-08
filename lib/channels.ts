@@ -19,7 +19,7 @@ export const channels: Record<string, ChannelConfig> = {
   help: {
     name: 'help',
     description: 'Get help with questions and issues',
-    topics: ['questions', 'support', 'troubleshooting', 'how-to'],
+    topics: ['help', 'questions', 'support', 'troubleshooting', 'how-to'],
   },
   bugs: {
     name: 'bugs',
