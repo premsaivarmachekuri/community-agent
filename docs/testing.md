@@ -10,15 +10,13 @@ Each call logs a random action (answered, routed, welcomed, surfaced, or flagged
 
 ## Testing the live stream indicator
 
-The `PUT` method creates a temporary stream entry so you can verify the real-time indicators without a Slack connection. Open the Activity page (`/activity`) in your browser, then run this in the DevTools console:
+The `PUT` method creates a temporary stream entry so you can verify the real-time indicators without a Slack connection:
 
-```js
-fetch('/api/test-action', { method: 'PUT' })
-  .then((r) => r.json())
-  .then(console.log);
+```bash
+curl -X PUT http://localhost:3000/api/test-action -b "better-auth.session_token=YOUR_SESSION_TOKEN"
 ```
 
-Within a few seconds, a green "Live" card should appear at the top of the activity list showing "Bot is responding..." with a spinner. The stream entry auto-expires after 120 seconds (Redis TTL).
+Open the Activity page (`/activity`) — within a few seconds, a green "Live" card should appear at the top of the activity list showing "Bot is responding..." with a spinner. The stream entry auto-expires after 120 seconds (Redis TTL).
 
 ## Clearing test data
 
