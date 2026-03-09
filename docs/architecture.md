@@ -78,7 +78,7 @@ Slack message → Chat SDK (receive & route) → Vercel Workflow (durable) → A
                          │ polled every 3s
                          ▼
          ┌─────────────────────────────────┐
-         │      Admin Panel (Next.js)       │
+         │      Admin panel (Next.js)       │
          │  • Live streaming cards          │
          │  • Activity feed + stats          │
          │  • Conversation detail            │

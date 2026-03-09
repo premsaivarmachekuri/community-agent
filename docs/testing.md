@@ -1,4 +1,4 @@
-# Testing Without Slack
+# Testing without Slack
 
 The `/api/test-action` endpoint lets you simulate bot actions (requires Upstash Redis env vars and an authenticated session). Sign in to the admin panel first, then use the endpoint from the browser console or a tool that forwards your session cookie.
 

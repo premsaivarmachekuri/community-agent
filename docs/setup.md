@@ -1,6 +1,6 @@
-# Full Setup (Slack bot + admin panel)
+# Full setup (Slack bot + admin panel)
 
-## 1. Create Slack App
+## 1. Create Slack app
 
 Go to [api.slack.com/apps](https://api.slack.com/apps) → **Create New App** → **From a manifest**.
 
@@ -66,7 +66,7 @@ After creating:
 
 > **Tip:** Create a free test workspace at [slack.com/create](https://slack.com/create) to experiment safely. Add channels matching the template defaults (`#help`, `#bugs`, `#introductions`) and install the bot there.
 
-## 2. Configure Environment Variables
+## 2. Configure environment variables
 
 Add these in your Vercel project settings (or `.env.local` for local dev):
 
@@ -93,7 +93,7 @@ Add these in your Vercel project settings (or `.env.local` for local dev):
 | `TURSO_DATABASE_URL`       | For prod  | Turso database URL (`libsql://...`). Defaults to `file:local.db` for local dev                                                                     |
 | `TURSO_AUTH_TOKEN`         | For prod  | Turso auth token (from Vercel Turso integration or [turso.tech](https://turso.tech))                                                               |
 
-## 3. Set up Vercel Storage
+## 3. Set up Vercel storage
 
 The app uses two databases. Set both up from the Vercel **Storage** tab—env vars are added to your project automatically.
 
@@ -121,7 +121,7 @@ Without Upstash Redis, the admin panel shows mock data—everything else still w
 
 Pull env vars locally after setup: `vercel link && vercel env pull .env.local`
 
-## 4. Set up Slack OAuth for Admin Panel
+## 4. Set up Slack OAuth for admin panel
 
 The admin panel uses Slack OAuth—only members of your workspace can sign in. This reuses the same Slack app you created in step 1.
 
@@ -140,7 +140,7 @@ The admin panel uses Slack OAuth—only members of your workspace can sign in. T
 >
 > **Local dev:** Add `http://localhost:3000/api/auth/callback/slack` as a second redirect URL in the Slack app. Set `BETTER_AUTH_URL=http://localhost:3000` in `.env.local`.
 
-## 5. Configure Channels
+## 5. Configure channels
 
 Edit `lib/channels.ts` to match your Slack workspace. These map to **existing channels**—the bot does not create them.
 

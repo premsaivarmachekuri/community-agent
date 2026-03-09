@@ -17,7 +17,7 @@ Open source AI-powered Slack community management bot with a built-in Next.js ad
 - **Admin panel**—live dashboard with real-time streaming indicators, ViewTransition animations, activity feed, type filters, text search, inline conversation previews, activity trends, and settings page with channel overview
 - **Auth**—Slack OAuth via [Better Auth](https://www.better-auth.com) restricts the admin panel to workspace members
 
-## Quick Start
+## Quick start
 
 Try the admin panel without setting up Slack:
 
@@ -38,7 +38,7 @@ For the full Slack bot setup, see [docs/setup.md](docs/setup.md).
 | Auth config     | `lib/auth.ts`                       | Slack OAuth for the admin panel          |
 | Action type UI  | `config/type-config.ts`             | Icons, labels, and colors per action type|
 
-### Knowledge Base
+### Knowledge base
 
 This template is designed to work alongside the [Knowledge Agent Template](https://github.com/vercel-labs/knowledge-agent-template). Set `SAVOIR_API_URL` to connect to a deployed Savoir backend, giving the bot `bash` and `bash_batch` tools to search and read your community docs remotely. Without it, the bot still works using web search, channel routing, and the system prompt.
 
@@ -49,7 +49,7 @@ This template is designed to work alongside the [Knowledge Agent Template](https
 - [Admin panel](docs/admin-panel.md)—dashboard pages, live streaming, filters, Next.js patterns
 - [Testing](docs/testing.md)—test without Slack, simulate actions, mock data
 
-## Built With
+## Built with
 
 - [Next.js 16](https://nextjs.org)—App Router with cacheComponents
 - [Chat SDK](https://chat-sdk.dev)—Slack adapter and bot framework
