@@ -4,13 +4,13 @@ The admin panel is a server-rendered Next.js dashboard that provides real-time v
 
 ## Rendering
 
-Pages are non-async — they render a static shell (header, sidebar, layout) and delegate data fetching to async Server Components wrapped in `<Suspense>` boundaries. The static shell streams immediately while dynamic content fills in. `cacheComponents` and React Compiler are both enabled.
+Pages are non-async—they render a static shell (header, sidebar, layout) and delegate data fetching to async Server Components wrapped in `<Suspense>` boundaries. The static shell streams immediately while dynamic content fills in. `cacheComponents` and React Compiler are both enabled.
 
 Client Component hooks like `usePathname` and `useSession` are isolated in their own `<Suspense>`-wrapped components so they don't force their parent into dynamic rendering.
 
 ## Data layer
 
-All data fetching lives in `data/queries/`. Every query enforces auth via `requireSession()` and is wrapped with React `cache()` to deduplicate calls within a request. Page components call a single composite query that handles fetching, authorization, and aggregation — the page receives exactly the data it needs to render. `cacheComponents` preserves the rendered component tree across client navigations via React Activity, so conversation previews opened on the activity page stay expanded when navigating back from a detail view.
+All data fetching lives in `data/queries/`. Every query enforces auth via `requireSession()` and is wrapped with React `cache()` to deduplicate calls within a request. Page components call a single composite query that handles fetching, authorization, and aggregation—the page receives exactly the data it needs to render. `cacheComponents` preserves the rendered component tree across client navigations via React Activity, so conversation previews opened on the activity page stay expanded when navigating back from a detail view.
 
 When Upstash Redis is not configured, queries fall back to `data/mock/` so the panel works without external services.
 
@@ -20,7 +20,7 @@ The workflow writes a stream entry to Redis when the bot starts processing a mes
 
 ## Transitions
 
-`<ViewTransition>` animates Suspense reveals — default crossfade on the dashboard, `slide-up`/`slide-down` on other pages with `default="none"` to suppress unwanted update fades.
+`<ViewTransition>` animates Suspense reveals—default crossfade on the dashboard, `slide-up`/`slide-down` on other pages with `default="none"` to suppress unwanted update fades.
 
 ## Search params
 

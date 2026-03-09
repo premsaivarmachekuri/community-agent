@@ -57,7 +57,7 @@ export function ConversationPreviewToggle() {
     <button
       onClick={toggle}
       aria-label={isOpen ? 'Hide conversation preview' : 'Show conversation preview'}
-      className="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+      className="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
       <MessageCircle className="h-3 w-3" />
       {isPending ? 'Loading...' : isOpen ? 'Hide' : 'Preview'}

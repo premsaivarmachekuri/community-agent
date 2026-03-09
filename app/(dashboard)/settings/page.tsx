@@ -35,24 +35,24 @@ function ConfigSection() {
   const items = [
     {
       icon: Bot,
-      label: 'AI Model',
+      label: 'AI model',
       value: config.model,
     },
     {
       icon: MessageSquare,
-      label: 'Slack Workspace',
+      label: 'Slack workspace',
       value: config.slackWorkspaceUrl || null,
       href: config.slackWorkspaceUrl || undefined,
     },
     {
       icon: BookOpen,
-      label: 'Knowledge Base',
+      label: 'Knowledge base',
       value: config.savoirApiUrl ? config.savoirApiUrl.replace(/^https?:\/\//, '') : null,
       href: config.savoirApiUrl || undefined,
     },
     {
       icon: Globe,
-      label: 'Search Domains',
+      label: 'Search domains',
       value: config.searchDomains.length > 0 ? config.searchDomains.join(', ') : null,
     },
   ];
@@ -108,7 +108,14 @@ async function ChannelOverview() {
       </CardHeader>
       <CardContent>
         {channelEntries.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No channels configured.</p>
+          <div className="flex flex-col items-center justify-center py-6 text-center">
+            <Hash className="h-8 w-8 text-muted-foreground/50" />
+            <h3 className="mt-3 text-base font-medium">No channels configured</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Add channels in <code className="rounded bg-muted px-1 text-xs">lib/channels.ts</code> to
+              match your Slack workspace.
+            </p>
+          </div>
         ) : (
           <div className="divide-y">
             {channelEntries.map(([key, ch]) => {
@@ -122,7 +129,7 @@ async function ChannelOverview() {
                     <div className="flex items-center gap-2">
                       <Link
                         href={`/activity?q=${encodeURIComponent(ch.name)}` as any}
-                        className="text-sm font-medium hover:underline"
+                        className="rounded text-sm font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                       >
                         #{ch.name}
                       </Link>

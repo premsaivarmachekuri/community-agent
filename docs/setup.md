@@ -74,35 +74,35 @@ Add these in your Vercel project settings (or `.env.local` for local dev):
 | -------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `SLACK_BOT_TOKEN`          | For Slack | Bot token from your Slack app (`xoxb-...`)                                                                                                         |
 | `SLACK_SIGNING_SECRET`     | For Slack | Signing secret from Slack app settings                                                                                                             |
-| `REDIS_URL`                | For Slack | Redis for conversation state (`redis://...`)                                                                                                       |
-| `AI_GATEWAY_API_KEY`       | For AI    | [AI Gateway](https://vercel.com/docs/ai-gateway) API key (recommended — auto-authenticated on Vercel via OIDC)                                     |
-| `ANTHROPIC_API_KEY`        | For AI    | Direct Anthropic API key — fallback if not using AI Gateway                                                                                        |
+| `REDIS_URL`                | For Slack | Redis for conversation state (`redis://...`)                                                                                                        |
+| `AI_GATEWAY_API_KEY`       | For AI    | [AI Gateway](https://vercel.com/docs/ai-gateway) API key (recommended—auto-authenticated on Vercel via OIDC)                                       |
+| `ANTHROPIC_API_KEY`        | For AI    | Direct Anthropic API key—fallback if not using AI Gateway                                                                                          |
 | `COMMUNITY_NAME`           | No        | Name shown in bot responses (default: "Your Community")                                                                                            |
 | `AI_MODEL`                 | No        | AI model (default: `anthropic/claude-sonnet-4-20250514`). Uses [AI Gateway](https://vercel.com/docs/ai-gateway) for routing                        |
 | `UPSTASH_REDIS_REST_URL`   | No        | Upstash Redis REST URL (or use `KV_REST_API_URL` from Vercel Marketplace)                                                                          |
 | `UPSTASH_REDIS_REST_TOKEN` | No        | Upstash Redis REST token (or use `KV_REST_API_TOKEN` from Vercel Marketplace)                                                                      |
-| `SLACK_WORKSPACE_URL`      | No        | Slack workspace URL — adds an "Open Slack" link to the admin panel                                                                                 |
+| `SLACK_WORKSPACE_URL`      | No        | Slack workspace URL—adds an "Open Slack" link to the admin panel                                                                                   |
 | `SAVOIR_API_URL`           | No        | [Knowledge Agent Template](https://github.com/vercel-labs/knowledge-agent-template) API URL for sandboxed bash execution                           |
 | `SAVOIR_API_KEY`           | No        | Savoir API key (if the instance requires auth)                                                                                                     |
 | `SEARCH_DOMAINS`           | No        | Comma-separated domains for Claude's web search/fetch tools (e.g. `docs.example.com,partner.com`). When set, the bot can only search these domains |
-| `COMMUNITY_LEAD_SLACK_ID`  | No        | Slack user ID — bot can escalate tricky issues via DM                                                                                              |
+| `COMMUNITY_LEAD_SLACK_ID`  | No        | Slack user ID—bot can escalate tricky issues via DM                                                                                                |
 | `BETTER_AUTH_SECRET`       | Yes       | Secret for admin panel auth sessions (min 32 chars). Generate with `openssl rand -base64 32`                                                       |
-| `SLACK_CLIENT_ID`          | Yes       | Slack app Client ID (Basic Information → App Credentials)                                                                                          |
+| `SLACK_CLIENT_ID`          | Yes       | Slack app Client ID (Basic Information→App Credentials)                                                                                            |
 | `SLACK_CLIENT_SECRET`      | Yes       | Slack app Client Secret (same location)                                                                                                            |
-| `SLACK_TEAM_ID`            | Yes       | Slack workspace ID (`T...`) — restricts admin sign-in to workspace members                                                                         |
+| `SLACK_TEAM_ID`            | Yes       | Slack workspace ID (`T...`)—restricts admin sign-in to workspace members                                                                           |
 | `TURSO_DATABASE_URL`       | For prod  | Turso database URL (`libsql://...`). Defaults to `file:local.db` for local dev                                                                     |
 | `TURSO_AUTH_TOKEN`         | For prod  | Turso auth token (from Vercel Turso integration or [turso.tech](https://turso.tech))                                                               |
 
 ## 3. Set up Vercel Storage
 
-The app uses two databases. Set both up from the Vercel **Storage** tab — env vars are added to your project automatically.
+The app uses two databases. Set both up from the Vercel **Storage** tab—env vars are added to your project automatically.
 
 **Turso (auth sessions):**
 
 1. Go to your Vercel project → **Storage** tab → **Create Database** → **[Turso](https://turso.tech/)**
 2. Auto-populates `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`
-3. Create the auth tables — run `npx auth@latest migrate` locally, or use the Turso dashboard SQL console. See the [Better Auth migration docs](https://www.better-auth.com/docs/concepts/database#running-migrations) for details.
-4. For local dev, no setup needed — defaults to `file:local.db`
+3. Create the auth tables—run `npx auth@latest migrate` locally, or use the Turso dashboard SQL console. See the [Better Auth migration docs](https://www.better-auth.com/docs/concepts/database#running-migrations) for details.
+4. For local dev, no setup needed—defaults to `file:local.db`
 
 **Upstash Redis (bot action logging):**
 
@@ -111,38 +111,38 @@ The app uses two databases. Set both up from the Vercel **Storage** tab — env 
 
 | Vercel Marketplace variable   | Equivalent `UPSTASH_*` name | Used?                                                    |
 | ----------------------------- | --------------------------- | -------------------------------------------------------- |
-| `KV_REST_API_URL`             | `UPSTASH_REDIS_REST_URL`    | **Yes** — set one or the other                           |
-| `KV_REST_API_TOKEN`           | `UPSTASH_REDIS_REST_TOKEN`  | **Yes** — set one or the other                           |
+| `KV_REST_API_URL`             | `UPSTASH_REDIS_REST_URL`    | **Yes**—set one or the other                             |
+| `KV_REST_API_TOKEN`           | `UPSTASH_REDIS_REST_TOKEN`  | **Yes**—set one or the other                             |
 | `KV_REST_API_READ_ONLY_TOKEN` | —                           | No (app needs write access)                              |
 | `KV_URL`                      | —                           | No                                                       |
 | `REDIS_URL`                   | —                           | No (this is for conversation state, not the admin panel) |
 
-Without Upstash Redis, the admin panel shows mock data — everything else still works.
+Without Upstash Redis, the admin panel shows mock data—everything else still works.
 
 Pull env vars locally after setup: `vercel link && vercel env pull .env.local`
 
 ## 4. Set up Slack OAuth for Admin Panel
 
-The admin panel uses Slack OAuth — only members of your workspace can sign in. This reuses the same Slack app you created in step 1.
+The admin panel uses Slack OAuth—only members of your workspace can sign in. This reuses the same Slack app you created in step 1.
 
 1. Go to your Slack app → **Basic Information** → **App Credentials**
 2. Copy the **Client ID** and **Client Secret**
 3. Go to **OAuth & Permissions** → **Redirect URLs** → add `https://<your-production-domain>/api/auth/callback/slack`
-4. Find your **Workspace ID** (starts with `T`) — visible in the browser URL when using Slack: `app.slack.com/client/T.../...`
+4. Find your **Workspace ID** (starts with `T`)—visible in the browser URL when using Slack: `app.slack.com/client/T.../...`
 5. Add these env vars to your Vercel project (make sure to include the **Production** environment):
-   - `SLACK_CLIENT_ID` — Client ID from step 2
-   - `SLACK_CLIENT_SECRET` — Client Secret from step 2
-   - `SLACK_TEAM_ID` — Workspace ID from step 4
-   - `BETTER_AUTH_SECRET` — generate with `openssl rand -base64 32`
-   - `BETTER_AUTH_URL` — your production domain URL (e.g. `https://your-app.vercel.app`)
+   - `SLACK_CLIENT_ID`—Client ID from step 2
+   - `SLACK_CLIENT_SECRET`—Client Secret from step 2
+   - `SLACK_TEAM_ID`—Workspace ID from step 4
+   - `BETTER_AUTH_SECRET`—generate with `openssl rand -base64 32`
+   - `BETTER_AUTH_URL`—your production domain URL (e.g. `https://your-app.vercel.app`)
 
-> **Important:** Use your **production domain** — not a branch deployment URL (e.g. `git-main` variants). Branch URLs are preview deployments and may interfere with OAuth callbacks. Check **Settings → Domains** for the correct URL.
+> **Important:** Use your **production domain**—not a branch deployment URL (e.g. `git-main` variants). Branch URLs are preview deployments and may interfere with OAuth callbacks. Check **Settings → Domains** for the correct URL.
 >
 > **Local dev:** Add `http://localhost:3000/api/auth/callback/slack` as a second redirect URL in the Slack app. Set `BETTER_AUTH_URL=http://localhost:3000` in `.env.local`.
 
 ## 5. Configure Channels
 
-Edit `lib/channels.ts` to match your Slack workspace. These map to **existing channels** — the bot does not create them.
+Edit `lib/channels.ts` to match your Slack workspace. These map to **existing channels**—the bot does not create them.
 
 ```ts
 export const channels: Record<string, ChannelConfig> = {
@@ -188,10 +188,10 @@ After deploying, go to your Slack app → **Event Subscriptions** → set the Re
 | Channel routing  | `@Community Agent how do I set up Vercel Workflow?`                                                 | "Your question would fit best in the #help channel..." (logged as **routed**)                                                                |
 | Flag to lead     | `@Community Agent someone is being rude in #help, can you get a human to look at it?`               | "I've flagged the issue to a community lead." (bot DMs the lead, logged as **flagged**)                                                      |
 | Web search       | `@Community Agent what's the latest on Next.js 16 caching?`                                         | "Next.js 16 introduces significant updates..." (searches via Claude's native web search, scoped to `SEARCH_DOMAINS`, logged as **answered**) |
-| Knowledge base   | `@Community Agent what files are in the knowledge base?`                                            | "We have the following files..." (uses `bash` tool via Savoir — requires `SAVOIR_API_URL`, logged as **answered**)                           |
+| Knowledge base   | `@Community Agent what files are in the knowledge base?`                                            | "We have the following files..." (uses `bash` tool via Savoir—requires `SAVOIR_API_URL`, logged as **answered**)                           |
 | Unanswered scan  | `@Community Agent are there any unanswered questions in #help?`                                     | "There are no unanswered questions in the #help channel in the last 24 hours!" (logged as **surfaced** if questions are found)               |
 | Thread follow-up | Reply in the thread: `thanks, where can I report a bug?`                                            | "You can report bugs in the #bugs channel." (maintains conversation context, updates the existing action)                                    |
 | Trigger welcome  | Join `#introductions`                                                                               | Bot posts a welcome DM with a channel guide (logged as **welcomed**)                                                                         |
 | DM the bot       | Send a direct message                                                                               | Bot responds as a community manager (logged as **answered** with channel `DM`)                                                               |
 
-Each action is logged to the admin panel — check the dashboard to see stats and activity update in real time.
+Each action is logged to the admin panel—check the dashboard to see stats and activity update in real time.

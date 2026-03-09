@@ -8,7 +8,7 @@ export default function NotFound() {
     <div className="p-4">
       <Button variant="ghost" size="sm" className="mb-3" asChild>
         <Link href="/activity">
-          <ArrowLeft className="mr-1 h-3 w-3" /> Back to Activity
+          <ArrowLeft className="mr-1 h-3 w-3" /> Back to activity
         </Link>
       </Button>
       <Card>

@@ -36,7 +36,7 @@ export function Sidebar({ communityName }: { communityName: string }) {
           <Bot className="h-5 w-5" />
           <div className="min-w-0">
             <span className="block truncate text-sm font-semibold">{communityName}</span>
-            <span className="block text-[11px] text-muted-foreground">Admin Panel</span>
+            <span className="block text-[11px] text-muted-foreground">Admin panel</span>
           </div>
         </div>
       </SidebarHeader>

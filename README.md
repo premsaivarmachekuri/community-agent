@@ -8,14 +8,14 @@ Open source AI-powered Slack community management bot with a built-in Next.js ad
 
 ## Features
 
-- **Community manager AI** — Routes questions, welcomes members, surfaces unanswered threads, and flags issues to a lead. Powered by [AI SDK](https://ai-sdk.dev)
-- **Channel-aware routing** — Configurable channel map so the bot knows your workspace layout and where to send people
-- **Durable workflows** — Every LLM call and tool execution is a checkpoint with automatic retries via [Vercel Workflow](https://vercel.com/docs/workflow)
-- **Web search** — Claude's native web search and fetch tools, scoped to your community's domains via `SEARCH_DOMAINS`. Model switching and fallbacks through [AI Gateway](https://vercel.com/docs/ai-gateway)
-- **Sandbox execution** — Optional `bash`/`bash_batch` tools for running commands in a sandboxed environment via the [Knowledge Agent Template](https://github.com/vercel-labs/knowledge-agent-template) API
-- **Native Slack UI** — Typing indicators, threaded replies, and DMs. Powered by [Chat SDK](https://chat-sdk.dev)
-- **Admin panel** — Live dashboard with real-time streaming indicators, ViewTransition animations, activity feed, type filters, text search, inline conversation previews, activity trends, and settings page with channel overview
-- **Auth** — Slack OAuth via [Better Auth](https://www.better-auth.com) restricts the admin panel to workspace members
+- **Community manager AI**—routes questions, welcomes members, surfaces unanswered threads, and flags issues to a lead. Powered by [AI SDK](https://ai-sdk.dev)
+- **Channel-aware routing**—configurable channel map so the bot knows your workspace layout and where to send people
+- **Durable workflows**—every LLM call and tool execution is a checkpoint with automatic retries via [Vercel Workflow](https://vercel.com/docs/workflow)
+- **Web search**—Claude's native web search and fetch tools, scoped to your community's domains via `SEARCH_DOMAINS`. Model switching and fallbacks through [AI Gateway](https://vercel.com/docs/ai-gateway)
+- **Sandbox execution**—optional `bash`/`bash_batch` tools for running commands in a sandboxed environment via the [Knowledge Agent Template](https://github.com/vercel-labs/knowledge-agent-template) API
+- **Native Slack UI**—typing indicators, threaded replies, and DMs. Powered by [Chat SDK](https://chat-sdk.dev)
+- **Admin panel**—live dashboard with real-time streaming indicators, ViewTransition animations, activity feed, type filters, text search, inline conversation previews, activity trends, and settings page with channel overview
+- **Auth**—Slack OAuth via [Better Auth](https://www.better-auth.com) restricts the admin panel to workspace members
 
 ## Quick Start
 
@@ -23,7 +23,7 @@ Try the admin panel without setting up Slack:
 
 1. Import the repo on [vercel.com/new](https://vercel.com/new)
 2. Add a `COMMUNITY_NAME` env var (e.g. `DevHub`)
-3. Deploy — the dashboard works immediately with mock data
+3. Deploy—the dashboard works immediately with mock data
 
 For the full Slack bot setup, see [docs/setup.md](docs/setup.md).
 
@@ -31,12 +31,12 @@ For the full Slack bot setup, see [docs/setup.md](docs/setup.md).
 
 | What to change  | File                                | Details                                   |
 | --------------- | ----------------------------------- | ----------------------------------------- |
-| Bot personality | `lib/agent.ts`                      | System prompt and instructions            |
-| Channel map     | `lib/channels.ts`                   | Must match your Slack workspace           |
-| Welcome message | `lib/welcome.ts`                    | Sent when new members join                |
-| Agent tools     | `workflows/agent-workflow/tools.ts` | Add, remove, or modify tools              |
-| Auth config     | `lib/auth.ts`                       | Slack OAuth for the admin panel           |
-| Action type UI  | `config/type-config.ts`             | Icons, labels, and colors per action type |
+| Bot personality | `lib/agent.ts`                      | System prompt and instructions           |
+| Channel map     | `lib/channels.ts`                   | Must match your Slack workspace          |
+| Welcome message | `lib/welcome.ts`                    | Sent when new members join               |
+| Agent tools     | `workflows/agent-workflow/tools.ts` | Add, remove, or modify tools             |
+| Auth config     | `lib/auth.ts`                       | Slack OAuth for the admin panel          |
+| Action type UI  | `config/type-config.ts`             | Icons, labels, and colors per action type|
 
 ### Knowledge Base
 
@@ -44,20 +44,20 @@ This template is designed to work alongside the [Knowledge Agent Template](https
 
 ## Docs
 
-- [Full setup guide](docs/setup.md) — Slack app, env vars, storage, OAuth, channels, deploy
-- [Architecture](docs/architecture.md) — How the bot works, key files, workflow constraints
-- [Admin panel](docs/admin-panel.md) — Dashboard pages, live streaming, filters, Next.js patterns
-- [Testing](docs/testing.md) — Test without Slack, simulate actions, mock data
+- [Full setup guide](docs/setup.md)—Slack app, env vars, storage, OAuth, channels, deploy
+- [Architecture](docs/architecture.md)—how the bot works, key files, workflow constraints
+- [Admin panel](docs/admin-panel.md)—dashboard pages, live streaming, filters, Next.js patterns
+- [Testing](docs/testing.md)—test without Slack, simulate actions, mock data
 
 ## Built With
 
-- [Next.js 16](https://nextjs.org) — App Router with cacheComponents
-- [Chat SDK](https://chat-sdk.dev) — Slack adapter and bot framework
-- [AI SDK 6](https://ai-sdk.dev) — AI model integration with AI Gateway support
-- [Vercel Workflow](https://vercel.com/docs/workflow) — Durable workflow execution
-- [Better Auth](https://www.better-auth.com) — Slack OAuth for the admin panel
-- [shadcn/ui](https://ui.shadcn.com) — Component library
-- [Upstash Redis](https://upstash.com) — Bot action logging, stats, and conversation storage
+- [Next.js 16](https://nextjs.org)—App Router with cacheComponents
+- [Chat SDK](https://chat-sdk.dev)—Slack adapter and bot framework
+- [AI SDK 6](https://ai-sdk.dev)—AI model integration with AI Gateway support
+- [Vercel Workflow](https://vercel.com/docs/workflow)—durable workflow execution
+- [Better Auth](https://www.better-auth.com)—Slack OAuth for the admin panel
+- [shadcn/ui](https://ui.shadcn.com)—component library
+- [Upstash Redis](https://upstash.com)—bot action logging, stats, and conversation storage
 
 ## License
 

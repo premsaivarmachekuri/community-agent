@@ -1,6 +1,6 @@
 import { Suspense, ViewTransition } from 'react';
 import { connection } from 'next/server';
-import { ArrowLeft, Bot, ExternalLink, Lock, User } from 'lucide-react';
+import { ArrowLeft, Bot, ExternalLink, Lock, MessageSquare, User } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Markdown from 'react-markdown';
@@ -80,8 +80,12 @@ async function ConversationDetail({ params }: Pick<PageProps<'/activity/[id]'>, 
         </Card>
       ) : messages.length === 0 ? (
         <Card>
-          <CardContent className="py-6 text-center text-sm text-muted-foreground">
-            No conversation content available for this action.
+          <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+            <MessageSquare className="h-8 w-8 text-muted-foreground/50" />
+            <h3 className="mt-3 text-base font-medium">No conversation content</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              This action was logged without a conversation thread.
+            </p>
           </CardContent>
         </Card>
       ) : (
@@ -98,7 +102,7 @@ async function ConversationDetail({ params }: Pick<PageProps<'/activity/[id]'>, 
                 </div>
                 <Card
                   className={cn(
-                    'max-w-[75%] gap-0 py-0',
+                    'max-w-[85%] gap-0 py-0 sm:max-w-[75%]',
                     msg.role === 'assistant' && 'bg-muted/50',
                   )}
                 >

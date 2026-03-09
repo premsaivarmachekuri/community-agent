@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 type DayBucket = {
@@ -81,14 +82,17 @@ export function AnalyticsChart({ data }: { data: DayBucket[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm">Activity Trend</CardTitle>
+        <CardTitle className="text-sm">Activity trend</CardTitle>
         <p className="text-xs text-muted-foreground">{subtitle}</p>
       </CardHeader>
       <CardContent>
         {!hasData ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">
-            No activity recorded yet.
-          </p>
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <TrendingUp className="h-8 w-8 text-muted-foreground/50" />
+            <p className="mt-3 text-sm text-muted-foreground">
+              No activity recorded yet. The chart will populate as the bot handles messages.
+            </p>
+          </div>
         ) : (
           <ResponsiveContainer width="100%" height={240}>
             <AreaChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>

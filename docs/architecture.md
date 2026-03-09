@@ -92,13 +92,13 @@ Slack message → Chat SDK (receive & route) → Vercel Workflow (durable) → A
 
 Three layers work together:
 
-- **[Chat SDK](https://chat-sdk.dev)** — the messaging layer. Receives Slack webhook events, manages conversation threads, stores history in Redis, sends replies, shows typing indicators. It's the bot's "mouth and ears." Supports multiple platforms (Slack, Discord) so the same AI logic can be reused with a different adapter.
-- **[AI SDK](https://ai-sdk.dev)** — the AI layer. Sends prompts to the model (Claude, GPT, etc.), streams responses, handles tool calls. It's the bot's "brain." Doesn't know anything about Slack — just does LLM calls.
-- **[Vercel Workflow](https://vercel.com/docs/workflow)** — the durability layer. Wraps AI SDK calls in durable steps with automatic retries and checkpoints. If a long response fails halfway, it picks up where it left off instead of starting over.
+- **[Chat SDK](https://chat-sdk.dev)**—the messaging layer. Receives Slack webhook events, manages conversation threads, stores history in Redis, sends replies, shows typing indicators. It's the bot's "mouth and ears." Supports multiple platforms (Slack, Discord) so the same AI logic can be reused with a different adapter.
+- **[AI SDK](https://ai-sdk.dev)**—the AI layer. Sends prompts to the model (Claude, GPT, etc.), streams responses, handles tool calls. It's the bot's "brain." Doesn't know anything about Slack—just does LLM calls.
+- **[Vercel Workflow](https://vercel.com/docs/workflow)**—the durability layer. Wraps AI SDK calls in durable steps with automatic retries and checkpoints. If a long response fails halfway, it picks up where it left off instead of starting over.
 
 ## Tools
 
-Tools (`suggest_channel`, `unanswered`, `bash`, `bash_batch`, `web_search`, `flag_to_lead`) run as durable steps inside the workflow. `web_search` wraps Claude's native search tool via a `generateText` sub-call. Less-used tools use Claude's `deferLoading` so only relevant tools are loaded into context. Welcome messages for new members are handled directly in the route (no workflow needed).
+Tools (`suggest_channel`, `unanswered`, `bash`, `bash_batch`, `web_search`, `flag_to_lead`) run as durable steps inside the workflow. `web_search` wraps Claude's native search tool via a `generateText` sub-call. Less-used tools use Claude's `deferLoading` so only relevant tools are loaded into context. Welcome messages for new members are handled directly in the route—no workflow needed.
 
 ## Admin panel
 
@@ -109,9 +109,9 @@ Server-rendered dashboard with live streaming, activity feed, conversation histo
 | File                                | Purpose                                                                                           |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `lib/agent.ts`                      | System prompt and personality                                                                     |
-| `lib/channels.ts`                   | Channel map — must match your Slack workspace                                                     |
+| `lib/channels.ts`                   | Channel map—must match your Slack workspace                                                       |
 | `lib/welcome.ts`                    | Welcome message sent when members join                                                            |
-| `lib/auth.ts`                       | Better Auth config — Slack OAuth for admin panel                                                  |
+| `lib/auth.ts`                       | Better Auth config—Slack OAuth for admin panel                                                    |
 | `workflows/agent-workflow/tools.ts` | Agent tools (`suggest_channel`, `unanswered`, `bash`, `bash_batch`, `web_search`, `flag_to_lead`) |
 
-> **Workflow constraint:** Files using `'use step'` or `'use workflow'` must live inside the `workflows/` directory for the bundler to process them. Node.js-only packages (like `@slack/web-api`) must be dynamically imported inside step functions — they can't be used at the workflow top level.
+> **Workflow constraint:** Files using `'use step'` or `'use workflow'` must live inside the `workflows/` directory for the bundler to process them. Node.js-only packages (like `@slack/web-api`) must be dynamically imported inside step functions—they can't be used at the workflow top level.

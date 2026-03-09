@@ -81,35 +81,35 @@ async function StatsCards() {
 
   const cards = [
     {
-      title: 'Questions Answered',
+      title: 'Questions answered',
       value: String(counts.answered || 0),
       type: 'answered' as const,
       href: '/activity?type=answered',
       weekly: thisWeek.answered || 0,
     },
     {
-      title: 'Questions Routed',
+      title: 'Questions routed',
       value: String(counts.routed || 0),
       type: 'routed' as const,
       href: '/activity?type=routed',
       weekly: thisWeek.routed || 0,
     },
     {
-      title: 'Members Welcomed',
+      title: 'Members welcomed',
       value: String(counts.welcomed || 0),
       type: 'welcomed' as const,
       href: '/activity?type=welcomed',
       weekly: thisWeek.welcomed || 0,
     },
     {
-      title: 'Questions Surfaced',
+      title: 'Questions surfaced',
       value: String(counts.surfaced || 0),
       type: 'surfaced' as const,
       href: '/activity?type=surfaced',
       weekly: thisWeek.surfaced || 0,
     },
     {
-      title: 'Issues Flagged',
+      title: 'Issues flagged',
       value: String(counts.flagged || 0),
       type: 'flagged' as const,
       href: '/activity?type=flagged',
@@ -123,7 +123,7 @@ async function StatsCards() {
         const cfg = typeConfig[stat.type];
         return (
           <Link key={stat.title} href={stat.href as any}>
-            <Card className="gap-1 py-2.5 transition-colors hover:bg-accent/50 sm:gap-1.5 sm:py-3">
+            <Card className="gap-1 py-2.5 transition-colors hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:gap-1.5 sm:py-3">
               <CardHeader className="flex flex-row items-center justify-between px-3 pb-0">
                 <CardTitle className="text-xs font-medium text-muted-foreground">
                   {stat.title}
@@ -151,10 +151,10 @@ async function StatsCards() {
         );
       })}
       <Link href="/activity">
-        <Card className="gap-1 py-2.5 transition-colors hover:bg-accent/50 sm:gap-1.5 sm:py-3">
+        <Card className="gap-1 py-2.5 transition-colors hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:gap-1.5 sm:py-3">
           <CardHeader className="flex flex-row items-center justify-between px-3 pb-0">
             <CardTitle className="text-xs font-medium text-muted-foreground">
-              Total Actions
+              Total actions
             </CardTitle>
             <div className="hidden h-5 w-5 items-center justify-center rounded-full bg-muted sm:flex">
               <MessageSquare className="h-2.5 w-2.5 text-muted-foreground" />
@@ -183,7 +183,7 @@ async function RecentActivityCard() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-sm">Recent Activity</CardTitle>
+        <CardTitle className="text-sm">Recent activity</CardTitle>
         <Button variant="outline" size="sm" asChild>
           <Link href="/activity">
             View all <ArrowRight className="ml-1 h-3 w-3" />
@@ -193,7 +193,7 @@ async function RecentActivityCard() {
       <CardContent>
         {recent.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No activity yet — stats will appear as the bot handles messages.
+            No activity yet—stats will appear as the bot handles messages.
           </p>
         ) : (
           <div className="space-y-1">
@@ -208,7 +208,7 @@ async function RecentActivityCard() {
                 <Link
                   key={action.id}
                   href={href as any}
-                  className="-mx-2 flex items-start gap-2.5 rounded-md px-2 py-1.5 transition-colors hover:bg-accent/50"
+                  className="-mx-2 flex items-start gap-2.5 rounded-md px-2 py-1.5 transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   <div
                     className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${cfg.bgColor}`}

@@ -28,7 +28,7 @@ export default function ActivityPage({ searchParams }: PageProps<'/activity'>) {
   return (
     <>
       <Header title="Activity" description="Recent bot actions across your community" />
-      <div className="flex-1 space-y-3 p-4">
+      <div className="flex-1 space-y-4 p-4">
         <ActiveStreamsProvider>
           <ActiveStreams />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -43,7 +43,7 @@ export default function ActivityPage({ searchParams }: PageProps<'/activity'>) {
                 <ActivityFiltersWithCounts />
               </ViewTransition>
             </Suspense>
-            <Suspense>
+            <Suspense fallback={<Skeleton className="h-8 w-48" />}>
               <ActivitySearch />
             </Suspense>
           </div>
@@ -159,8 +159,8 @@ async function ActivityList({ searchParams }: Pick<PageProps<'/activity'>, 'sear
                         <ConversationPreviewToggle />
                         <Link
                           href={`/activity/${action.id}` as any}
-                          className="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
-                        >
+                      className="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
                           Full thread
                         </Link>
                       </>
@@ -170,7 +170,7 @@ async function ActivityList({ searchParams }: Pick<PageProps<'/activity'>, 'sear
                         href={action.metadata.permalink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+                        className="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                       >
                         <ExternalLink className="h-3 w-3" />
                         View in Slack
