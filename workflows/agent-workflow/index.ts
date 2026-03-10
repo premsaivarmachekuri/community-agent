@@ -5,7 +5,6 @@ import type { AnthropicLanguageModelOptions } from '@ai-sdk/anthropic';
 import type { AgentInput, AgentResult } from '@/lib/types';
 import { createLogger } from '@/lib/logger';
 import { config } from '@/lib/config';
-import { anthropic } from '@/lib/ai';
 import { buildInstructions } from '@/lib/agent';
 import { durableTools } from './tools';
 import {
@@ -43,9 +42,8 @@ export async function workflowAgent(input: AgentInput): Promise<AgentResult> {
       ? `\n\nCurrent thread permalink (pass to flag_to_lead if needed): ${threadPermalink}`
       : '';
 
-    const modelId = config.model.replace(/^anthropic\//, '');
     const agent = new DurableAgent({
-      model: (async () => anthropic(modelId)) as any,
+      model: config.model,
       system: buildInstructions() + systemSuffix,
       tools: durableTools as any,
       providerOptions: {
