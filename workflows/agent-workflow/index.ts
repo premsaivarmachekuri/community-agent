@@ -6,7 +6,7 @@ import type { AgentInput, AgentResult } from '@/lib/types';
 import { createLogger } from '@/lib/logger';
 import { config } from '@/lib/config';
 import { buildInstructions } from '@/lib/agent';
-import { durableTools } from './tools';
+import { durableTools, setSlackContext } from './tools';
 import {
   stepPostToSlack,
   stepResolveChannelName,
@@ -41,6 +41,8 @@ export async function workflowAgent(input: AgentInput): Promise<AgentResult> {
     const systemSuffix = threadPermalink
       ? `\n\nCurrent thread permalink (pass to flag_to_lead if needed): ${threadPermalink}`
       : '';
+
+    setSlackContext(input.slack);
 
     const agent = new DurableAgent({
       model: config.model,

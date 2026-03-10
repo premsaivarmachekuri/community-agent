@@ -12,8 +12,28 @@ const savoir = config.savoirApiUrl
   ? createSavoirClient(config.savoirApiUrl, config.savoirApiKey || undefined)
   : null;
 
+let currentSlack: { channelId: string; threadTs: string } | null = null;
+
+export function setSlackContext(slack: { channelId: string; threadTs: string } | undefined) {
+  currentSlack = slack ?? null;
+}
+
+async function updateStatus(status: string) {
+  if (!currentSlack) return;
+  try {
+    const { chat } = await import('@/lib/chat');
+    const slackAdapter = chat.getAdapter('slack');
+    const threadId = slackAdapter.encodeThreadId({
+      channel: currentSlack.channelId,
+      threadTs: currentSlack.threadTs,
+    });
+    await slackAdapter.startTyping(threadId, status);
+  } catch {}
+}
+
 async function executeBash({ command }: { command: string }) {
   'use step';
+  await updateStatus('reading docs...');
 
   if (!savoir) {
     return {
@@ -34,6 +54,7 @@ async function executeBash({ command }: { command: string }) {
 
 async function executeBashBatch({ commands }: { commands: string[] }) {
   'use step';
+  await updateStatus('reading docs...');
 
   if (!savoir) {
     return {
@@ -60,6 +81,7 @@ async function executeBashBatch({ commands }: { commands: string[] }) {
 
 async function executeWebSearch({ query }: { query: string }) {
   'use step';
+  await updateStatus('searching the web...');
 
   const { generateText, stepCountIs } = await import('ai');
   const { anthropic } = await import('@/lib/ai');
@@ -95,6 +117,7 @@ const suggestChannelInputSchema = z.object({
 
 async function executeSuggestChannel({ topic }: { topic: string }) {
   'use step';
+  await updateStatus('finding the right channel...');
 
   const topicLower = topic.toLowerCase();
 
@@ -152,6 +175,7 @@ function parseChannelInput(raw: string): string {
 
 async function executeUnanswered({ channel, hours = 24 }: { channel: string; hours?: number }) {
   'use step';
+  await updateStatus('scanning for unanswered questions...');
 
   const parsed = parseChannelInput(channel);
   const isChannelId = /^[A-Z0-9]+$/.test(parsed) && parsed.startsWith('C');
@@ -251,6 +275,7 @@ async function executeFlagToLead({
   permalink?: string;
 }) {
   'use step';
+  await updateStatus('flagging to community lead...');
 
   const leadId = config.communityLeadSlackId;
   if (!leadId) {
