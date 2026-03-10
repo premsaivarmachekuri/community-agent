@@ -22,6 +22,7 @@ import {
 import { config } from "@/lib/config";
 import { AnalyticsChart } from "./_components/analytics-chart";
 import { DashboardLive } from "./_components/dashboard-live";
+import { Route } from "next";
 
 const PROTOCOL_RE = /^https?:\/\//;
 
@@ -139,7 +140,7 @@ async function StatsCards() {
       {cards.map((stat) => {
         const cfg = typeConfig[stat.type];
         return (
-          <Link href={stat.href as never} key={stat.title}>
+          <Link href={stat.href as Route} key={stat.title}>
             <Card className="gap-1 py-2.5 transition-colors hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:gap-1.5 sm:py-3">
               <CardHeader className="flex flex-row items-center justify-between px-3 pb-0">
                 <CardTitle className="font-medium text-muted-foreground text-xs">
@@ -232,7 +233,7 @@ async function RecentActivityCard() {
               return (
                 <Link
                   className="-mx-2 flex items-start gap-2.5 rounded-md px-2 py-1.5 transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  href={href as never}
+                  href={href as Route}
                   key={action.id}
                 >
                   <div

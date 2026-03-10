@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getChannelCounts } from "@/data/queries/activity";
 import { channels } from "@/lib/channels";
 import { config } from "@/lib/config";
+import { Route } from "next";
 
 const PROTOCOL_RE = /^https?:\/\//;
 
@@ -164,7 +165,7 @@ async function ChannelOverview() {
                     <div className="flex items-center gap-2">
                       <Link
                         className="rounded font-medium text-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        href={`/activity?q=${encodeURIComponent(ch.name)}`}
+                        href={`/activity?q=${encodeURIComponent(ch.name)}` as Route}
                       >
                         #{ch.name}
                       </Link>

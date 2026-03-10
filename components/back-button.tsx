@@ -3,6 +3,7 @@
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Route } from "next";
 
 export function BackButton({
   fallbackHref,
@@ -19,7 +20,7 @@ export function BackButton({
         if (window.history.length > 1) {
           router.back();
         } else {
-          router.push(fallbackHref as never);
+          router.push(fallbackHref as Route);
         }
       }}
       size="sm"
