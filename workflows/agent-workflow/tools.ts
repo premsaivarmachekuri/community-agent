@@ -1,3 +1,4 @@
+import type { ToolSet } from "ai";
 import { z } from "zod";
 import { anthropic } from "@/lib/ai";
 import { channels } from "@/lib/channels";
@@ -333,7 +334,7 @@ async function executeFlagToLead({
   }
 }
 
-export const durableTools: Record<string, unknown> = {
+export const durableTools: ToolSet = {
   suggest_channel: {
     description: `REQUIRED tool for any channel routing question. You MUST call this tool whenever someone asks where to post, which channel to use, or where to go for something. Do NOT answer routing questions with plain text — always call this tool first so the action is tracked.
 

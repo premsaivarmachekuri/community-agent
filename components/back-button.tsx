@@ -19,7 +19,7 @@ export function BackButton({
         if (window.history.length > 1) {
           router.back();
         } else {
-          router.push(fallbackHref);
+          router.push(fallbackHref as never);
         }
       }}
       size="sm"
