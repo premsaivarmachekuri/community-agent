@@ -21,13 +21,12 @@ export function setSlackContext(slack: { channelId: string; threadTs: string } |
 async function updateStatus(status: string) {
   if (!currentSlack) return;
   try {
-    const { chat } = await import('@/lib/chat');
-    const slackAdapter = chat.getAdapter('slack');
-    const threadId = slackAdapter.encodeThreadId({
-      channel: currentSlack.channelId,
-      threadTs: currentSlack.threadTs,
+    const { getSlackClient } = await import('@/lib/slack');
+    await getSlackClient().apiCall('assistant.threads.setStatus', {
+      channel_id: currentSlack.channelId,
+      thread_ts: currentSlack.threadTs,
+      status,
     });
-    await slackAdapter.startTyping(threadId, status);
   } catch {}
 }
 
