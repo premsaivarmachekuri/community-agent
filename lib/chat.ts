@@ -3,9 +3,11 @@ import type { Thread, Message } from 'chat';
 import { createSlackAdapter } from '@chat-adapter/slack';
 import { createRedisState } from '@chat-adapter/state-redis';
 import { workflowAgent } from '@/workflows/agent-workflow';
+import { getSlackClient } from '@/lib/slack';
 import { start } from 'workflow/api';
 
 const logger = new ConsoleLogger('info');
+const slackClient = getSlackClient();
 
 export const chat = new Chat({
   userName: 'agent',
@@ -19,6 +21,35 @@ export const chat = new Chat({
   state: createRedisState({ url: process.env.REDIS_URL!, logger }),
   logger,
 });
+
+async function fetchThreadHistory(
+  channelId: string,
+  threadTs: string,
+): Promise<Array<{ role: 'user' | 'assistant'; content: string }>> {
+  try {
+    const result = await slackClient.conversations.replies({
+      channel: channelId,
+      ts: threadTs,
+      limit: 100,
+    });
+
+    if (!result.messages) return [];
+
+    const authResult = await slackClient.auth.test();
+    const botUserId = authResult.user_id;
+
+    return result.messages
+      .slice(0, -1)
+      .filter((msg) => msg.text && !('subtype' in msg))
+      .map((msg) => ({
+        role: (msg.user === botUserId ? 'assistant' : 'user') as 'user' | 'assistant',
+        content: msg.text!,
+      }));
+  } catch (error) {
+    logger.error('Failed to fetch thread history', { error: String(error) });
+    return [];
+  }
+}
 
 function parseThreadId(threadId: string): { channelId: string; threadTs: string } | null {
   const parts = threadId.split(':');
@@ -42,20 +73,7 @@ async function handleMessage(thread: Thread, message?: Message): Promise<void> {
     return;
   }
 
-  const history: Array<{ role: 'user' | 'assistant'; content: string }> = [];
-  try {
-    for await (const msg of thread.allMessages) {
-      if (msg.text.trim()) {
-        history.push({
-          role: msg.author.isMe ? 'assistant' : 'user',
-          content: msg.text,
-        });
-      }
-    }
-    history.pop();
-  } catch (error) {
-    logger.error('Failed to fetch thread history', { error: String(error) });
-  }
+  const history = await fetchThreadHistory(threadInfo.channelId, threadInfo.threadTs);
 
   start(workflowAgent, [
     {
