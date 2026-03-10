@@ -1,7 +1,6 @@
 import { DurableAgent } from '@workflow/ai/agent';
 import { getWritable } from 'workflow';
 import type { UIMessageChunk } from 'ai';
-import type { AnthropicLanguageModelOptions } from '@ai-sdk/anthropic';
 import type { AgentInput, AgentResult } from '@/lib/types';
 import { createLogger } from '@/lib/logger';
 import { config } from '@/lib/config';
@@ -47,7 +46,7 @@ export async function workflowAgent(input: AgentInput): Promise<AgentResult> {
     const agent = new DurableAgent({
       model: config.model,
       system: buildInstructions() + systemSuffix,
-      tools: durableTools as any,
+      tools: durableTools,
     });
 
     const messages = [...(input.history || []), { role: 'user' as const, content: input.prompt }];
