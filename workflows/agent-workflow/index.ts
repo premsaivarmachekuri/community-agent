@@ -46,28 +46,6 @@ export async function workflowAgent(input: AgentInput): Promise<AgentResult> {
       model: config.model,
       system: buildInstructions() + systemSuffix,
       tools: durableTools as any,
-      providerOptions: {
-        anthropic: {
-          contextManagement: {
-            edits: [
-              {
-                type: 'clear_tool_uses_20250919',
-                trigger: { type: 'input_tokens', value: 80_000 },
-                keep: { type: 'tool_uses', value: 5 },
-                clearAtLeast: { type: 'input_tokens', value: 5000 },
-                clearToolInputs: true,
-              },
-              {
-                type: 'compact_20260112',
-                trigger: { type: 'input_tokens', value: 100_000 },
-                instructions:
-                  'Summarize the conversation concisely, preserving key decisions, tool results, and context.',
-                pauseAfterCompaction: false,
-              },
-            ],
-          },
-        } satisfies AnthropicLanguageModelOptions,
-      },
     });
 
     const messages = [...(input.history || []), { role: 'user' as const, content: input.prompt }];
