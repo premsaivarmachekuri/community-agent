@@ -1,13 +1,10 @@
-'use client';
+"use client";
 
-import { Suspense } from 'react';
-import { Bot, LayoutDashboard, Activity, Settings, LogOut } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { authClient } from '@/lib/auth-client';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Activity, Bot, LayoutDashboard, LogOut, Settings } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 import {
-  Sidebar as SidebarRoot,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
@@ -16,27 +13,34 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  Sidebar as SidebarRoot,
   SidebarSeparator,
   useSidebar,
-} from '@/components/ui/sidebar';
+} from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { authClient } from "@/lib/auth-client";
 
 const navItems = [
-  { href: '/' as const, label: 'Overview', icon: LayoutDashboard },
-  { href: '/activity' as const, label: 'Activity', icon: Activity },
-  { href: '/settings' as const, label: 'Settings', icon: Settings },
+  { href: "/" as const, label: "Overview", icon: LayoutDashboard },
+  { href: "/activity" as const, label: "Activity", icon: Activity },
+  { href: "/settings" as const, label: "Settings", icon: Settings },
 ];
 
 export function Sidebar({ communityName }: { communityName: string }) {
   const { setOpenMobile } = useSidebar();
 
   return (
-    <SidebarRoot style={{ viewTransitionName: 'sidebar' }}>
+    <SidebarRoot style={{ viewTransitionName: "sidebar" }}>
       <SidebarHeader className="px-3 py-3">
         <div className="flex items-center gap-2">
           <Bot className="h-5 w-5" />
           <div className="min-w-0">
-            <span className="block truncate text-sm font-semibold">{communityName}</span>
-            <span className="block text-[11px] text-muted-foreground">Admin panel</span>
+            <span className="block truncate font-semibold text-sm">
+              {communityName}
+            </span>
+            <span className="block text-[11px] text-muted-foreground">
+              Admin panel
+            </span>
           </div>
         </div>
       </SidebarHeader>
@@ -60,16 +64,16 @@ export function Sidebar({ communityName }: { communityName: string }) {
           </Suspense>
           <SidebarMenuItem>
             <SidebarMenuButton
-              size="sm"
               onClick={() =>
                 authClient.signOut({
                   fetchOptions: {
                     onSuccess: () => {
-                      window.location.href = '/sign-in';
+                      window.location.href = "/sign-in";
                     },
                   },
                 })
               }
+              size="sm"
               tooltip="Sign out"
             >
               <LogOut />
@@ -86,10 +90,16 @@ function NavItems({ onNavigate }: { onNavigate: () => void }) {
   const pathname = usePathname();
 
   return navItems.map((item) => {
-    const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+    const isActive =
+      item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
     return (
       <SidebarMenuItem key={item.href}>
-        <SidebarMenuButton asChild isActive={isActive} tooltip={item.label} onClick={onNavigate}>
+        <SidebarMenuButton
+          asChild
+          isActive={isActive}
+          onClick={onNavigate}
+          tooltip={item.label}
+        >
           <Link href={item.href}>
             <item.icon />
             <span>{item.label}</span>
@@ -106,10 +116,12 @@ function UserProfile() {
   return (
     <SidebarMenuItem>
       <SidebarMenuButton className="cursor-default hover:bg-transparent active:bg-transparent">
-        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sidebar-accent text-[10px] font-medium">
-          {session?.user?.name?.charAt(0)?.toUpperCase() || '?'}
+        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sidebar-accent font-medium text-[10px]">
+          {session?.user?.name?.charAt(0)?.toUpperCase() || "?"}
         </div>
-        <span className="truncate text-xs font-medium">{session?.user?.name}</span>
+        <span className="truncate font-medium text-xs">
+          {session?.user?.name}
+        </span>
       </SidebarMenuButton>
     </SidebarMenuItem>
   );

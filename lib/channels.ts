@@ -1,4 +1,4 @@
-import type { ChannelConfig } from './types';
+import type { ChannelConfig } from "./types";
 
 /**
  * Channel configuration for the community workspace.
@@ -12,24 +12,24 @@ import type { ChannelConfig } from './types';
  */
 export const channels: Record<string, ChannelConfig> = {
   general: {
-    name: 'general',
-    description: 'General discussion and announcements',
-    topics: ['announcements', 'general discussion', 'community news'],
+    name: "general",
+    description: "General discussion and announcements",
+    topics: ["announcements", "general discussion", "community news"],
   },
   help: {
-    name: 'help',
-    description: 'Get help with questions and issues',
-    topics: ['help', 'questions', 'support', 'troubleshooting', 'how-to'],
+    name: "help",
+    description: "Get help with questions and issues",
+    topics: ["help", "questions", "support", "troubleshooting", "how-to"],
   },
   bugs: {
-    name: 'bugs',
-    description: 'Report and track bugs',
-    topics: ['bug reports', 'errors', 'crashes', 'broken features'],
+    name: "bugs",
+    description: "Report and track bugs",
+    topics: ["bug reports", "errors", "crashes", "broken features"],
   },
   introductions: {
-    name: 'introductions',
-    description: 'New members introduce themselves',
-    topics: ['introductions', 'new members'],
+    name: "introductions",
+    description: "New members introduce themselves",
+    topics: ["introductions", "new members"],
     isWelcomeChannel: true,
   },
 };
@@ -40,6 +40,9 @@ export function getWelcomeChannel(): ChannelConfig | undefined {
 
 export function formatChannelGuide(): string {
   return Object.values(channels)
-    .map((ch) => `#${ch.name} — ${ch.description} (topics: ${ch.topics.join(', ')})`)
-    .join('\n');
+    .map(
+      (ch) =>
+        `#${ch.name} — ${ch.description} (topics: ${ch.topics.join(", ")})`
+    )
+    .join("\n");
 }

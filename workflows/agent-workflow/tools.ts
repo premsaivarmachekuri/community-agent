@@ -1,10 +1,10 @@
-import { z } from 'zod';
-import { anthropic } from '@/lib/ai';
-import { channels } from '@/lib/channels';
-import { config } from '@/lib/config';
-import { createSavoirClient } from '@/lib/savoir';
-import { getSlackClient } from '@/lib/slack';
-import { logAction } from '@/lib/store';
+import { z } from "zod";
+import { anthropic } from "@/lib/ai";
+import { channels } from "@/lib/channels";
+import { config } from "@/lib/config";
+import { createSavoirClient } from "@/lib/savoir";
+import { getSlackClient } from "@/lib/slack";
+import { logAction } from "@/lib/store";
 
 const deferLoading = {
   providerOptions: { anthropic: { deferLoading: true } },
@@ -16,29 +16,36 @@ const savoir = config.savoirApiUrl
 
 let currentSlack: { channelId: string; threadTs: string } | null = null;
 
-export function setSlackContext(slack: { channelId: string; threadTs: string } | undefined) {
+export function setSlackContext(
+  slack: { channelId: string; threadTs: string } | undefined
+) {
   currentSlack = slack ?? null;
 }
 
 async function updateStatus(status: string) {
-  if (!currentSlack) return;
+  if (!currentSlack) {
+    return;
+  }
   try {
-    await getSlackClient().apiCall('assistant.threads.setStatus', {
+    await getSlackClient().apiCall("assistant.threads.setStatus", {
       channel_id: currentSlack.channelId,
       thread_ts: currentSlack.threadTs,
       status,
     });
-  } catch {}
+  } catch {
+    /* noop */
+  }
 }
 
 async function executeBash({ command }: { command: string }) {
-  'use step';
-  await updateStatus('reading docs...');
+  "use step";
+  await updateStatus("reading docs...");
 
   if (!savoir) {
     return {
-      stdout: '',
-      stderr: 'Savoir API is not configured. Set SAVOIR_API_URL to enable file search.',
+      stdout: "",
+      stderr:
+        "Savoir API is not configured. Set SAVOIR_API_URL to enable file search.",
       exitCode: 1,
     };
   }
@@ -53,15 +60,16 @@ async function executeBash({ command }: { command: string }) {
 }
 
 async function executeBashBatch({ commands }: { commands: string[] }) {
-  'use step';
-  await updateStatus('reading docs...');
+  "use step";
+  await updateStatus("reading docs...");
 
   if (!savoir) {
     return {
       results: commands.map((command) => ({
         command,
-        stdout: '',
-        stderr: 'Savoir API is not configured. Set SAVOIR_API_URL to enable file search.',
+        stdout: "",
+        stderr:
+          "Savoir API is not configured. Set SAVOIR_API_URL to enable file search.",
         exitCode: 1,
       })),
     };
@@ -80,29 +88,36 @@ async function executeBashBatch({ commands }: { commands: string[] }) {
 }
 
 const bashInputSchema = z.object({
-  command: z.string().describe('The bash command to execute'),
+  command: z.string().describe("The bash command to execute"),
 });
 
 const bashBatchInputSchema = z.object({
-  commands: z.array(z.string()).describe('List of bash commands to execute in one request'),
+  commands: z
+    .array(z.string())
+    .describe("List of bash commands to execute in one request"),
 });
 
 const suggestChannelInputSchema = z.object({
   topic: z
     .string()
-    .describe('A short description of the question or topic to find the right channel for'),
+    .describe(
+      "A short description of the question or topic to find the right channel for"
+    ),
 });
 
 async function executeSuggestChannel({ topic }: { topic: string }) {
-  'use step';
-  await updateStatus('finding the right channel...');
+  "use step";
+  await updateStatus("finding the right channel...");
 
   const topicLower = topic.toLowerCase();
 
   const scored = Object.values(channels).map((ch) => {
     const score = ch.topics.reduce((acc, t) => {
       const keyword = t.toLowerCase();
-      return acc + (topicLower.includes(keyword) || keyword.includes(topicLower) ? 1 : 0);
+      return (
+        acc +
+        (topicLower.includes(keyword) || keyword.includes(topicLower) ? 1 : 0)
+      );
     }, 0);
     return { channel: ch, score };
   });
@@ -111,15 +126,20 @@ async function executeSuggestChannel({ topic }: { topic: string }) {
 
   const best = scored[0];
   if (!best) {
-    return { suggested: null, description: null, confidence: 'no_match', allChannels: '' };
+    return {
+      suggested: null,
+      description: null,
+      confidence: "no_match",
+      allChannels: "",
+    };
   }
   const allChannels = Object.values(channels)
     .map((ch) => `#${ch.name} — ${ch.description}`)
-    .join('\n');
+    .join("\n");
 
   await logAction({
-    type: 'routed',
-    channel: best.score > 0 ? `#${best.channel.name}` : '#general',
+    type: "routed",
+    channel: best.score > 0 ? `#${best.channel.name}` : "#general",
     description:
       best.score > 0
         ? `Suggested routing question to #${best.channel.name}`
@@ -130,7 +150,7 @@ async function executeSuggestChannel({ topic }: { topic: string }) {
   return {
     suggested: best.score > 0 ? `#${best.channel.name}` : null,
     description: best.score > 0 ? best.channel.description : null,
-    confidence: best.score > 0 ? 'match' : 'no_match',
+    confidence: best.score > 0 ? "match" : "no_match",
     allChannels,
   };
 }
@@ -139,24 +159,39 @@ const unansweredInputSchema = z.object({
   channel: z
     .string()
     .describe(
-      'Channel name to scan (without #), e.g. "help". If you receive a Slack channel ID like C0AJGCJSCES, pass it as-is.',
+      'Channel name to scan (without #), e.g. "help". If you receive a Slack channel ID like C0AJGCJSCES, pass it as-is.'
     ),
-  hours: z.number().optional().describe('How many hours back to look (default: 24)'),
+  hours: z
+    .number()
+    .optional()
+    .describe("How many hours back to look (default: 24)"),
 });
 
+const LEADING_HASH_RE = /^#/;
+const SLACK_MENTION_RE = /^<#(\w+)\|?(\w*)>$/;
+const CHANNEL_ID_RE = /^[A-Z0-9]+$/;
+
 function parseChannelInput(raw: string): string {
-  const cleaned = raw.replace(/^#/, '');
-  const slackMention = cleaned.match(/^<#(\w+)\|?(\w*)>$/);
-  if (slackMention) return slackMention[1];
+  const cleaned = raw.replace(LEADING_HASH_RE, "");
+  const slackMention = cleaned.match(SLACK_MENTION_RE);
+  if (slackMention) {
+    return slackMention[1];
+  }
   return cleaned;
 }
 
-async function executeUnanswered({ channel, hours = 24 }: { channel: string; hours?: number }) {
-  'use step';
-  await updateStatus('scanning for unanswered questions...');
+async function executeUnanswered({
+  channel,
+  hours = 24,
+}: {
+  channel: string;
+  hours?: number;
+}) {
+  "use step";
+  await updateStatus("scanning for unanswered questions...");
 
   const parsed = parseChannelInput(channel);
-  const isChannelId = /^[A-Z0-9]+$/.test(parsed) && parsed.startsWith('C');
+  const isChannelId = CHANNEL_ID_RE.test(parsed) && parsed.startsWith("C");
   const slack = getSlackClient();
 
   let channelId: string;
@@ -172,7 +207,7 @@ async function executeUnanswered({ channel, hours = 24 }: { channel: string; hou
     }
   } else {
     const listResult = await slack.conversations.list({
-      types: 'public_channel',
+      types: "public_channel",
       limit: 200,
     });
     const target = listResult.channels?.find((ch) => ch.name === parsed);
@@ -185,7 +220,7 @@ async function executeUnanswered({ channel, hours = 24 }: { channel: string; hou
 
   const oldest = String(Math.floor(Date.now() / 1000) - hours * 3600);
 
-  let historyResult;
+  let historyResult: Awaited<ReturnType<typeof slack.conversations.history>>;
   try {
     historyResult = await slack.conversations.history({
       channel: channelId,
@@ -194,7 +229,7 @@ async function executeUnanswered({ channel, hours = 24 }: { channel: string; hou
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
-    if (msg.includes('not_in_channel') || msg.includes('channel_not_found')) {
+    if (msg.includes("not_in_channel") || msg.includes("channel_not_found")) {
       return {
         error: `I'm not a member of #${channelName}. Invite me first: /invite @Community Agent in that channel.`,
         questions: [],
@@ -205,20 +240,23 @@ async function executeUnanswered({ channel, hours = 24 }: { channel: string; hou
 
   const unanswered = (historyResult.messages ?? [])
     .filter(
-      (msg) => !msg.subtype && msg.text && (msg.reply_count === undefined || msg.reply_count === 0),
+      (msg) =>
+        !msg.subtype &&
+        msg.text &&
+        (msg.reply_count === undefined || msg.reply_count === 0)
     )
     .map((msg) => ({
-      text: msg.text!.slice(0, 200),
-      user: msg.user ?? 'unknown',
+      text: msg.text?.slice(0, 200),
+      user: msg.user ?? "unknown",
       ts: msg.ts,
-      permalink: `https://slack.com/archives/${channelId}/p${msg.ts?.replace('.', '')}`,
+      permalink: `https://slack.com/archives/${channelId}/p${msg.ts?.replace(".", "")}`,
     }));
 
   if (unanswered.length > 0) {
     await logAction({
-      type: 'surfaced',
+      type: "surfaced",
       channel: `#${channelName}`,
-      description: `Found ${unanswered.length} unanswered question${unanswered.length === 1 ? '' : 's'} in the last ${hours} hours`,
+      description: `Found ${unanswered.length} unanswered question${unanswered.length === 1 ? "" : "s"} in the last ${hours} hours`,
       metadata: { count: String(unanswered.length), hours: String(hours) },
     });
   }
@@ -232,14 +270,16 @@ async function executeUnanswered({ channel, hours = 24 }: { channel: string; hou
 }
 
 const flagInputSchema = z.object({
-  summary: z.string().describe('Brief summary of the issue being flagged'),
+  summary: z.string().describe("Brief summary of the issue being flagged"),
   context: z
     .string()
-    .describe('Relevant context: what was asked, what channel, why it needs human attention'),
+    .describe(
+      "Relevant context: what was asked, what channel, why it needs human attention"
+    ),
   permalink: z
     .string()
     .optional()
-    .describe('Slack permalink to the original message, if available'),
+    .describe("Slack permalink to the original message, if available"),
 });
 
 async function executeFlagToLead({
@@ -251,27 +291,27 @@ async function executeFlagToLead({
   context: string;
   permalink?: string;
 }) {
-  'use step';
-  await updateStatus('flagging to community lead...');
+  "use step";
+  await updateStatus("flagging to community lead...");
 
   const leadId = config.communityLeadSlackId;
   if (!leadId) {
     return {
       success: false,
-      error: 'No community lead configured. Set COMMUNITY_LEAD_SLACK_ID.',
+      error: "No community lead configured. Set COMMUNITY_LEAD_SLACK_ID.",
     };
   }
 
   const slack = getSlackClient();
 
   const message = [
-    `:rotating_light: *Flagged for review*`,
-    '',
+    ":rotating_light: *Flagged for review*",
+    "",
     `*Summary:* ${summary}`,
-    '',
+    "",
     context,
-    permalink ? `\n<${permalink}|View in Slack>` : '',
-  ].join('\n');
+    permalink ? `\n<${permalink}|View in Slack>` : "",
+  ].join("\n");
 
   try {
     await slack.chat.postMessage({
@@ -280,20 +320,20 @@ async function executeFlagToLead({
     });
 
     await logAction({
-      type: 'flagged',
-      channel: 'DM',
+      type: "flagged",
+      channel: "DM",
       description: `Flagged issue to community lead: ${summary}`,
       metadata: { summary },
     });
 
-    return { success: true, message: 'Issue flagged to community lead.' };
+    return { success: true, message: "Issue flagged to community lead." };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     return { success: false, error: `Failed to flag: ${msg}` };
   }
 }
 
-export const durableTools: Record<string, any> = {
+export const durableTools: Record<string, unknown> = {
   suggest_channel: {
     description: `REQUIRED tool for any channel routing question. You MUST call this tool whenever someone asks where to post, which channel to use, or where to go for something. Do NOT answer routing questions with plain text — always call this tool first so the action is tracked.
 
@@ -341,7 +381,9 @@ Example: ["ls -la", "cat README.md", "grep -r 'auth' docs/"]`,
     ...deferLoading,
   },
   web_search: anthropic.tools.webSearch_20250305({
-    ...(config.searchDomains.length > 0 ? { allowedDomains: config.searchDomains } : {}),
+    ...(config.searchDomains.length > 0
+      ? { allowedDomains: config.searchDomains }
+      : {}),
   }),
   flag_to_lead: {
     description: `Flag a tricky issue to a community lead for human review. Use this when you encounter a question or situation you cannot confidently handle — for example, sensitive topics, complex technical issues requiring expert knowledge, or potential policy violations.

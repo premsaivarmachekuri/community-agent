@@ -1,5 +1,5 @@
-import { formatChannelGuide } from './channels';
-import { config } from './config';
+import { formatChannelGuide } from "./channels";
+import { config } from "./config";
 
 const SYSTEM_PROMPT = `You are the community manager for the ${config.communityName} Slack workspace.
 
@@ -43,7 +43,7 @@ You have access to a knowledge base via bash commands. **Always check the knowle
 
 Use bash_batch to run multiple commands efficiently in a single request. Only fall back to web search if the knowledge base doesn't have what you need.`;
   }
-  return '';
+  return "";
 }
 
 function buildWebSearchInstructions(): string {
@@ -52,11 +52,11 @@ function buildWebSearchInstructions(): string {
 ## Web Search
 
 You have web search and web fetch tools. Use them when:
-- Someone asks a technical question you're not 100% sure about${config.savoirApiUrl ? " and the knowledge base doesn't cover it" : ''}
+- Someone asks a technical question you're not 100% sure about${config.savoirApiUrl ? " and the knowledge base doesn't cover it" : ""}
 - A question involves recent updates, releases, or current information
 - You need to verify facts that may have changed recently
 
-${config.savoirApiUrl ? 'Prefer the knowledge base for documentation questions. Use web search for current events, recent releases, or topics not in the knowledge base.' : 'When in doubt, search first. Don\'t suggest "check the docs" if you can search for the answer yourself.'}`;
+${config.savoirApiUrl ? "Prefer the knowledge base for documentation questions. Use web search for current events, recent releases, or topics not in the knowledge base." : 'When in doubt, search first. Don\'t suggest "check the docs" if you can search for the answer yourself.'}`;
 }
 
 function buildFlaggingInstructions(): string {
@@ -71,7 +71,7 @@ If you encounter something you cannot confidently handle, use the flag_to_lead t
 - A member is frustrated and needs human attention
 - You've tried to help but the issue remains unresolved`;
   }
-  return '';
+  return "";
 }
 
 export function buildInstructions(): string {

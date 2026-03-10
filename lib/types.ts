@@ -1,101 +1,101 @@
 /** Channel configuration for routing and community management */
 export interface ChannelConfig {
-  name: string;
   description: string;
-  topics: string[];
   isWelcomeChannel?: boolean;
+  name: string;
+  topics: string[];
 }
 
 /** Slack context for posting responses */
 export interface SlackContext {
+  botToken: string;
   channelId: string;
   threadTs: string;
-  botToken: string;
 }
 
 /** Chat message for conversation history */
 export interface ChatMessage {
-  role: 'user' | 'assistant';
   content: string;
+  role: "user" | "assistant";
 }
 
 /** Input for running the agent */
 export interface AgentInput {
+  history?: ChatMessage[];
   prompt: string;
   slack?: SlackContext;
-  history?: ChatMessage[];
 }
 
 /** Agent run result */
 export interface AgentResult {
-  success: boolean;
-  response: string;
   error?: string;
+  response: string;
+  success: boolean;
 }
 
 /** Bot action logged to the admin panel */
-export type BotAction = {
-  id: string;
-  type: 'routed' | 'welcomed' | 'surfaced' | 'answered' | 'flagged';
+export interface BotAction {
   channel: string;
-  user?: string;
   description: string;
-  metadata?: Record<string, string>;
-  timestamp: number;
+  id: string;
   lastUpdated?: number;
+  metadata?: Record<string, string>;
   threadKey?: string;
-};
+  timestamp: number;
+  type: "routed" | "welcomed" | "surfaced" | "answered" | "flagged";
+  user?: string;
+}
 
 /** A message in a stored conversation */
-export type ConversationMessage = {
-  role: 'user' | 'assistant';
+export interface ConversationMessage {
   content: string;
+  role: "user" | "assistant";
   timestamp?: number;
-};
+}
 
 /** A conversation stored alongside an action */
-export type Conversation = {
+export interface Conversation {
   actionId: string;
   messages: ConversationMessage[];
-};
+}
 
 /** An active agent stream visible in the admin panel */
-export type StreamEntry = {
-  threadId: string;
+export interface StreamEntry {
   channel: string;
   prompt: string;
+  status: "streaming" | "done";
   text: string;
-  status: 'streaming' | 'done';
+  threadId: string;
   timestamp: number;
-};
+}
 
 /** Full conversation detail returned from the data layer */
-export type ConversationDetail = {
+export interface ConversationDetail {
   action: BotAction;
+  dmRestricted: boolean;
   messages: ConversationMessage[];
   threadKey: string | null;
-  dmRestricted: boolean;
-};
+}
 
 /** Aggregated dashboard statistics */
-export type DashboardStats = {
+export interface DashboardStats {
   counts: Record<string, number>;
   thisWeek: Record<string, number>;
-};
+}
 
 /** Analytics time-series bucket */
-export type AnalyticsBucket = {
-  date: string;
+export interface AnalyticsBucket {
   answered: number;
-  routed: number;
-  welcomed: number;
-  surfaced: number;
+  date: string;
   flagged: number;
-};
+  routed: number;
+  surfaced: number;
+  welcomed: number;
+}
 
 /** Analytics data with bucketed trends and type breakdown */
-export type AnalyticsData = {
+export interface AnalyticsData {
   buckets: AnalyticsBucket[];
-  typeCounts: Record<string, number>;
   totalActions: number;
-};
+  typeCounts: Record<string, number>;
+}

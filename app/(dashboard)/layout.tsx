@@ -1,8 +1,12 @@
-import { Sidebar } from '@/components/Sidebar';
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { config } from '@/lib/config';
+import { Sidebar } from "@/components/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { config } from "@/lib/config";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <SidebarProvider>
       <Sidebar communityName={config.communityName} />

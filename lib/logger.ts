@@ -1,7 +1,8 @@
-type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+type LogLevel = "debug" | "info" | "warn" | "error";
 
-const IS_DEV = process.env.NODE_ENV === 'development';
-const LOG_LEVEL = (process.env.LOG_LEVEL as LogLevel) || (IS_DEV ? 'debug' : 'info');
+const IS_DEV = process.env.NODE_ENV === "development";
+const LOG_LEVEL =
+  (process.env.LOG_LEVEL as LogLevel) || (IS_DEV ? "debug" : "info");
 
 const LOG_LEVELS: Record<LogLevel, number> = {
   debug: 0,
@@ -15,10 +16,13 @@ function shouldLog(level: LogLevel): boolean {
 }
 
 class Logger {
-  constructor(
-    private context: string,
-    private requestId?: string,
-  ) {}
+  private readonly context: string;
+  private readonly requestId?: string;
+
+  constructor(context: string, requestId?: string) {
+    this.context = context;
+    this.requestId = requestId;
+  }
 
   private formatMessage(level: LogLevel, message: string): string {
     const parts = [
@@ -28,29 +32,37 @@ class Logger {
       message,
     ].filter(Boolean);
 
-    return parts.join(' ');
+    return parts.join(" ");
   }
 
   debug(message: string, data?: unknown) {
-    if (!shouldLog('debug')) return;
-    console.log(this.formatMessage('debug', message), data ?? '');
+    if (!shouldLog("debug")) {
+      return;
+    }
+    console.log(this.formatMessage("debug", message), data ?? "");
   }
 
   info(message: string, data?: unknown) {
-    if (!shouldLog('info')) return;
-    console.log(this.formatMessage('info', message), data ?? '');
+    if (!shouldLog("info")) {
+      return;
+    }
+    console.log(this.formatMessage("info", message), data ?? "");
   }
 
   warn(message: string, data?: unknown) {
-    if (!shouldLog('warn')) return;
-    console.warn(this.formatMessage('warn', message), data ?? '');
+    if (!shouldLog("warn")) {
+      return;
+    }
+    console.warn(this.formatMessage("warn", message), data ?? "");
   }
 
   error(message: string, error?: Error | unknown) {
-    if (!shouldLog('error')) return;
+    if (!shouldLog("error")) {
+      return;
+    }
     console.error(
-      this.formatMessage('error', message),
-      error instanceof Error ? error.message : error,
+      this.formatMessage("error", message),
+      error instanceof Error ? error.message : error
     );
     if (error instanceof Error && error.stack) {
       console.error(error.stack);

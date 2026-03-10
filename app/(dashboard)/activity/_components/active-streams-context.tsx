@@ -1,20 +1,31 @@
-'use client';
+"use client";
 
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  type ReactNode,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 
-type ActiveStreamsContextValue = {
+interface ActiveStreamsContextValue {
   activeThreadKeys: string[];
   setActiveThreadKeys: (keys: string[]) => void;
-};
+}
 
 const ActiveStreamsContext = createContext<ActiveStreamsContextValue>({
   activeThreadKeys: [],
-  setActiveThreadKeys: () => {},
+  setActiveThreadKeys: () => {
+    /* noop */
+  },
 });
 
 export function ActiveStreamsProvider({ children }: { children: ReactNode }) {
   const [activeThreadKeys, setActiveThreadKeys] = useState<string[]>([]);
-  const value = useMemo(() => ({ activeThreadKeys, setActiveThreadKeys }), [activeThreadKeys]);
+  const value = useMemo(
+    () => ({ activeThreadKeys, setActiveThreadKeys }),
+    [activeThreadKeys]
+  );
   return <ActiveStreamsContext value={value}>{children}</ActiveStreamsContext>;
 }
 

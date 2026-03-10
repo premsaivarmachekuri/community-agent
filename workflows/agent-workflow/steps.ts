@@ -1,13 +1,26 @@
-import { chat } from '@/lib/chat';
-import { createLogger } from '@/lib/logger';
-import { getSlackClient } from '@/lib/slack';
-import { logAction, writeStreamEntry, clearStream, appendToConversation } from '@/lib/store';
-import type { BotAction, ConversationMessage, SlackContext, StreamEntry } from '@/lib/types';
+import { chat } from "@/lib/chat";
+import { createLogger } from "@/lib/logger";
+import { getSlackClient } from "@/lib/slack";
+import {
+  appendToConversation,
+  clearStream,
+  logAction,
+  writeStreamEntry,
+} from "@/lib/store";
+import type {
+  BotAction,
+  ConversationMessage,
+  SlackContext,
+  StreamEntry,
+} from "@/lib/types";
 
-export async function stepPostToSlack(slack: SlackContext, text: string): Promise<void> {
-  'use step';
+export async function stepPostToSlack(
+  slack: SlackContext,
+  text: string
+): Promise<void> {
+  "use step";
 
-  const slackAdapter = chat.getAdapter('slack');
+  const slackAdapter = chat.getAdapter("slack");
   const threadId = slackAdapter.encodeThreadId({
     channel: slack.channelId,
     threadTs: slack.threadTs,
@@ -16,23 +29,30 @@ export async function stepPostToSlack(slack: SlackContext, text: string): Promis
   await slackAdapter.postMessage(threadId, { markdown: text });
 }
 
-export async function stepResolveChannelName(channelId: string): Promise<string> {
-  'use step';
+export async function stepResolveChannelName(
+  channelId: string
+): Promise<string> {
+  "use step";
 
   try {
-    const info = await getSlackClient().conversations.info({ channel: channelId });
-    return info.channel?.name ? `#${info.channel.name}` : 'DM';
+    const info = await getSlackClient().conversations.info({
+      channel: channelId,
+    });
+    return info.channel?.name ? `#${info.channel.name}` : "DM";
   } catch (error) {
-    createLogger('steps').debug('Failed to resolve channel name', { channelId, error });
-    return 'DM';
+    createLogger("steps").debug("Failed to resolve channel name", {
+      channelId,
+      error,
+    });
+    return "DM";
   }
 }
 
 export async function stepGetPermalink(
   channelId: string,
-  messageTs: string,
+  messageTs: string
 ): Promise<string | null> {
-  'use step';
+  "use step";
 
   try {
     const result = await getSlackClient().chat.getPermalink({
@@ -41,38 +61,41 @@ export async function stepGetPermalink(
     });
     return result.permalink ?? null;
   } catch (error) {
-    createLogger('steps').debug('Failed to get permalink', { channelId, error });
+    createLogger("steps").debug("Failed to get permalink", {
+      channelId,
+      error,
+    });
     return null;
   }
 }
 
 export async function stepLogAction(
-  action: Omit<BotAction, 'id' | 'timestamp'>,
+  action: Omit<BotAction, "id" | "timestamp">,
   conversation?: ConversationMessage[],
-  threadKey?: string,
+  threadKey?: string
 ): Promise<void> {
-  'use step';
+  "use step";
 
   await logAction(action, conversation, threadKey);
 }
 
 export async function stepSaveUserMessage(
   threadKey: string,
-  messages: ConversationMessage[],
+  messages: ConversationMessage[]
 ): Promise<void> {
-  'use step';
+  "use step";
 
   await appendToConversation(threadKey, messages);
 }
 
 export async function stepStartStream(entry: StreamEntry): Promise<void> {
-  'use step';
+  "use step";
 
   await writeStreamEntry(entry);
 }
 
 export async function stepEndStream(threadId: string): Promise<void> {
-  'use step';
+  "use step";
 
   await clearStream(threadId);
 }

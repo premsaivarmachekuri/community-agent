@@ -1,35 +1,42 @@
-import { Suspense, ViewTransition } from 'react';
-import { after } from 'next/server';
-import { ExternalLink, MessageSquare } from 'lucide-react';
-import Link from 'next/link';
-import { Header } from '@/components/Header';
-import { ActiveStreams } from './_components/ActiveStreams';
-import { ActiveStreamsProvider } from './_components/ActiveStreamsContext';
-import { ActivityCardGlow } from './_components/ActivityCardGlow';
-import { ActivityFilters } from './_components/ActivityFilters';
-import { ActivitySearch } from './_components/ActivitySearch';
+import { ExternalLink, MessageSquare } from "lucide-react";
+import Link from "next/link";
+import { after } from "next/server";
+import { Suspense, ViewTransition } from "react";
+import { FormattedTime } from "@/components/formatted-time";
+import { Header } from "@/components/header";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { typeConfig } from "@/config/type-config";
 import {
+  getActionCounts,
+  getLastSeenTimestamp,
+  getRecentActions,
+} from "@/data/queries/activity";
+import { requireSession } from "@/data/queries/auth";
+import { setLastSeen } from "@/lib/store";
+import type { BotAction } from "@/lib/types";
+import { cn } from "@/lib/utils";
+import { ActiveStreams } from "./_components/active-streams";
+import { ActiveStreamsProvider } from "./_components/active-streams-context";
+import { ActivityCardGlow } from "./_components/activity-card-glow";
+import { ActivityFilters } from "./_components/activity-filters";
+import { ActivitySearch } from "./_components/activity-search";
+import {
+  ConversationPreviewContent,
   ConversationPreviewProvider,
   ConversationPreviewToggle,
-  ConversationPreviewContent,
-} from './_components/ConversationPreview';
-import { FormattedTime } from '@/components/FormattedTime';
-import { ShowMoreButton } from './_components/ShowMoreButton';
-import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { getActionCounts, getRecentActions, getLastSeenTimestamp } from '@/data/queries/activity';
-import { setLastSeen } from '@/lib/store';
-import { requireSession } from '@/data/queries/auth';
-import type { BotAction } from '@/lib/types';
-import { typeConfig } from '@/config/type-config';
-import { cn } from '@/lib/utils';
+} from "./_components/conversation-preview";
+import { ShowMoreButton } from "./_components/show-more-button";
 
-export default function ActivityPage({ searchParams }: PageProps<'/activity'>) {
+export default function ActivityPage({ searchParams }: PageProps<"/activity">) {
   const countsPromise = getActionCounts();
 
   return (
     <>
-      <Header title="Activity" description="Recent bot actions across your community" />
+      <Header
+        description="Recent bot actions across your community"
+        title="Activity"
+      />
       <div className="flex-1 space-y-4 p-4">
         <ActiveStreamsProvider>
           <ActiveStreams />
@@ -66,13 +73,16 @@ export default function ActivityPage({ searchParams }: PageProps<'/activity'>) {
   );
 }
 
-async function ActivityList({ searchParams }: Pick<PageProps<'/activity'>, 'searchParams'>) {
-  const [{ type, q, limit: limitParam }, allActions, session, lastSeen] = await Promise.all([
-    searchParams,
-    getRecentActions(),
-    requireSession(),
-    getLastSeenTimestamp(),
-  ] as const);
+async function ActivityList({
+  searchParams,
+}: Pick<PageProps<"/activity">, "searchParams">) {
+  const [{ type, q, limit: limitParam }, allActions, session, lastSeen] =
+    await Promise.all([
+      searchParams,
+      getRecentActions(),
+      requireSession(),
+      getLastSeenTimestamp(),
+    ] as const);
 
   let actions: BotAction[] = type
     ? allActions.filter((a: BotAction) => a.type === type)
@@ -85,7 +95,7 @@ async function ActivityList({ searchParams }: Pick<PageProps<'/activity'>, 'sear
       (a: BotAction) =>
         a.description.toLowerCase().includes(query) ||
         a.channel.toLowerCase().includes(query) ||
-        a.user?.toLowerCase().includes(query),
+        a.user?.toLowerCase().includes(query)
     );
   }
 
@@ -96,22 +106,29 @@ async function ActivityList({ searchParams }: Pick<PageProps<'/activity'>, 'sear
   const paginatedActions = actions.slice(0, limit);
 
   if (actions.length === 0) {
-    const filterLabel = type ? typeConfig[type as BotAction['type']]?.label : null;
+    const filterLabel = type
+      ? typeConfig[type as BotAction["type"]]?.label
+      : null;
     const hasFilters = type || searchQuery;
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
         <MessageSquare className="h-8 w-8 text-muted-foreground/50" />
-        <h3 className="mt-3 text-base font-medium">
-          {hasFilters ? 'No matching actions' : 'No activity yet'}
+        <h3 className="mt-3 font-medium text-base">
+          {hasFilters ? "No matching actions" : "No activity yet"}
         </h3>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {searchQuery && filterLabel
-            ? `No ${filterLabel.toLowerCase()} actions matching "${searchQuery}".`
-            : searchQuery
-              ? `No actions matching "${searchQuery}". Try a different search term.`
-              : filterLabel
-                ? `No ${filterLabel.toLowerCase()} actions yet.`
-                : 'Bot actions will appear here as your community agent handles messages, routes questions, and welcomes members.'}
+        <p className="mt-1 text-muted-foreground text-sm">
+          {(() => {
+            if (searchQuery && filterLabel) {
+              return `No ${filterLabel.toLowerCase()} actions matching "${searchQuery}".`;
+            }
+            if (searchQuery) {
+              return `No actions matching "${searchQuery}". Try a different search term.`;
+            }
+            if (filterLabel) {
+              return `No ${filterLabel.toLowerCase()} actions yet.`;
+            }
+            return "Bot actions will appear here as your community agent handles messages, routes questions, and welcomes members.";
+          })()}
         </p>
       </div>
     );
@@ -129,50 +146,54 @@ async function ActivityList({ searchParams }: Pick<PageProps<'/activity'>, 'sear
         const isNew = lastSeen > 0 && action.timestamp > lastSeen;
 
         const cardContent = (
-          <Card className={isNew ? 'animate-new-glow' : ''}>
+          <Card className={isNew ? "animate-new-glow" : ""}>
             <CardContent className="flex items-start gap-2.5 py-2.5 sm:gap-3 sm:py-3">
               <div
                 className={cn(
-                  'flex h-6 w-6 shrink-0 items-center justify-center rounded-full sm:h-7 sm:w-7',
-                  config.bgColor,
+                  "flex h-6 w-6 shrink-0 items-center justify-center rounded-full sm:h-7 sm:w-7",
+                  config.bgColor
                 )}
               >
-                <Icon className={cn('h-3 w-3 sm:h-3.5 sm:w-3.5', config.iconColor)} />
+                <Icon
+                  className={cn("h-3 w-3 sm:h-3.5 sm:w-3.5", config.iconColor)}
+                />
               </div>
               <div className="min-w-0 flex-1 space-y-1">
                 <p className="text-sm">{action.description}</p>
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground text-xs">
                   <FormattedTime timestamp={action.timestamp} />
-                  {action.lastUpdated && action.lastUpdated !== action.timestamp && (
-                    <>
-                      <span>&middot;</span>
-                      <span>
-                        updated <FormattedTime timestamp={action.lastUpdated} />
-                      </span>
-                    </>
-                  )}
+                  {action.lastUpdated &&
+                    action.lastUpdated !== action.timestamp && (
+                      <>
+                        <span>&middot;</span>
+                        <span>
+                          updated{" "}
+                          <FormattedTime timestamp={action.lastUpdated} />
+                        </span>
+                      </>
+                    )}
                   <span>&middot;</span>
                   <span>{action.channel}</span>
                 </div>
-                {(action.type === 'answered' || action.metadata?.permalink) && (
+                {(action.type === "answered" || action.metadata?.permalink) && (
                   <div className="flex flex-wrap items-center gap-2 pt-0.5">
-                    {action.type === 'answered' && (
+                    {action.type === "answered" && (
                       <>
                         <ConversationPreviewToggle />
                         <Link
-                          href={`/activity/${action.id}` as any}
-                      className="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    >
+                          className="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 font-medium text-foreground text-xs transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                          href={`/activity/${action.id}`}
+                        >
                           Full thread
                         </Link>
                       </>
                     )}
                     {action.metadata?.permalink && (
                       <a
+                        className="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 font-medium text-foreground text-xs transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         href={action.metadata.permalink}
-                        target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        target="_blank"
                       >
                         <ExternalLink className="h-3 w-3" />
                         View in Slack
@@ -180,7 +201,7 @@ async function ActivityList({ searchParams }: Pick<PageProps<'/activity'>, 'sear
                     )}
                   </div>
                 )}
-                {action.type === 'answered' && <ConversationPreviewContent />}
+                {action.type === "answered" && <ConversationPreviewContent />}
               </div>
             </CardContent>
           </Card>
@@ -189,7 +210,7 @@ async function ActivityList({ searchParams }: Pick<PageProps<'/activity'>, 'sear
         return (
           <ViewTransition key={action.threadKey ?? action.id}>
             <ActivityCardGlow threadKey={action.threadKey}>
-              {action.type === 'answered' ? (
+              {action.type === "answered" ? (
                 <ConversationPreviewProvider actionId={action.id}>
                   {cardContent}
                 </ConversationPreviewProvider>
@@ -201,9 +222,9 @@ async function ActivityList({ searchParams }: Pick<PageProps<'/activity'>, 'sear
         );
       })}
       <ShowMoreButton
-        totalCount={totalCount}
         currentCount={paginatedActions.length}
         pageSize={PAGE_SIZE}
+        totalCount={totalCount}
       />
     </div>
   );
@@ -212,13 +233,15 @@ async function ActivityList({ searchParams }: Pick<PageProps<'/activity'>, 'sear
 function ActivityFiltersSkeleton() {
   return (
     <div className="flex flex-wrap gap-1">
-      {['All', 'Answered', 'Routed', 'Welcomed', 'Surfaced', 'Flagged'].map((label) => (
-        <Skeleton
-          key={label}
-          className="h-8 rounded-md"
-          style={{ width: `${label.length * 8 + 40}px` }}
-        />
-      ))}
+      {["All", "Answered", "Routed", "Welcomed", "Surfaced", "Flagged"].map(
+        (label) => (
+          <Skeleton
+            className="h-8 rounded-md"
+            key={label}
+            style={{ width: `${label.length * 8 + 40}px` }}
+          />
+        )
+      )}
     </div>
   );
 }

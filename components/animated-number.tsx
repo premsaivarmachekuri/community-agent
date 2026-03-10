@@ -1,8 +1,14 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
-export function AnimatedNumber({ value, className }: { value: string; className?: string }) {
+export function AnimatedNumber({
+  value,
+  className,
+}: {
+  value: string;
+  className?: string;
+}) {
   const [prev, setPrev] = useState(value);
   const [animating, setAnimating] = useState(false);
 
@@ -13,7 +19,7 @@ export function AnimatedNumber({ value, className }: { value: string; className?
 
   return (
     <div
-      className={`${className ?? ''} ${animating ? 'animate-number-roll' : ''}`}
+      className={`${className ?? ""} ${animating ? "animate-number-roll" : ""}`}
       onAnimationEnd={() => setAnimating(false)}
     >
       {value}

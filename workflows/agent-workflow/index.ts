@@ -1,31 +1,41 @@
-import { DurableAgent } from '@workflow/ai/agent';
-import { getWritable } from 'workflow';
-import type { UIMessageChunk } from 'ai';
-import type { AgentInput, AgentResult } from '@/lib/types';
-import { createLogger } from '@/lib/logger';
-import { config } from '@/lib/config';
-import { buildInstructions } from '@/lib/agent';
-import { durableTools, setSlackContext } from './tools';
+import { DurableAgent } from "@workflow/ai/agent";
+import type { UIMessageChunk } from "ai";
+import { getWritable } from "workflow";
+import { buildInstructions } from "@/lib/agent";
+import { config } from "@/lib/config";
+import { createLogger } from "@/lib/logger";
+import type { AgentInput, AgentResult } from "@/lib/types";
 import {
-  stepPostToSlack,
-  stepResolveChannelName,
+  stepEndStream,
   stepGetPermalink,
   stepLogAction,
+  stepPostToSlack,
+  stepResolveChannelName,
   stepSaveUserMessage,
   stepStartStream,
-  stepEndStream,
-} from './steps';
+} from "./steps";
+import { durableTools, setSlackContext } from "./tools";
+
+const ROUTING_PATTERN_RE = /\b(?:post|report|ask|go|head)\b.*\b#(\w+)\b/i;
+const CHANNEL_HASH_RE = /#(\w+)/;
 
 export async function workflowAgent(input: AgentInput): Promise<AgentResult> {
-  'use workflow';
+  "use workflow";
 
-  const logger = createLogger('agent-workflow');
+  const logger = createLogger("agent-workflow");
 
-  logger.info('Workflow started', { promptLength: input.prompt.length });
+  logger.info("Workflow started", { promptLength: input.prompt.length });
 
-  let responseText = 'No response generated.';
+  let responseText = "No response generated.";
   let success = true;
-  let result: any = null;
+  let result: {
+    messages: Array<{
+      role: string;
+      content:
+        | string
+        | Array<{ type: string; text?: string; toolName?: string }>;
+    }>;
+  } | null = null;
 
   const streamThreadId = input.slack
     ? `${input.slack.channelId}:${input.slack.threadTs}`
@@ -33,13 +43,16 @@ export async function workflowAgent(input: AgentInput): Promise<AgentResult> {
 
   try {
     let threadPermalink: string | null = null;
-    if (input.slack && !input.slack.channelId.startsWith('D')) {
-      threadPermalink = await stepGetPermalink(input.slack.channelId, input.slack.threadTs);
+    if (input.slack && !input.slack.channelId.startsWith("D")) {
+      threadPermalink = await stepGetPermalink(
+        input.slack.channelId,
+        input.slack.threadTs
+      );
     }
 
     const systemSuffix = threadPermalink
       ? `\n\nCurrent thread permalink (pass to flag_to_lead if needed): ${threadPermalink}`
-      : '';
+      : "";
 
     setSlackContext(input.slack);
 
@@ -49,25 +62,30 @@ export async function workflowAgent(input: AgentInput): Promise<AgentResult> {
       tools: durableTools,
     });
 
-    const messages = [...(input.history || []), { role: 'user' as const, content: input.prompt }];
+    const messages = [
+      ...(input.history || []),
+      { role: "user" as const, content: input.prompt },
+    ];
 
     if (streamThreadId && input.slack) {
-      const streamChannelName = await stepResolveChannelName(input.slack.channelId);
+      const streamChannelName = await stepResolveChannelName(
+        input.slack.channelId
+      );
       await stepStartStream({
         threadId: streamThreadId,
         channel: streamChannelName,
         prompt: input.prompt
-          .replace(/<@[A-Z0-9]+>/g, '')
-          .replace(/@U[A-Z0-9]{8,}/g, '')
+          .replace(/<@[A-Z0-9]+>/g, "")
+          .replace(/@U[A-Z0-9]{8,}/g, "")
           .trim(),
-        text: '',
-        status: 'streaming',
+        text: "",
+        status: "streaming",
         timestamp: Date.now(),
       });
 
       if (input.history?.length) {
         await stepSaveUserMessage(streamThreadId, [
-          { role: 'user', content: input.prompt, timestamp: Date.now() },
+          { role: "user", content: input.prompt, timestamp: Date.now() },
         ]);
       }
     }
@@ -78,29 +96,31 @@ export async function workflowAgent(input: AgentInput): Promise<AgentResult> {
       maxSteps: 50,
     });
 
-    const lastAssistantMessage = result.messages.filter((m: any) => m.role === 'assistant').pop();
+    const lastAssistantMessage = result.messages
+      .filter((m) => m.role === "assistant")
+      .pop();
 
     if (lastAssistantMessage?.content) {
-      if (typeof lastAssistantMessage.content === 'string') {
+      if (typeof lastAssistantMessage.content === "string") {
         responseText = lastAssistantMessage.content;
       } else if (Array.isArray(lastAssistantMessage.content)) {
         responseText =
           lastAssistantMessage.content
-            .filter((part: any) => part.type === 'text')
-            .map((part: any) => part.text)
-            .join('') || 'No response generated.';
+            .filter((part) => part.type === "text")
+            .map((part) => part.text ?? "")
+            .join("") || "No response generated.";
       }
     }
 
-    logger.info('Agent completed', { responseLength: responseText.length });
+    logger.info("Agent completed", { responseLength: responseText.length });
   } catch (error) {
     success = false;
-    responseText = `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}`;
-    logger.error('Agent failed', { error: String(error) });
+    responseText = `Sorry, I encountered an error: ${error instanceof Error ? error.message : "Unknown error"}`;
+    logger.error("Agent failed", { error: String(error) });
   }
 
   if (input.slack) {
-    const isDM = input.slack.channelId.startsWith('D');
+    const isDM = input.slack.channelId.startsWith("D");
     const isFirstMessage = !input.history?.length;
     const postText =
       isDM && isFirstMessage
@@ -112,37 +132,50 @@ export async function workflowAgent(input: AgentInput): Promise<AgentResult> {
   if (success && input.slack) {
     const toolCalls =
       result?.messages
-        ?.filter((m: any) => m.role === 'assistant' && Array.isArray(m.content))
-        .flatMap((m: any) => m.content.filter((p: any) => p.type === 'tool-call')) ?? [];
+        ?.filter((m) => m.role === "assistant" && Array.isArray(m.content))
+        .flatMap((m) =>
+          (m.content as Array<{ type: string; toolName?: string }>).filter(
+            (p) => p.type === "tool-call"
+          )
+        ) ?? [];
 
-    const toolsWithOwnLogging = ['suggest_channel', 'unanswered', 'flag_to_lead'];
-    const alreadyLogged = toolCalls.some((tc: any) => toolsWithOwnLogging.includes(tc.toolName));
+    const toolsWithOwnLogging = [
+      "suggest_channel",
+      "unanswered",
+      "flag_to_lead",
+    ];
+    const alreadyLogged = toolCalls.some((tc) =>
+      toolsWithOwnLogging.includes(tc.toolName ?? "")
+    );
 
-    const routingPattern = /\b(?:post|report|ask|go|head)\b.*\b#(\w+)\b/i;
-    const routingMatch = !alreadyLogged && routingPattern.test(responseText);
+    const routingMatch =
+      !alreadyLogged && ROUTING_PATTERN_RE.test(responseText);
 
     if (routingMatch) {
       const channelName = await stepResolveChannelName(input.slack.channelId);
-      const match = responseText.match(/#(\w+)/);
+      const match = responseText.match(CHANNEL_HASH_RE);
       const suggestedChannel = match ? `#${match[1]}` : channelName;
 
       await stepLogAction(
         {
-          type: 'routed',
+          type: "routed",
           channel: channelName,
           description: `Suggested routing question to ${suggestedChannel}`,
           metadata: {},
         },
         [],
-        `${input.slack.channelId}:${input.slack.threadTs}`,
+        `${input.slack.channelId}:${input.slack.threadTs}`
       );
     } else if (!alreadyLogged) {
       const channelName = await stepResolveChannelName(input.slack.channelId);
 
-      const isDM = input.slack.channelId.startsWith('D');
+      const isDM = input.slack.channelId.startsWith("D");
       const metadata: Record<string, string> = {};
       if (!isDM) {
-        const permalink = await stepGetPermalink(input.slack.channelId, input.slack.threadTs);
+        const permalink = await stepGetPermalink(
+          input.slack.channelId,
+          input.slack.threadTs
+        );
         if (permalink) {
           metadata.permalink = permalink;
         }
@@ -150,30 +183,37 @@ export async function workflowAgent(input: AgentInput): Promise<AgentResult> {
 
       const conversation = [
         ...(input.history || []).map((m) => ({
-          role: m.role as 'user' | 'assistant',
+          role: m.role as "user" | "assistant",
           content: m.content,
         })),
-        { role: 'user' as const, content: input.prompt, timestamp: Date.now() },
-        { role: 'assistant' as const, content: responseText, timestamp: Date.now() },
+        { role: "user" as const, content: input.prompt, timestamp: Date.now() },
+        {
+          role: "assistant" as const,
+          content: responseText,
+          timestamp: Date.now(),
+        },
       ];
 
       const threadKey = `${input.slack.channelId}:${input.slack.threadTs}`;
 
       const cleanPrompt = input.prompt
-        .replace(/<@[A-Z0-9]+>/g, '')
-        .replace(/@U[A-Z0-9]{8,}/g, '')
+        .replace(/<@[A-Z0-9]+>/g, "")
+        .replace(/@U[A-Z0-9]{8,}/g, "")
         .trim();
-      const preview = cleanPrompt.length > 120 ? `${cleanPrompt.slice(0, 120)}…` : cleanPrompt;
+      const preview =
+        cleanPrompt.length > 120
+          ? `${cleanPrompt.slice(0, 120)}…`
+          : cleanPrompt;
 
       await stepLogAction(
         {
-          type: 'answered',
+          type: "answered",
           channel: channelName,
-          description: preview || 'Answered a community question',
+          description: preview || "Answered a community question",
           metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
         },
         conversation,
-        threadKey,
+        threadKey
       );
     }
   }
@@ -182,7 +222,10 @@ export async function workflowAgent(input: AgentInput): Promise<AgentResult> {
     await stepEndStream(streamThreadId);
   }
 
-  logger.info('Workflow completed', { success, responseLength: responseText.length });
+  logger.info("Workflow completed", {
+    success,
+    responseLength: responseText.length,
+  });
 
   return {
     success,

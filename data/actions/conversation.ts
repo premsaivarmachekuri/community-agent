@@ -1,10 +1,12 @@
-'use server';
+"use server";
 
-import type { ConversationMessage } from '@/lib/types';
-import { getConversation } from '@/data/queries/activity';
-import { requireSession } from '@/data/queries/auth';
+import { getConversation } from "@/data/queries/activity";
+import { requireSession } from "@/data/queries/auth";
+import type { ConversationMessage } from "@/lib/types";
 
-export async function fetchConversationPreview(actionId: string): Promise<ConversationMessage[]> {
+export async function fetchConversationPreview(
+  actionId: string
+): Promise<ConversationMessage[]> {
   await requireSession();
   return getConversation(actionId);
 }

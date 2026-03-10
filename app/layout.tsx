@@ -1,10 +1,10 @@
-import type { Metadata } from 'next';
-import { GeistSans } from 'geist/font/sans';
-import { GeistMono } from 'geist/font/mono';
-import { ThemeProvider } from '@/components/ThemeProvider';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { config } from '@/lib/config';
-import './globals.css';
+import { GeistMono } from "geist/font/mono";
+import { GeistSans } from "geist/font/sans";
+import type { Metadata } from "next";
+import { ThemeProvider } from "@/components/theme-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { config } from "@/lib/config";
+import "./globals.css";
 
 export function generateMetadata(): Metadata {
   return {
@@ -13,19 +13,23 @@ export function generateMetadata(): Metadata {
   };
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html
-      lang="en"
       className={`${GeistSans.variable} ${GeistMono.variable}`}
+      lang="en"
       suppressHydrationWarning
     >
       <body>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
-          enableSystem
           disableTransitionOnChange
+          enableSystem
         >
           <TooltipProvider>{children}</TooltipProvider>
         </ThemeProvider>

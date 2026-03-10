@@ -1,38 +1,53 @@
-import { Suspense, ViewTransition } from 'react';
-import { ArrowRight, BookOpen, ExternalLink, MessageSquare, TrendingUp } from 'lucide-react';
-import Link from 'next/link';
-import { Header } from '@/components/Header';
-import { DashboardLive } from './_components/DashboardLive';
-import { AnalyticsChart } from './_components/AnalyticsChart';
-import { FormattedTime } from '@/components/FormattedTime';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { getDashboardStats, getRecentActions, getAnalyticsData } from '@/data/queries/activity';
-import { config } from '@/lib/config';
-import { typeConfig } from '@/config/type-config';
-import { AnimatedNumber } from '@/components/AnimatedNumber';
+import {
+  ArrowRight,
+  BookOpen,
+  ExternalLink,
+  MessageSquare,
+  TrendingUp,
+} from "lucide-react";
+import Link from "next/link";
+import { Suspense, ViewTransition } from "react";
+import { AnimatedNumber } from "@/components/animated-number";
+import { FormattedTime } from "@/components/formatted-time";
+import { Header } from "@/components/header";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { typeConfig } from "@/config/type-config";
+import {
+  getAnalyticsData,
+  getDashboardStats,
+  getRecentActions,
+} from "@/data/queries/activity";
+import { config } from "@/lib/config";
+import { AnalyticsChart } from "./_components/analytics-chart";
+import { DashboardLive } from "./_components/dashboard-live";
+
+const PROTOCOL_RE = /^https?:\/\//;
 
 export default function OverviewPage() {
   const analyticsPromise = getAnalyticsData();
 
   return (
     <>
-      <Header title="Overview" description={`${config.communityName} dashboard`} />
+      <Header
+        description={`${config.communityName} dashboard`}
+        title="Overview"
+      />
       <div className="flex-1 space-y-4 p-4">
         <DashboardLive />
         {config.savoirApiUrl && (
           <div className="flex items-center gap-2 rounded-lg border border-info/20 bg-info/5 px-3 py-2 text-xs">
             <BookOpen className="h-3.5 w-3.5 text-info" />
             <span>
-              Knowledge base:{' '}
+              Knowledge base:{" "}
               <a
-                href={config.savoirApiUrl}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="font-medium text-info hover:underline"
+                href={config.savoirApiUrl}
+                rel="noopener noreferrer"
+                target="_blank"
               >
-                {config.savoirApiUrl.replace(/^https?:\/\//, '')}
+                {config.savoirApiUrl.replace(PROTOCOL_RE, "")}
                 <ExternalLink className="ml-1 inline h-3 w-3" />
               </a>
             </span>
@@ -83,38 +98,38 @@ async function StatsCards() {
 
   const cards = [
     {
-      title: 'Questions answered',
+      title: "Questions answered",
       value: String(counts.answered || 0),
-      type: 'answered' as const,
-      href: '/activity?type=answered',
+      type: "answered" as const,
+      href: "/activity?type=answered",
       weekly: thisWeek.answered || 0,
     },
     {
-      title: 'Questions routed',
+      title: "Questions routed",
       value: String(counts.routed || 0),
-      type: 'routed' as const,
-      href: '/activity?type=routed',
+      type: "routed" as const,
+      href: "/activity?type=routed",
       weekly: thisWeek.routed || 0,
     },
     {
-      title: 'Members welcomed',
+      title: "Members welcomed",
       value: String(counts.welcomed || 0),
-      type: 'welcomed' as const,
-      href: '/activity?type=welcomed',
+      type: "welcomed" as const,
+      href: "/activity?type=welcomed",
       weekly: thisWeek.welcomed || 0,
     },
     {
-      title: 'Questions surfaced',
+      title: "Questions surfaced",
       value: String(counts.surfaced || 0),
-      type: 'surfaced' as const,
-      href: '/activity?type=surfaced',
+      type: "surfaced" as const,
+      href: "/activity?type=surfaced",
       weekly: thisWeek.surfaced || 0,
     },
     {
-      title: 'Issues flagged',
+      title: "Issues flagged",
       value: String(counts.flagged || 0),
-      type: 'flagged' as const,
-      href: '/activity?type=flagged',
+      type: "flagged" as const,
+      href: "/activity?type=flagged",
       weekly: thisWeek.flagged || 0,
     },
   ];
@@ -124,10 +139,10 @@ async function StatsCards() {
       {cards.map((stat) => {
         const cfg = typeConfig[stat.type];
         return (
-          <Link key={stat.title} href={stat.href as any}>
+          <Link href={stat.href} key={stat.title}>
             <Card className="gap-1 py-2.5 transition-colors hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:gap-1.5 sm:py-3">
               <CardHeader className="flex flex-row items-center justify-between px-3 pb-0">
-                <CardTitle className="text-xs font-medium text-muted-foreground">
+                <CardTitle className="font-medium text-muted-foreground text-xs">
                   {stat.title}
                 </CardTitle>
                 <div
@@ -137,13 +152,16 @@ async function StatsCards() {
                 </div>
               </CardHeader>
               <CardContent className="px-3">
-                <AnimatedNumber value={stat.value} className="text-xl font-bold" />
+                <AnimatedNumber
+                  className="font-bold text-xl"
+                  value={stat.value}
+                />
                 {stat.weekly > 0 ? (
-                  <p className="hidden items-center gap-1 text-xs text-success sm:flex">
+                  <p className="hidden items-center gap-1 text-success text-xs sm:flex">
                     <TrendingUp className="h-3 w-3" />+{stat.weekly} this week
                   </p>
                 ) : (
-                  <p className="hidden text-xs text-muted-foreground sm:block">
+                  <p className="hidden text-muted-foreground text-xs sm:block">
                     No activity this week
                   </p>
                 )}
@@ -155,7 +173,7 @@ async function StatsCards() {
       <Link href="/activity">
         <Card className="gap-1 py-2.5 transition-colors hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:gap-1.5 sm:py-3">
           <CardHeader className="flex flex-row items-center justify-between px-3 pb-0">
-            <CardTitle className="text-xs font-medium text-muted-foreground">
+            <CardTitle className="font-medium text-muted-foreground text-xs">
               Total actions
             </CardTitle>
             <div className="hidden h-5 w-5 items-center justify-center rounded-full bg-muted sm:flex">
@@ -163,13 +181,18 @@ async function StatsCards() {
             </div>
           </CardHeader>
           <CardContent className="px-3">
-            <AnimatedNumber value={String(counts.total)} className="text-xl font-bold" />
+            <AnimatedNumber
+              className="font-bold text-xl"
+              value={String(counts.total)}
+            />
             {thisWeek.total > 0 ? (
-              <p className="hidden items-center gap-1 text-xs text-success sm:flex">
+              <p className="hidden items-center gap-1 text-success text-xs sm:flex">
                 <TrendingUp className="h-3 w-3" />+{thisWeek.total} this week
               </p>
             ) : (
-              <p className="hidden text-xs text-muted-foreground sm:block">No activity this week</p>
+              <p className="hidden text-muted-foreground text-xs sm:block">
+                No activity this week
+              </p>
             )}
           </CardContent>
         </Card>
@@ -186,7 +209,7 @@ async function RecentActivityCard() {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-sm">Recent activity</CardTitle>
-        <Button variant="outline" size="sm" asChild>
+        <Button asChild size="sm" variant="outline">
           <Link href="/activity">
             View all <ArrowRight className="ml-1 h-3 w-3" />
           </Link>
@@ -194,7 +217,7 @@ async function RecentActivityCard() {
       </CardHeader>
       <CardContent>
         {recent.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             No activity yet—stats will appear as the bot handles messages.
           </p>
         ) : (
@@ -203,14 +226,14 @@ async function RecentActivityCard() {
               const cfg = typeConfig[action.type];
               const Icon = cfg.icon;
               const href =
-                action.type === 'answered'
+                action.type === "answered"
                   ? `/activity/${action.id}`
                   : `/activity?type=${action.type}`;
               return (
                 <Link
-                  key={action.id}
-                  href={href as any}
                   className="-mx-2 flex items-start gap-2.5 rounded-md px-2 py-1.5 transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  href={href}
+                  key={action.id}
                 >
                   <div
                     className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${cfg.bgColor}`}
@@ -219,8 +242,9 @@ async function RecentActivityCard() {
                   </div>
                   <div className="min-w-0 flex-1 text-sm">
                     <p className="text-foreground">{action.description}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {action.channel} &middot; <FormattedTime timestamp={action.timestamp} />
+                    <p className="text-muted-foreground text-xs">
+                      {action.channel} &middot;{" "}
+                      <FormattedTime timestamp={action.timestamp} />
                     </p>
                   </div>
                 </Link>
@@ -242,7 +266,7 @@ function RecentActivitySkeleton() {
       </CardHeader>
       <CardContent className="space-y-1">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="-mx-2 flex items-start gap-2.5 px-2 py-1.5">
+          <div className="-mx-2 flex items-start gap-2.5 px-2 py-1.5" key={i}>
             <Skeleton className="mt-0.5 h-5 w-5 shrink-0 rounded-full" />
             <div className="flex-1 space-y-1">
               <Skeleton className="h-4 w-3/4" />
@@ -273,7 +297,7 @@ function StatsCardsSkeleton() {
   return (
     <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-3">
       {[1, 2, 3, 4, 5, 6].map((i) => (
-        <Card key={i} className="gap-1 py-3 sm:gap-1.5 sm:py-3.5">
+        <Card className="gap-1 py-3 sm:gap-1.5 sm:py-3.5" key={i}>
           <CardHeader className="flex flex-row items-center justify-between px-3 pb-0">
             <Skeleton className="h-3 w-16 sm:w-20" />
             <Skeleton className="hidden h-5 w-5 rounded-full sm:block" />

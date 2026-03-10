@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import type { ReactNode } from 'react';
-import { Loader2 } from 'lucide-react';
-import { useActiveStreams } from './ActiveStreamsContext';
+import { Loader2 } from "lucide-react";
+import type { ReactNode } from "react";
+import { useActiveStreams } from "./active-streams-context";
 
 export function ActivityCardGlow({
   threadKey,
@@ -14,7 +14,9 @@ export function ActivityCardGlow({
   const { activeThreadKeys } = useActiveStreams();
   const isActive = threadKey ? activeThreadKeys.includes(threadKey) : false;
 
-  if (!isActive) return children;
+  if (!isActive) {
+    return children;
+  }
 
   return (
     <div className="relative rounded-xl ring-2 ring-success/40 [&_[data-slot=card]]:border-transparent [&_[data-slot=card]]:bg-success/5">
