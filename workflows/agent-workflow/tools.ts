@@ -1,4 +1,5 @@
 import type { ToolSet } from "ai";
+import { generateText, stepCountIs } from "ai";
 import { z } from "zod";
 import { anthropic } from "@/lib/ai";
 import { channels } from "@/lib/channels";
@@ -87,6 +88,33 @@ async function executeBashBatch({ commands }: { commands: string[] }) {
     })),
   };
 }
+
+async function executeWebSearch({ query }: { query: string }) {
+  "use step";
+  await updateStatus("searching the web...");
+
+  const modelId = config.model.replace(/^anthropic\//, "");
+  const result = await generateText({
+    model: anthropic(modelId),
+    tools: {
+      webSearch: anthropic.tools.webSearch_20250305({
+        ...(config.searchDomains.length > 0
+          ? { allowedDomains: config.searchDomains }
+          : {}),
+      }),
+    },
+    prompt: query,
+    stopWhen: stepCountIs(5),
+  });
+
+  return result.text;
+}
+
+const webSearchInputSchema = z.object({
+  query: z
+    .string()
+    .describe("The search query to look up on the web"),
+});
 
 const bashInputSchema = z.object({
   command: z.string().describe("The bash command to execute"),
@@ -381,11 +409,13 @@ Example: ["ls -la", "cat README.md", "grep -r 'auth' docs/"]`,
     execute: executeBashBatch,
     ...deferLoading,
   },
-  web_search: anthropic.tools.webSearch_20250305({
-    ...(config.searchDomains.length > 0
-      ? { allowedDomains: config.searchDomains }
-      : {}),
-  }),
+  web_search: {
+    description:
+      "Search the web for current information. Use when the user asks about something that may require up-to-date information or when knowledge base search doesn't have the answer.",
+    inputSchema: webSearchInputSchema,
+    execute: executeWebSearch,
+    ...deferLoading,
+  },
   flag_to_lead: {
     description: `Flag a tricky issue to a community lead for human review. Use this when you encounter a question or situation you cannot confidently handle — for example, sensitive topics, complex technical issues requiring expert knowledge, or potential policy violations.
 
