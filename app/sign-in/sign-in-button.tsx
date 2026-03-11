@@ -18,7 +18,9 @@ const oauthErrorMessages: Record<string, string> = {
 };
 
 function getInitialError(oauthError: string | null): string | null {
-  if (!oauthError) return null;
+  if (!oauthError) {
+    return null;
+  }
   return oauthErrorMessages[oauthError] ?? "Sign-in failed. Please try again.";
 }
 
@@ -27,7 +29,7 @@ export function SignInButton() {
   const isDev = process.env.NODE_ENV !== "production";
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(() =>
-    getInitialError(searchParams.get("error")),
+    getInitialError(searchParams.get("error"))
   );
 
   async function handleDevSignIn() {
@@ -72,7 +74,8 @@ export function SignInButton() {
       });
       if (result.error) {
         setError(
-          result.error.message || "Failed to sign in with Slack. Check that Slack is configured correctly.",
+          result.error.message ||
+            "Failed to sign in with Slack. Check that Slack is configured correctly."
         );
       }
     } catch {

@@ -4,8 +4,8 @@ import {
   ExternalLink,
   MessageSquare,
   TrendingUp,
-  View,
 } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
 import { Suspense, ViewTransition } from "react";
 import { AnimatedNumber } from "@/components/animated-number";
@@ -23,7 +23,6 @@ import {
 import { config } from "@/lib/config";
 import { AnalyticsChart } from "./_components/analytics-chart";
 import { DashboardLive } from "./_components/dashboard-live";
-import { Route } from "next";
 
 const PROTOCOL_RE = /^https?:\/\//;
 

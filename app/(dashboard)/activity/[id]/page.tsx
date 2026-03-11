@@ -14,8 +14,8 @@ import Markdown from "react-markdown";
 import { BackButton } from "@/components/back-button";
 import { FormattedTime } from "@/components/formatted-time";
 import { Header } from "@/components/header";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getActionById, getConversationDetail } from "@/data/queries/activity";
@@ -185,7 +185,7 @@ async function ConversationMessages({
                   <div className="mt-2 flex flex-wrap gap-1">
                     {deduplicateTools(msg.toolCalls).map((tc) => (
                       <Badge
-                        className="gap-1 text-xs font-normal"
+                        className="gap-1 font-normal text-xs"
                         key={tc.toolName}
                         variant="secondary"
                       >

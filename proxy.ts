@@ -5,10 +5,9 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname === "/api/auth/error") {
-    const error =
-      request.nextUrl.searchParams.get("error") || "unknown_error";
+    const error = request.nextUrl.searchParams.get("error") || "unknown_error";
     return NextResponse.redirect(
-      new URL(`/sign-in?error=${encodeURIComponent(error)}`, request.url),
+      new URL(`/sign-in?error=${encodeURIComponent(error)}`, request.url)
     );
   }
 

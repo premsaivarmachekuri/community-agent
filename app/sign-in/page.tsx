@@ -10,6 +10,8 @@ import {
 import { config } from "@/lib/config";
 import { SignInButton } from "./sign-in-button";
 
+const PROTOCOL_RE = /^https?:\/\//;
+
 export default function SignInPage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
@@ -21,12 +23,12 @@ export default function SignInPage() {
           </CardDescription>
           {config.slackWorkspaceUrl && (
             <a
-              className="inline-flex items-center justify-center gap-1 text-sm text-muted-foreground hover:underline"
+              className="inline-flex items-center justify-center gap-1 text-muted-foreground text-sm hover:underline"
               href={config.slackWorkspaceUrl}
               rel="noopener noreferrer"
               target="_blank"
             >
-              {config.slackWorkspaceUrl.replace(/^https?:\/\//, "")}
+              {config.slackWorkspaceUrl.replace(PROTOCOL_RE, "")}
               <ExternalLink className="h-3 w-3" />
             </a>
           )}

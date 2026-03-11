@@ -12,6 +12,8 @@ const deferLoading = {
   providerOptions: { anthropic: { deferLoading: true } },
 };
 
+const ANTHROPIC_PREFIX_RE = /^anthropic\//;
+
 const savoir = config.savoirApiUrl
   ? createSavoirClient(config.savoirApiUrl, config.savoirApiKey || undefined)
   : null;
@@ -93,7 +95,7 @@ async function executeWebSearch({ query }: { query: string }) {
   "use step";
   await updateStatus("searching the web...");
 
-  const modelId = config.model.replace(/^anthropic\//, "");
+  const modelId = config.model.replace(ANTHROPIC_PREFIX_RE, "");
   const result = await generateText({
     model: anthropic(modelId),
     tools: {
@@ -109,12 +111,6 @@ async function executeWebSearch({ query }: { query: string }) {
 
   return result.text;
 }
-
-const webSearchInputSchema = z.object({
-  query: z
-    .string()
-    .describe("The search query to look up on the web"),
-});
 
 const bashInputSchema = z.object({
   command: z.string().describe("The bash command to execute"),

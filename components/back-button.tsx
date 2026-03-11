@@ -1,9 +1,9 @@
 "use client";
 
 import { ArrowLeft } from "lucide-react";
+import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Route } from "next";
 
 export function BackButton({
   fallbackHref,
