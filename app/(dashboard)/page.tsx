@@ -4,6 +4,7 @@ import {
   ExternalLink,
   MessageSquare,
   TrendingUp,
+  View,
 } from "lucide-react";
 import Link from "next/link";
 import { Suspense, ViewTransition } from "react";
@@ -231,24 +232,25 @@ async function RecentActivityCard() {
                   ? `/activity/${action.id}`
                   : `/activity?type=${action.type}`;
               return (
-                <Link
-                  className="-mx-2 flex items-start gap-2.5 rounded-md px-2 py-1.5 transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  href={href as Route}
-                  key={action.id}
-                >
-                  <div
-                    className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${cfg.bgColor}`}
+                <ViewTransition key={action.id}>
+                  <Link
+                    className="-mx-2 flex items-start gap-2.5 rounded-md px-2 py-1.5 transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    href={href as Route}
                   >
-                    <Icon className={`h-2.5 w-2.5 ${cfg.iconColor}`} />
-                  </div>
-                  <div className="min-w-0 flex-1 text-sm">
-                    <p className="text-foreground">{action.description}</p>
-                    <p className="text-muted-foreground text-xs">
-                      {action.channel} &middot;{" "}
-                      <FormattedTime timestamp={action.timestamp} />
-                    </p>
-                  </div>
-                </Link>
+                    <div
+                      className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${cfg.bgColor}`}
+                    >
+                      <Icon className={`h-2.5 w-2.5 ${cfg.iconColor}`} />
+                    </div>
+                    <div className="min-w-0 flex-1 text-sm">
+                      <p className="text-foreground">{action.description}</p>
+                      <p className="text-muted-foreground text-xs">
+                        {action.channel} &middot;{" "}
+                        <FormattedTime timestamp={action.timestamp} />
+                      </p>
+                    </div>
+                  </Link>
+                </ViewTransition>
               );
             })}
           </div>
