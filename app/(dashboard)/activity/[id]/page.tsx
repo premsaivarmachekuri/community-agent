@@ -1,12 +1,11 @@
 import {
+  BookOpen,
   Bot,
   ExternalLink,
   Globe,
   Lock,
   MessageSquare,
-  Terminal,
   User,
-  Wrench,
 } from "lucide-react";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
@@ -184,14 +183,19 @@ async function ConversationMessages({
                 )}
                 {msg.toolCalls && msg.toolCalls.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1">
-                    {msg.toolCalls.map((tc, i) => (
+                    {deduplicateTools(msg.toolCalls).map((tc) => (
                       <Badge
                         className="gap-1 text-xs font-normal"
-                        key={`${tc.toolName}-${i}`}
+                        key={tc.toolName}
                         variant="secondary"
                       >
                         <ToolIcon toolName={tc.toolName} />
                         {formatToolName(tc.toolName)}
+                        {tc.count > 1 && (
+                          <span className="text-muted-foreground">
+                            ×{tc.count}
+                          </span>
+                        )}
                       </Badge>
                     ))}
                   </div>
@@ -211,12 +215,25 @@ async function ConversationMessages({
   );
 }
 
+function deduplicateTools(
+  toolCalls: { toolName: string }[]
+): { toolName: string; count: number }[] {
+  const counts = new Map<string, { toolName: string; count: number }>();
+  for (const tc of toolCalls) {
+    const label = formatToolName(tc.toolName);
+    const existing = counts.get(label);
+    if (existing) {
+      existing.count += 1;
+    } else {
+      counts.set(label, { toolName: tc.toolName, count: 1 });
+    }
+  }
+  return Array.from(counts.values());
+}
+
 const TOOL_LABELS: Record<string, string> = {
   bash: "Knowledge Base",
   bash_batch: "Knowledge Base",
-  flag_to_lead: "Flag to Lead",
-  suggest_channel: "Channel Routing",
-  unanswered: "Unanswered Scan",
   web_search: "Web Search",
 };
 
@@ -231,9 +248,9 @@ function ToolIcon({ toolName }: { toolName: string }) {
       return <Globe className={className} />;
     case "bash":
     case "bash_batch":
-      return <Terminal className={className} />;
+      return <BookOpen className={className} />;
     default:
-      return <Wrench className={className} />;
+      return <Bot className={className} />;
   }
 }
 
