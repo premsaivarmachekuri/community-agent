@@ -97,7 +97,7 @@ Three layers work together:
 
 ## Tools
 
-Tools (`suggest_channel`, `unanswered`, `bash`, `bash_batch`, `web_search`, `flag_to_lead`) run as durable steps inside the workflow. Each tool updates the Slack typing indicator with a tool-specific status (e.g. "searching the web...", "reading docs...") at the start of execution. `web_search` wraps Claude's native search tool via a `generateText` sub-call. Less-used tools use Claude's `deferLoading` so only relevant tools are loaded into context. Welcome messages for new members are handled directly in the route—no workflow needed.
+Tools (`suggest_channel`, `unanswered`, `bash`, `bash_batch`, `web_search`, `flag_to_lead`) run as durable steps inside the workflow. Each tool updates the Slack typing indicator with a tool-specific status (e.g. "searching the web...", "reading docs...") at the start of execution. `web_search` uses OpenAI's native `webSearch` tool via a separate `generateText` call (configurable model via `SEARCH_MODEL`, default `gpt-4o-mini`). This runs through the AI Gateway alongside the main agent model. Less-used tools use Anthropic's `deferLoading` so only relevant tools are loaded into context. Welcome messages for new members are handled directly in the route—no workflow needed.
 
 ## Admin panel
 
