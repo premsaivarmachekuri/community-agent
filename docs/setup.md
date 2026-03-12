@@ -77,6 +77,7 @@ Add these in your Vercel project settings (or `.env.local` for local dev):
 | `REDIS_URL`                | For Slack | Redis for conversation state (`redis://...`)                                                                                                        |
 | `AI_GATEWAY_API_KEY`       | For AI    | [AI Gateway](https://vercel.com/docs/ai-gateway) API key (recommended—auto-authenticated on Vercel via OIDC)                                       |
 | `ANTHROPIC_API_KEY`        | For AI    | Direct Anthropic API key—fallback if not using AI Gateway                                                                                          |
+| `OPENAI_API_KEY`           | For search| OpenAI API key for web search (uses OpenAI's Responses API which requires a direct key)                                                            |
 | `COMMUNITY_NAME`           | No        | Name shown in bot responses (default: "Your Community")                                                                                            |
 | `AI_MODEL`                 | No        | AI model (default: `anthropic/claude-sonnet-4-20250514`). Uses [AI Gateway](https://vercel.com/docs/ai-gateway) for routing                        |
 | `UPSTASH_REDIS_REST_URL`   | No        | Upstash Redis REST URL (or use `KV_REST_API_URL` from Vercel Marketplace)                                                                          |
