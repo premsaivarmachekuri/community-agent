@@ -38,3 +38,4 @@ jobs:
           BETTER_AUTH_SECRET: ci-placeholder
           SLACK_SIGNING_SECRET: ci-placeholder
           SLACK_BOT_TOKEN: xoxb-ci-placeholder
+          REDIS_URL: redis://ci-placeholder:6379
