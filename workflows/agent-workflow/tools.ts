@@ -10,6 +10,8 @@ const deferLoading = {
   providerOptions: { anthropic: { deferLoading: true } },
 };
 
+const ANTHROPIC_PREFIX_RE = /^anthropic\//;
+
 const savoir = config.savoirApiUrl
   ? createSavoirClient(config.savoirApiUrl, config.savoirApiKey || undefined)
   : null;
@@ -85,6 +87,30 @@ async function executeBashBatch({ commands }: { commands: string[] }) {
       exitCode: r.exitCode,
     })),
   };
+}
+
+async function executeWebSearch({ query }: { query: string }) {
+  "use step";
+  await updateStatus("searching the web...");
+
+  const { generateText, stepCountIs } = await import("ai");
+  const { anthropic } = await import("@/lib/ai");
+
+  const modelId = config.model.replace(ANTHROPIC_PREFIX_RE, "");
+  const result = await generateText({
+    model: anthropic(modelId),
+    tools: {
+      webSearch: anthropic.tools.webSearch_20250305({
+        ...(config.searchDomains.length > 0
+          ? { allowedDomains: config.searchDomains }
+          : {}),
+      }),
+    },
+    prompt: query,
+    stopWhen: stepCountIs(5),
+  });
+
+  return result.text;
 }
 
 const bashInputSchema = z.object({
@@ -379,6 +405,13 @@ Example: ["ls -la", "cat README.md", "grep -r 'auth' docs/"]`,
     inputSchema: bashBatchInputSchema,
     execute: executeBashBatch,
     ...deferLoading,
+  },
+  web_search: {
+    description: `Search the web for current information. Use when someone asks a question that requires up-to-date knowledge, documentation lookups, or facts you're not certain about.${config.searchDomains.length > 0 ? ` Searches are scoped to: ${config.searchDomains.join(", ")}` : ""}`,
+    inputSchema: z.object({
+      query: z.string().describe("The search query"),
+    }),
+    execute: executeWebSearch,
   },
   flag_to_lead: {
     description: `Flag a tricky issue to a community lead for human review. Use this when you encounter a question or situation you cannot confidently handle — for example, sensitive topics, complex technical issues requiring expert knowledge, or potential policy violations.

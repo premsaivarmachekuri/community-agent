@@ -56,18 +56,10 @@ export async function workflowAgent(input: AgentInput): Promise<AgentResult> {
 
     setSlackContext(input.slack);
 
-    const { anthropic } = await import("@/lib/ai");
     const agent = new DurableAgent({
       model: config.model,
       system: buildInstructions() + systemSuffix,
-      tools: {
-        ...durableTools,
-        web_search: anthropic.tools.webSearch_20250305({
-          ...(config.searchDomains.length > 0
-            ? { allowedDomains: config.searchDomains }
-            : {}),
-        }),
-      },
+      tools: durableTools,
     });
 
     const messages = [
