@@ -97,7 +97,7 @@ Three layers work together:
 
 ## Tools
 
-Tools (`suggest_channel`, `unanswered`, `bash`, `bash_batch`, `web_search`, `flag_to_lead`) run as durable steps inside the workflow. Each tool updates the Slack typing indicator with a tool-specific status (e.g. "searching the web...", "reading docs...") at the start of execution. `web_search` uses Anthropic's native web search tool (`webSearch_20250305`) via a `generateText` sub-call, routed through the AI Gateway. The AI SDK and Anthropic provider are dynamically imported inside the step function to avoid workflow bundling issues. Less-used tools use Anthropic's `deferLoading` so only relevant tools are loaded into context. Welcome messages for new members are handled directly in the route—no workflow needed.
+Tools (`suggest_channel`, `unanswered`, `bash`, `bash_batch`, `web_search`, `flag_to_lead`) run as durable steps inside the workflow. Each tool updates the Slack typing indicator with a tool-specific status (e.g. "searching the web...", "reading docs...") at the start of execution. `web_search` uses Anthropic's native web search tool (`webSearch_20250305`) via a `generateText` sub-call routed through [AI Gateway](https://vercel.com/docs/ai-gateway). Less-used tools use Anthropic's `deferLoading` so only relevant tools are loaded into context. Welcome messages for new members are handled directly in the route—no workflow needed.
 
 ## Admin panel
 
@@ -113,4 +113,4 @@ Server-rendered dashboard with live streaming, activity feed, conversation histo
 | `lib/auth.ts`                       | Better Auth config—Slack OAuth for admin panel                                                    |
 | `workflows/agent-workflow/tools.ts` | Agent tools (`suggest_channel`, `unanswered`, `bash`, `bash_batch`, `web_search`, `flag_to_lead`) |
 
-> **Workflow constraint:** Files using `'use step'` or `'use workflow'` must live inside the `workflows/` directory for the bundler to process them. Node.js-only packages (like `@slack/web-api`) must be dynamically imported inside step functions—they can't be used at the workflow top level.
+> **Workflow constraint:** Files using `'use step'` or `'use workflow'` must live inside the `workflows/` directory for the bundler to process them. `ai` and `@ai-sdk/anthropic` must be dynamically imported inside step functions—static top-level imports break the workflow runtime.

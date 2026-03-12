@@ -75,8 +75,7 @@ Add these in your Vercel project settings (or `.env.local` for local dev):
 | `SLACK_BOT_TOKEN`          | For Slack | Bot token from your Slack app (`xoxb-...`)                                                                                                         |
 | `SLACK_SIGNING_SECRET`     | For Slack | Signing secret from Slack app settings                                                                                                             |
 | `REDIS_URL`                | For Slack | Redis for conversation state (`redis://...`)                                                                                                        |
-| `AI_GATEWAY_API_KEY`       | For AI    | [AI Gateway](https://vercel.com/docs/ai-gateway) API key (recommended—auto-authenticated on Vercel via OIDC)                                       |
-| `ANTHROPIC_API_KEY`        | For AI    | Direct Anthropic API key—fallback if not using AI Gateway                                                                                          |
+| `ANTHROPIC_API_KEY`        | Local dev | Direct Anthropic API key for local development. On Vercel, [AI Gateway](https://vercel.com/docs/ai-gateway) auto-authenticates via OIDC            |
 | `COMMUNITY_NAME`           | No        | Name shown in bot responses (default: "Your Community")                                                                                            |
 | `AI_MODEL`                 | No        | AI model (default: `anthropic/claude-sonnet-4-20250514`). Uses [AI Gateway](https://vercel.com/docs/ai-gateway) for routing                        |
 | `UPSTASH_REDIS_REST_URL`   | No        | Upstash Redis REST URL (or use `KV_REST_API_URL` from Vercel Marketplace)                                                                          |
