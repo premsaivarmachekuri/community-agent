@@ -11,9 +11,6 @@ importers:
       '@ai-sdk/anthropic':
         specifier: ^3.0.58
         version: 3.0.58(zod@3.25.76)
-      '@ai-sdk/openai':
-        specifier: ^3.0.41
-        version: 3.0.41(zod@3.25.76)
       '@chat-adapter/slack':
         specifier: ^4.17.0
         version: 4.17.0
@@ -6159,12 +6156,6 @@ snapshots:
       '@ai-sdk/provider-utils': 4.0.5(zod@4.3.6)
       zod: 4.3.6
     optional: true
-
-  '@ai-sdk/openai@3.0.41(zod@3.25.76)':
-    dependencies:
-      '@ai-sdk/provider': 3.0.8
-      '@ai-sdk/provider-utils': 4.0.19(zod@3.25.76)
-      zod: 3.25.76
 
   '@ai-sdk/openai@3.0.41(zod@4.3.6)':
     dependencies:

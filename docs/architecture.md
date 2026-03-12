@@ -97,7 +97,7 @@ Three layers work together:
 
 ## Tools
 
-Tools (`suggest_channel`, `unanswered`, `bash`, `bash_batch`, `web_search`, `flag_to_lead`) run as durable steps inside the workflow. Each tool updates the Slack typing indicator with a tool-specific status (e.g. "searching the web...", "reading docs...") at the start of execution. `web_search` uses OpenAI's native web search tool (`gpt-4o-mini`) via a `generateText` sub-call, routed through the AI Gateway. The AI SDK and OpenAI provider are dynamically imported inside the step function to avoid workflow bundling issues. Less-used tools use Anthropic's `deferLoading` so only relevant tools are loaded into context. Welcome messages for new members are handled directly in the route—no workflow needed.
+Tools (`suggest_channel`, `unanswered`, `bash`, `bash_batch`, `web_search`, `flag_to_lead`) run as durable steps inside the workflow. Each tool updates the Slack typing indicator with a tool-specific status (e.g. "searching the web...", "reading docs...") at the start of execution. `web_search` uses Anthropic's native web search tool (`webSearch_20250305`) via a `generateText` sub-call, routed through the AI Gateway. The AI SDK and Anthropic provider are dynamically imported inside the step function to avoid workflow bundling issues. Less-used tools use Anthropic's `deferLoading` so only relevant tools are loaded into context. Welcome messages for new members are handled directly in the route—no workflow needed.
 
 ## Admin panel
 

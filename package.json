@@ -33,7 +33,6 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.58",
-    "@ai-sdk/openai": "^3.0.41",
     "@chat-adapter/slack": "^4.17.0",
     "@chat-adapter/state-redis": "^4.17.0",
     "@libsql/client": "^0.17.0",

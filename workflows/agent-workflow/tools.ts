@@ -6,6 +6,8 @@ import { createSavoirClient } from "@/lib/savoir";
 import { getSlackClient } from "@/lib/slack";
 import { logAction } from "@/lib/store";
 
+const ANTHROPIC_PREFIX_RE = /^anthropic\//;
+
 const deferLoading = {
   providerOptions: { anthropic: { deferLoading: true } },
 };
@@ -92,19 +94,19 @@ async function executeWebSearch({ query }: { query: string }) {
   await updateStatus("searching the web...");
 
   const { generateText, stepCountIs } = await import("ai");
-  const { openai } = await import("@/lib/ai");
+  const { anthropic } = await import("@/lib/ai");
 
-  const searchPrompt =
-    config.searchDomains.length > 0
-      ? `Search only these domains: ${config.searchDomains.join(", ")}. Query: ${query}`
-      : query;
-
+  const modelId = config.model.replace(ANTHROPIC_PREFIX_RE, "");
   const result = await generateText({
-    model: openai("gpt-4o-mini"),
+    model: anthropic(modelId),
     tools: {
-      webSearch: openai.tools.webSearch(),
+      webSearch: anthropic.tools.webSearch_20250305({
+        ...(config.searchDomains.length > 0
+          ? { allowedDomains: config.searchDomains }
+          : {}),
+      }),
     },
-    prompt: searchPrompt,
+    prompt: query,
     stopWhen: stepCountIs(5),
   });
 
