@@ -8,3 +8,5 @@ export const anthropic = createAnthropic({
     apiKey: process.env.AI_GATEWAY_API_KEY,
   }),
 });
+
+export const anthropicDirect = createAnthropic();

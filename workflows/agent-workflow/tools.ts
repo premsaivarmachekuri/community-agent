@@ -1,7 +1,7 @@
 import type { ToolSet } from "ai";
 import { generateText, stepCountIs } from "ai";
 import { z } from "zod";
-import { anthropic } from "@/lib/ai";
+import { anthropicDirect } from "@/lib/ai";
 import { channels } from "@/lib/channels";
 import { config } from "@/lib/config";
 import { createSavoirClient } from "@/lib/savoir";
@@ -97,9 +97,9 @@ async function executeWebSearch({ query }: { query: string }) {
 
   const modelId = config.model.replace(ANTHROPIC_PREFIX_RE, "");
   const result = await generateText({
-    model: anthropic(modelId),
+    model: anthropicDirect(modelId),
     tools: {
-      webSearch: anthropic.tools.webSearch_20250305({
+      webSearch: anthropicDirect.tools.webSearch_20250305({
         ...(config.searchDomains.length > 0
           ? { allowedDomains: config.searchDomains }
           : {}),
