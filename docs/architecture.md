@@ -2,6 +2,8 @@
 
 The app has two halves: a **Slack bot** and an **admin panel**, both in a single Next.js deployment.
 
+A visual overview is available in [architecture-diagram.excalidraw](architecture-diagram.excalidraw) (open with Excalidraw extension or [excalidraw.com](https://excalidraw.com)).
+
 ## Slack bot flow
 
 ```
@@ -41,8 +43,8 @@ Slack message → Chat SDK (receive & route) → Vercel Workflow (durable) → A
          │       Vercel Workflow (durable)                       │
          │       workflows/agent-workflow/index.ts               │
          │                                                       │
-         │  1. Resolve channel name                              │
-         │  2. Start live stream (write to Redis)                │
+         │  1. Get thread permalink (non-DM only)               │
+         │  2. Resolve channel name + start live stream         │
          │  3. Save user message (follow-ups only)               │
          │  4. Run DurableAgent (AI SDK + Claude)                │
          │           ┌────────────────────────────────┐          │
