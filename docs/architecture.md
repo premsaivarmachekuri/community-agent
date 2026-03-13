@@ -26,7 +26,7 @@ Slack message → Chat SDK (receive & route) → Vercel Workflow (durable) → A
                  ▼                       ▼                   ▼
          ┌──────────────┐     ┌──────────────┐    ┌────────────────┐
          │  Chat SDK     │     │  Chat SDK     │    │  Welcome DM    │
-         │  onNewMention │     │  onSubscribed │    │  lib/welcome.ts│
+         │  onNewMention │     │  onSubscribed-│    │  lib/welcome.ts│
          │  + subscribe  │     │  Message      │    │  (no workflow) │
          └───────┬──────┘     └───────┬──────┘    └────────────────┘
                  │                    │
