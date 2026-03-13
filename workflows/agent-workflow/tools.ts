@@ -14,22 +14,35 @@ const savoir = config.savoirApiUrl
   ? createSavoirClient(config.savoirApiUrl, config.savoirApiKey || undefined)
   : null;
 
-let currentSlack: { channelId: string; threadTs: string } | null = null;
+const SLACK_CONTEXT_KEY = "__community_agent_slack_context";
+
+function getSlackContext(): {
+  channelId: string;
+  threadTs: string;
+} | null {
+  return (
+    (globalThis as Record<string, unknown>)[SLACK_CONTEXT_KEY] as {
+      channelId: string;
+      threadTs: string;
+    } | null
+  ) ?? null;
+}
 
 export function setSlackContext(
   slack: { channelId: string; threadTs: string } | undefined
 ) {
-  currentSlack = slack ?? null;
+  (globalThis as Record<string, unknown>)[SLACK_CONTEXT_KEY] = slack ?? null;
 }
 
-async function updateStatus(status: string) {
-  if (!currentSlack) {
+export async function updateStatus(status: string) {
+  const ctx = getSlackContext();
+  if (!ctx) {
     return;
   }
   try {
     await getSlackClient().apiCall("assistant.threads.setStatus", {
-      channel_id: currentSlack.channelId,
-      thread_ts: currentSlack.threadTs,
+      channel_id: ctx.channelId,
+      thread_ts: ctx.threadTs,
       status,
     });
   } catch {
