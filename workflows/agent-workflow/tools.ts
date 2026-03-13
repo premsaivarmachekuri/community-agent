@@ -34,7 +34,7 @@ export function setSlackContext(
   (globalThis as Record<string, unknown>)[SLACK_CONTEXT_KEY] = slack ?? null;
 }
 
-export async function updateStatus(status: string) {
+async function updateStatus(status: string) {
   const ctx = getSlackContext();
   if (!ctx) {
     return;
