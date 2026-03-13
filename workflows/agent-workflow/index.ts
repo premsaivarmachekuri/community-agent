@@ -55,11 +55,11 @@ export async function workflowAgent(input: AgentInput): Promise<AgentResult> {
       ? `\n\nCurrent thread permalink (pass to flag_to_lead if needed): ${threadPermalink}`
       : "";
 
-    if (streamThreadId && input.slack) {
-      await stepSaveStatusContext(streamThreadId, {
-        channelId: input.slack.channelId,
-        threadTs: input.slack.threadTs,
-      });
+    if (input.slack) {
+      await stepSaveStatusContext(
+        input.slack.channelId,
+        input.slack.threadTs
+      );
     }
 
     const agent = new DurableAgent({
@@ -230,7 +230,7 @@ export async function workflowAgent(input: AgentInput): Promise<AgentResult> {
   }
 
   if (streamThreadId) {
-    await stepEndStream(streamThreadId);
+    await stepEndStream(streamThreadId, input.slack);
   }
 
   logger.info("Workflow completed", {

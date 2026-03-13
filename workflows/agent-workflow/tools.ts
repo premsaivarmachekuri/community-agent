@@ -4,7 +4,7 @@ import { channels } from "@/lib/channels";
 import { config } from "@/lib/config";
 import { createSavoirClient } from "@/lib/savoir";
 import { getSlackClient } from "@/lib/slack";
-import { getStatusContext, logAction } from "@/lib/store";
+import { getActiveStatusContext, logAction } from "@/lib/store";
 
 const deferLoading = {
   providerOptions: { anthropic: { deferLoading: true } },
@@ -14,25 +14,18 @@ const savoir = config.savoirApiUrl
   ? createSavoirClient(config.savoirApiUrl, config.savoirApiKey || undefined)
   : null;
 
-let statusThreadId: string | null = null;
-
-export function setStatusThreadId(threadId: string | undefined) {
-  statusThreadId = threadId ?? null;
-}
-
 async function updateStatus(status: string) {
-  if (!statusThreadId) {
-    return;
-  }
-  const ctx = await getStatusContext(statusThreadId);
-  if (!ctx) {
-    return;
-  }
   try {
+    const ctx = await getActiveStatusContext();
+    if (!ctx) {
+      return;
+    }
     const { chat } = await import("@/lib/chat");
     const slackAdapter = chat.getAdapter("slack");
-    const threadId = `slack:${ctx.channelId}:${ctx.threadTs}`;
-    await slackAdapter.startTyping(threadId, status);
+    await slackAdapter.startTyping(
+      `slack:${ctx.channelId}:${ctx.threadTs}`,
+      status
+    );
   } catch {
     /* noop */
   }

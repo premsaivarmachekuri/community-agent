@@ -433,9 +433,11 @@ export async function writeStreamEntry(entry: StreamEntry): Promise<void> {
   }
 }
 
+const ACTIVE_STATUS_KEY = `${STATUS_CTX_PREFIX}active`;
+
 export async function saveStatusContext(
-  threadId: string,
-  context: { channelId: string; threadTs: string }
+  channelId: string,
+  threadTs: string
 ): Promise<void> {
   const client = getRedis();
   if (!client) {
@@ -443,8 +445,8 @@ export async function saveStatusContext(
   }
   try {
     await client.set(
-      `${STATUS_CTX_PREFIX}${threadId}`,
-      JSON.stringify(context),
+      ACTIVE_STATUS_KEY,
+      JSON.stringify({ channelId, threadTs }),
       { ex: TTL_STATUS_CTX }
     );
   } catch (error) {
@@ -454,15 +456,16 @@ export async function saveStatusContext(
   }
 }
 
-export async function getStatusContext(
-  threadId: string
-): Promise<{ channelId: string; threadTs: string } | null> {
+export async function getActiveStatusContext(): Promise<{
+  channelId: string;
+  threadTs: string;
+} | null> {
   const client = getRedis();
   if (!client) {
     return null;
   }
   try {
-    const raw = await client.get<string>(`${STATUS_CTX_PREFIX}${threadId}`);
+    const raw = await client.get<string>(ACTIVE_STATUS_KEY);
     if (!raw) {
       return null;
     }
@@ -472,13 +475,22 @@ export async function getStatusContext(
   }
 }
 
-export async function clearStatusContext(threadId: string): Promise<void> {
+export async function clearStatusContext(
+  channelId: string,
+  threadTs: string
+): Promise<void> {
   const client = getRedis();
   if (!client) {
     return;
   }
   try {
-    await client.del(`${STATUS_CTX_PREFIX}${threadId}`);
+    const current = await getActiveStatusContext();
+    if (
+      current?.channelId === channelId &&
+      current?.threadTs === threadTs
+    ) {
+      await client.del(ACTIVE_STATUS_KEY);
+    }
   } catch {
     /* noop */
   }

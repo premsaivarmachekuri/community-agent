@@ -9,7 +9,6 @@ import {
   saveStatusContext,
   writeStreamEntry,
 } from "@/lib/store";
-import { setStatusThreadId } from "./tools";
 import type {
   BotAction,
   ConversationMessage,
@@ -97,19 +96,23 @@ export async function stepStartStream(entry: StreamEntry): Promise<void> {
   await writeStreamEntry(entry);
 }
 
-export async function stepEndStream(threadId: string): Promise<void> {
-  "use step";
-
-  await clearStream(threadId);
-  await clearStatusContext(threadId);
-}
-
-export async function stepSaveStatusContext(
+export async function stepEndStream(
   threadId: string,
-  context: { channelId: string; threadTs: string }
+  slack?: { channelId: string; threadTs: string }
 ): Promise<void> {
   "use step";
 
-  await saveStatusContext(threadId, context);
-  setStatusThreadId(threadId);
+  await clearStream(threadId);
+  if (slack) {
+    await clearStatusContext(slack.channelId, slack.threadTs);
+  }
+}
+
+export async function stepSaveStatusContext(
+  channelId: string,
+  threadTs: string
+): Promise<void> {
+  "use step";
+
+  await saveStatusContext(channelId, threadTs);
 }
