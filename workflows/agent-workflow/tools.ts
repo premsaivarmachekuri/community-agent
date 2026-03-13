@@ -14,6 +14,17 @@ const savoir = config.savoirApiUrl
   ? createSavoirClient(config.savoirApiUrl, config.savoirApiKey || undefined)
   : null;
 
+/*
+ * Shows a tool-specific status in the Slack thread (e.g. "searching the web...").
+ * Uses Chat SDK's startTyping() — raw assistant.threads.setStatus calls don't work
+ * because Chat SDK manages the Assistants API lifecycle and overrides them.
+ *
+ * Reads Slack thread context from a global Redis key written at workflow start.
+ * Vercel Workflow runs step functions in isolated serverless contexts, so module-level
+ * state set in one step isn't available in the next. A single Redis key avoids that,
+ * with the trade-off that concurrent workflows can briefly show the wrong status text
+ * on a thread (cosmetic only — doesn't affect bot behavior).
+ */
 async function updateStatus(status: string) {
   try {
     const ctx = await getActiveStatusContext();

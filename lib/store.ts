@@ -433,6 +433,12 @@ export async function writeStreamEntry(entry: StreamEntry): Promise<void> {
   }
 }
 
+/*
+ * Single global key for the active Slack thread context. Each workflow writes here
+ * at start so tool steps can read it back (steps run in isolated serverless contexts
+ * and can't share module-level state). Trade-off: concurrent workflows overwrite each
+ * other's context, which can briefly show the wrong status text — cosmetic only.
+ */
 const ACTIVE_STATUS_KEY = `${STATUS_CTX_PREFIX}active`;
 
 export async function saveStatusContext(

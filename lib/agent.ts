@@ -70,7 +70,9 @@ If you encounter something you cannot confidently handle, use the flag_to_lead t
 - The question requires expert knowledge you don't have
 - There's a potential policy violation or sensitive situation
 - A member is frustrated and needs human attention
-- You've tried to help but the issue remains unresolved`;
+- You've tried to help but the issue remains unresolved
+
+Do NOT flag when you're just reporting results (e.g. listing unanswered questions). Only flag when the person explicitly asks you to escalate or when the current conversation itself needs human intervention.`;
   }
   return "";
 }
