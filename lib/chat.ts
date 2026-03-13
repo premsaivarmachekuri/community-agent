@@ -1,13 +1,13 @@
 import { createSlackAdapter } from "@chat-adapter/slack";
 import { createRedisState } from "@chat-adapter/state-redis";
-import { Chat, ConsoleLogger } from "chat";
+import { Chat } from "chat";
 import { start } from "workflow/api";
+import { createLogger } from "@/lib/logger";
 import { getSlackClient } from "@/lib/slack";
+import { handleMemberJoined } from "@/lib/welcome";
 import { workflowAgent } from "@/workflows/agent-workflow";
 
-const logger = new ConsoleLogger("info");
-
-const slackClient = getSlackClient();
+const logger = createLogger("chat");
 
 /** Thread IDs follow the format: "slack:CHANNEL_ID:THREAD_TS" */
 function parseThreadId(
@@ -20,46 +20,11 @@ function parseThreadId(
   return null;
 }
 
-/** Excludes bot's own messages and strips the latest message (passed separately as the prompt). */
-async function fetchThreadHistory(
-  channelId: string,
-  threadTs: string
-): Promise<Array<{ role: "user" | "assistant"; content: string }>> {
-  try {
-    const result = await slackClient.conversations.replies({
-      channel: channelId,
-      ts: threadTs,
-      limit: 100, // Reasonable limit for context
-    });
-
-    if (!result.messages) {
-      return [];
-    }
-
-    const authResult = await slackClient.auth.test();
-    const botUserId = authResult.user_id;
-
-    const messages = result.messages.slice(0, -1);
-
-    return messages
-      .filter((msg) => msg.text && !("subtype" in msg))
-      .map((msg) => ({
-        role: (msg.user === botUserId ? "assistant" : "user") as
-          | "user"
-          | "assistant",
-        content: msg.text ?? "",
-      }));
-  } catch (error) {
-    logger.error("Failed to fetch thread history", { error: String(error) });
-    return [];
-  }
-}
-
 async function setThinkingStatus(threadId: string): Promise<void> {
   const threadInfo = parseThreadId(threadId);
   if (threadInfo) {
     try {
-      await slackClient.apiCall("assistant.threads.setStatus", {
+      await getSlackClient().apiCall("assistant.threads.setStatus", {
         channel_id: threadInfo.channelId,
         thread_ts: threadInfo.threadTs,
         status: "is thinking...",
@@ -72,19 +37,27 @@ async function setThinkingStatus(threadId: string): Promise<void> {
 
 export const chat = new Chat({
   userName: "agent",
-  adapters: {
-    slack: createSlackAdapter({
-      botToken: process.env.SLACK_BOT_TOKEN ?? "",
-      signingSecret: process.env.SLACK_SIGNING_SECRET ?? "",
-      logger: logger.child("slack"),
-    }),
-  },
-  state: createRedisState({ url: process.env.REDIS_URL ?? "", logger }),
-  logger,
+  adapters: { slack: createSlackAdapter() },
+  state: createRedisState(),
+  logger: "info",
 });
 
 async function handleMessage(
-  thread: { id: string; post: (text: string) => Promise<unknown> },
+  thread: {
+    id: string;
+    post: (text: string) => Promise<unknown>;
+    adapter: {
+      fetchMessages: (
+        threadId: string,
+        opts: { limit: number }
+      ) => Promise<{
+        messages: Array<{
+          text: string;
+          author: { isMe: boolean };
+        }>;
+      }>;
+    };
+  },
   message: { text?: string } | undefined
 ): Promise<void> {
   await setThinkingStatus(thread.id);
@@ -100,10 +73,21 @@ async function handleMessage(
     return;
   }
 
-  const history = await fetchThreadHistory(
-    threadInfo.channelId,
-    threadInfo.threadTs
-  );
+  let history: Array<{ role: "user" | "assistant"; content: string }> = [];
+  try {
+    const result = await thread.adapter.fetchMessages(thread.id, {
+      limit: 100,
+    });
+    history = result.messages
+      .slice(0, -1)
+      .filter((msg) => msg.text.trim())
+      .map((msg) => ({
+        role: msg.author.isMe ? ("assistant" as const) : ("user" as const),
+        content: msg.text,
+      }));
+  } catch (error) {
+    logger.error("Failed to fetch thread history", { error: String(error) });
+  }
 
   start(workflowAgent, [
     {
@@ -131,3 +115,9 @@ chat.onNewMention(async (thread, message) => {
 });
 
 chat.onSubscribedMessage(handleMessage);
+
+chat.onMemberJoinedChannel(async (event) => {
+  handleMemberJoined({ user: event.userId, channel: event.channelId }).catch(
+    (err) => logger.error("Welcome handler failed", { error: String(err) })
+  );
+});

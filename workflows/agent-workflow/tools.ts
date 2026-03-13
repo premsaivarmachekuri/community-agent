@@ -92,8 +92,7 @@ async function executeWebSearch({ query }: { query: string }) {
   await updateStatus("searching the web...");
 
   const { generateText, stepCountIs } = await import("ai");
-  const { createAnthropic } = await import("@ai-sdk/anthropic");
-  const anthropic = createAnthropic();
+  const { anthropic } = await import("@ai-sdk/anthropic");
 
   const result = await generateText({
     model: config.model,
