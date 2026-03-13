@@ -29,11 +29,10 @@ async function updateStatus(status: string) {
     return;
   }
   try {
-    await getSlackClient().apiCall("assistant.threads.setStatus", {
-      channel_id: ctx.channelId,
-      thread_ts: ctx.threadTs,
-      status,
-    });
+    const { chat } = await import("@/lib/chat");
+    const slackAdapter = chat.getAdapter("slack");
+    const threadId = `slack:${ctx.channelId}:${ctx.threadTs}`;
+    await slackAdapter.startTyping(threadId, status);
   } catch {
     /* noop */
   }

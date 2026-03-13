@@ -3,7 +3,6 @@ import { createRedisState } from "@chat-adapter/state-redis";
 import { Chat } from "chat";
 import { start } from "workflow/api";
 import { createLogger } from "@/lib/logger";
-import { getSlackClient } from "@/lib/slack";
 import { handleMemberJoined } from "@/lib/welcome";
 import { workflowAgent } from "@/workflows/agent-workflow";
 
@@ -21,17 +20,11 @@ function parseThreadId(
 }
 
 async function setThinkingStatus(threadId: string): Promise<void> {
-  const threadInfo = parseThreadId(threadId);
-  if (threadInfo) {
-    try {
-      await getSlackClient().apiCall("assistant.threads.setStatus", {
-        channel_id: threadInfo.channelId,
-        thread_ts: threadInfo.threadTs,
-        status: "is thinking...",
-      });
-    } catch (error) {
-      logger.error("Failed to set assistant status", { error: String(error) });
-    }
+  try {
+    const slackAdapter = chat.getAdapter("slack");
+    await slackAdapter.startTyping(threadId, "is thinking...");
+  } catch (error) {
+    logger.error("Failed to set assistant status", { error: String(error) });
   }
 }
 
