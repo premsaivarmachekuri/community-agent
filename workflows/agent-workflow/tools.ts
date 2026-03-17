@@ -96,14 +96,15 @@ async function executeWebSearch({ query }: { query: string }) {
   "use step";
   await updateStatus("searching the web...");
 
-  const { gateway, generateText, stepCountIs } = await import("ai");
+  const { generateText, stepCountIs } = await import("ai");
+  const { anthropic } = await import("@ai-sdk/anthropic");
 
   const result = await generateText({
     model: config.model,
     tools: {
-      perplexity_search: gateway.tools.perplexitySearch({
+      webSearch: anthropic.tools.webSearch_20250305({
         ...(config.searchDomains.length > 0
-          ? { searchDomainFilter: config.searchDomains }
+          ? { allowedDomains: config.searchDomains }
           : {}),
       }),
     },
