@@ -116,39 +116,3 @@ export async function stepSaveStatusContext(
 
   await saveStatusContext(channelId, threadTs);
 }
-
-export async function stepAddReaction(
-  channelId: string,
-  timestamp: string,
-  emoji: string
-): Promise<void> {
-  "use step";
-
-  try {
-    await getSlackClient().reactions.add({
-      channel: channelId,
-      timestamp,
-      name: emoji,
-    });
-  } catch {
-    /* noop — reaction may already exist or message may be gone */
-  }
-}
-
-export async function stepRemoveReaction(
-  channelId: string,
-  timestamp: string,
-  emoji: string
-): Promise<void> {
-  "use step";
-
-  try {
-    await getSlackClient().reactions.remove({
-      channel: channelId,
-      timestamp,
-      name: emoji,
-    });
-  } catch {
-    /* noop — reaction may not exist */
-  }
-}

@@ -3,7 +3,6 @@ import { createRedisState } from "@chat-adapter/state-redis";
 import { Chat } from "chat";
 import { start } from "workflow/api";
 import { createLogger } from "@/lib/logger";
-import { getSlackClient } from "@/lib/slack";
 import { handleMemberJoined } from "@/lib/welcome";
 import { workflowAgent } from "@/workflows/agent-workflow";
 
@@ -66,15 +65,6 @@ async function handleMessage(
   }
 
   await setThinkingStatus(thread.id);
-  try {
-    await getSlackClient().reactions.add({
-      channel: threadInfo.channelId,
-      timestamp: threadInfo.threadTs,
-      name: "eyes",
-    });
-  } catch {
-    /* noop — reaction may already exist */
-  }
 
   let history: Array<{ role: "user" | "assistant"; content: string }> = [];
   try {
