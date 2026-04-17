@@ -1,10 +1,10 @@
 "use client";
 
-import { Slack } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
+import { MessageCircle } from "lucide-react";
 
 const oauthErrorMessages: Record<string, string> = {
   access_denied:
@@ -29,7 +29,7 @@ export function SignInButton() {
   const isDev = process.env.NODE_ENV !== "production";
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(() =>
-    getInitialError(searchParams.get("error"))
+    getInitialError(searchParams.get("error")),
   );
 
   async function handleDevSignIn() {
@@ -75,7 +75,7 @@ export function SignInButton() {
       if (result.error) {
         setError(
           result.error.message ||
-            "Failed to sign in with Slack. Check that Slack is configured correctly."
+            "Failed to sign in with Slack. Check that Slack is configured correctly.",
         );
       }
     } catch {
@@ -91,7 +91,7 @@ export function SignInButton() {
         </p>
       )}
       <Button className="w-full" onClick={handleSlackSignIn}>
-        <Slack className="mr-2 h-4 w-4" />
+        <MessageCircle className="mr-2 h-4 w-4" />
         Sign in with Slack
       </Button>
       {isDev && (
