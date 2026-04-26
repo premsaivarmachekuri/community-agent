@@ -3,15 +3,12 @@ import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { config } from "@/lib/config";
 import "./globals.css";
 
-export function generateMetadata(): Metadata {
-  return {
-    title: `${config.communityName} — Admin`,
-    description: `Admin panel for the ${config.communityName} community agent`,
-  };
-}
+export const metadata: Metadata = {
+  title: "Sprint — Remote Job Readiness Agent",
+  description: "Transform your profile into a personalized remote job action plan in minutes.",
+};
 
 export default function RootLayout({
   children,
