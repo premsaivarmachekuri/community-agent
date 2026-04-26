@@ -1,5 +1,5 @@
 import { generateText } from "ai";
-import { anthropic } from "@ai-sdk/anthropic";
+import { google } from "@ai-sdk/google";
 import { buildSystemPrompt } from "@/lib/agent";
 import type { UserProfile, JobReadinessReport } from "@/lib/types";
 
@@ -21,7 +21,7 @@ Return ONLY valid JSON, no markdown or extra text.`;
 
   try {
     const { text } = await generateText({
-      model: anthropic("claude-opus-4-1"),
+      model: google("gemini-2.0-flash"),
       system: systemPrompt,
       prompt: userPrompt,
     });
