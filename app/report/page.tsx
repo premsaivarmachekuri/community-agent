@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { exportAsJSON, copyToClipboard } from '@/lib/export';
 import type { JobReadinessReport } from '@/lib/types';
 
 export default function ReportPage() {
@@ -24,13 +25,22 @@ export default function ReportPage() {
     const fetchReport = async () => {
       try {
         const response = await fetch(`/api/report?id=${workflowId}`);
+        
+        // If 202 Accepted (still processing), retry after 2 seconds
+        if (response.status === 202) {
+          setTimeout(() => {
+            fetchReport();
+          }, 2000);
+          return;
+        }
+        
         if (!response.ok) throw new Error('Failed to fetch report');
         const data = await response.json();
         setReport(data);
+        setLoading(false);
       } catch (err) {
-        console.error('Error fetching report:', err);
+        console.error('[v0] Error fetching report:', err);
         setError('Failed to load your report. Please try again.');
-      } finally {
         setLoading(false);
       }
     };
@@ -67,16 +77,47 @@ export default function ReportPage() {
       {/* Header */}
       <header className="border-b border-border py-6 px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-start mb-4">
             <div>
-              <h1 className="text-2xl font-bold">Sprint Report</h1>
+              <h1 className="text-3xl font-bold">Your Sprint Report</h1>
               <p className="text-muted-foreground mt-1">
-                {report.profile.name}&apos;s 7-day job readiness plan
+                {report.profile.name}&apos;s personalized 7-day job readiness plan
               </p>
             </div>
-            <a href="/" className="text-primary text-sm hover:underline">
-              New Sprint
-            </a>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => exportAsJSON(report)}
+              >
+                Download JSON
+              </Button>
+              <a href="/">
+                <Button variant="ghost" size="sm">
+                  New Sprint
+                </Button>
+              </a>
+            </div>
+          </div>
+          
+          {/* Profile Summary */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <p className="text-muted-foreground">Target Role</p>
+              <p className="font-semibold">{report.profile.targetRole}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Tech Stack</p>
+              <p className="font-semibold">{report.profile.techStack.length} skills</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Job Readiness</p>
+              <p className="font-semibold text-primary">{report.gapAudit.overallScore}/100</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Companies</p>
+              <p className="font-semibold">{report.targetCompanies.length}</p>
+            </div>
           </div>
         </div>
       </header>
@@ -178,6 +219,19 @@ function GapAuditTab({ report }: { report: JobReadinessReport }) {
 }
 
 function CompaniesTab({ report }: { report: JobReadinessReport }) {
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
+
+  const handleCopyEmail = (companyName: string, emailIdx: number) => {
+    const email = report.coldEmails[companyName];
+    if (!email) return;
+    
+    const emailText = `Subject: ${email.subject}\n\n${email.body}`;
+    copyToClipboard(emailText).then(() => {
+      setCopiedIdx(emailIdx);
+      setTimeout(() => setCopiedIdx(null), 2000);
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -188,7 +242,7 @@ function CompaniesTab({ report }: { report: JobReadinessReport }) {
       </div>
 
       {report.targetCompanies.map((company, idx) => (
-        <Card key={idx} className="p-6">
+        <Card key={idx} className="p-6 hover:shadow-md transition-shadow">
           <div className="mb-4">
             <h3 className="text-xl font-bold mb-1">{company.name}</h3>
             <p className="text-sm text-muted-foreground">{company.description}</p>
@@ -212,18 +266,24 @@ function CompaniesTab({ report }: { report: JobReadinessReport }) {
           </div>
 
           {report.coldEmails[company.name] && (
-            <Card className="p-4 bg-gray-50 dark:bg-gray-900/50">
-              <p className="text-xs font-semibold text-muted-foreground mb-2">Cold Email Draft</p>
-              <div className="space-y-2">
-                <p className="text-sm font-medium">
-                  Subject: {report.coldEmails[company.name].subject}
-                </p>
-                <p className="text-sm whitespace-pre-wrap">
-                  {report.coldEmails[company.name].body}
-                </p>
+            <Card className="p-4 bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800">
+              <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-3 uppercase tracking-wide">Cold Email Template</p>
+              <div className="space-y-3 mb-4">
+                <div>
+                  <p className="text-xs text-muted-foreground">Subject Line:</p>
+                  <p className="text-sm font-medium">{report.coldEmails[company.name].subject}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Email Body:</p>
+                  <p className="text-sm whitespace-pre-wrap">{report.coldEmails[company.name].body}</p>
+                </div>
               </div>
-              <Button size="sm" variant="outline" className="mt-3">
-                Copy Email
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleCopyEmail(company.name, idx)}
+              >
+                {copiedIdx === idx ? '✓ Copied!' : 'Copy Email'}
               </Button>
             </Card>
           )}
@@ -232,7 +292,7 @@ function CompaniesTab({ report }: { report: JobReadinessReport }) {
             href={company.website}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary text-sm hover:underline inline-block mt-4"
+            className="text-primary text-sm hover:underline inline-block mt-4 font-medium"
           >
             Visit Website →
           </a>
