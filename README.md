@@ -1,63 +1,50 @@
-# Community Agent Template
+# Sprint — Remote Job Readiness Agent
 
-Open source AI-powered Slack community management bot with a built-in Next.js admin panel. Uses Chat SDK, AI SDK, and Vercel Workflow.
+Transform your profile into a personalized remote job action plan in minutes. Upload your profile, answer a quick intake form, and get an AI-powered analysis with your 7-day execution roadmap.
 
-**Template.** Fork it, customize it, and deploy your own AI community manager with Vercel.
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel-labs%2Fcommunity-agent-template&env=COMMUNITY_NAME,BETTER_AUTH_SECRET,SLACK_CLIENT_ID,SLACK_CLIENT_SECRET,SLACK_TEAM_ID&envDescription=COMMUNITY_NAME%3A%20Name%20in%20bot%20responses%20%7C%20BETTER_AUTH_SECRET%3A%20Run%20%60openssl%20rand%20-base64%2032%60%20%7C%20SLACK_CLIENT_ID%20%26%20SLACK_CLIENT_SECRET%3A%20From%20Slack%20app%20Basic%20Information%20%7C%20SLACK_TEAM_ID%3A%20Workspace%20ID.%20Add%20AI%20keys%20after%20deploy.&envLink=https%3A%2F%2Fgithub.com%2Fvercel-labs%2Fcommunity-agent-template%23configure-environment-variables&project-name=community-agent&repository-name=community-agent&stores=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22turso%22%7D%5D)
+**For Job Seekers.** Get your profile audited, find target companies, and launch a personalized outreach campaign—all in one session.
 
 ## Features
 
-- **Community manager AI**—routes questions, welcomes members, surfaces unanswered threads, and flags issues to a lead. Powered by [AI SDK](https://ai-sdk.dev)
-- **Channel-aware routing**—configurable channel map so the bot knows your workspace layout and where to send people
-- **Durable workflows**—every LLM call and tool execution is a checkpoint with automatic retries via [Vercel Workflow](https://vercel.com/docs/workflow)
-- **Web search**—Anthropic's native web search tool, scoped to your community's domains via `SEARCH_DOMAINS`. Runs through [AI Gateway](https://vercel.com/docs/ai-gateway)
-- **Sandbox execution**—optional `bash`/`bash_batch` tools for running commands in a sandboxed environment via the [Knowledge Agent Template](https://github.com/vercel-labs/knowledge-agent-template) API
-- **Native Slack UI**—typing indicators, threaded replies, and DMs. Powered by [Chat SDK](https://chat-sdk.dev)
-- **Admin panel**—live dashboard with real-time streaming indicators, ViewTransition animations, activity feed, type filters, text search, inline conversation previews, activity trends, and settings page with channel overview
-- **Auth**—Slack OAuth via [Better Auth](https://www.better-auth.com) restricts the admin panel to workspace members
+- **Gap Audit**—AI analyzes your profile across 5 dimensions: project quality, async communication, tooling expertise, proof of work, and startup fit. Gets your overall job-readiness score.
+- **Company Research**—automatically researches and recommends 5-10 target startups matched to your tech stack and goals, with hiring signals and relevance explained.
+- **Cold Email Generator**—creates personalized email templates for each company, pulling details from company research to make each outreach feel genuine.
+- **7-Day Sprint Plan**—day-by-day action plan with concrete, completable tasks: GitHub optimization, deployment, open source contributions, documentation, and outreach.
+- **Live Agent Thinking**—stream agent reasoning in real-time as it analyzes your profile, researches companies, and builds your plan.
+- **Clean UI**—Y Combinator-inspired minimal design with simple forms, readable reports, and downloadable plans. Built with [shadcn/ui](https://ui.shadcn.com) and Tailwind.
+- **AI-Powered**—Claude 3 Opus reasoning engine via [AI SDK](https://ai-sdk.dev) and [Vercel AI Gateway](https://vercel.com/docs/ai-gateway).
 
 ## Quick start
 
-Try the admin panel without setting up Slack:
+1. Clone or fork this repo
+2. Install dependencies: `pnpm install`
+3. Run locally: `pnpm dev`
+4. Visit http://localhost:3000 to see the landing page
+5. Fill out the intake form to generate a mock report
 
-1. Import the repo on [vercel.com/new](https://vercel.com/new)
-2. Add a `COMMUNITY_NAME` env var (e.g. `DevHub`)
-3. Deploy—the dashboard works immediately with mock data
-
-For the full Slack bot setup, see [docs/setup.md](docs/setup.md).
+No environment variables are required to get started locally. To use the AI features, add `ANTHROPIC_API_KEY` to your `.env.local`.
 
 ## Customization
 
 | What to change  | File                                                      | Details                                   |
 | --------------- | --------------------------------------------------------- | ----------------------------------------- |
-| Bot personality | [`lib/agent.ts`](lib/agent.ts)                            | System prompt and instructions           |
-| Channel map     | [`lib/channels.ts`](lib/channels.ts)                      | Must match your Slack workspace          |
-| Welcome message | [`lib/welcome.ts`](lib/welcome.ts)                        | Sent when new members join               |
-| Agent tools     | [`workflows/agent-workflow/tools.ts`](workflows/agent-workflow/tools.ts) | Add, remove, or modify tools             |
-| Auth config     | [`lib/auth.ts`](lib/auth.ts)                              | Slack OAuth for the admin panel          |
-| Action type UI  | [`config/type-config.ts`](config/type-config.ts)          | Icons, labels, and colors per action type|
-
-### Knowledge base
-
-This template is designed to work alongside the [Knowledge Agent Template](https://github.com/vercel-labs/knowledge-agent-template). Set `SAVOIR_API_URL` to connect to a deployed Savoir backend, giving the bot `bash` and `bash_batch` tools to search and read your community docs remotely. Without it, the bot still works using web search, channel routing, and the system prompt.
-
-## Docs
-
-- [Full setup guide](docs/setup.md)—Slack app, env vars, storage, OAuth, channels, deploy
-- [Architecture](docs/architecture.md)—how the bot works, key files, workflow constraints
-- [Admin panel](docs/admin-panel.md)—dashboard pages, live streaming, filters, Next.js patterns
-- [Testing](docs/testing.md)—test without Slack, simulate actions, mock data
+| Intake form fields | [`app/page.tsx`](app/page.tsx)                      | User profile data collection             |
+| Agent system prompt | [`lib/agent.ts`](lib/agent.ts)                      | Job readiness analysis instructions      |
+| Report output structure | [`lib/types.ts`](lib/types.ts)                  | Gap audit, companies, sprint plan types  |
+| Workflow steps | [`workflows/job-readiness/steps.ts`](workflows/job-readiness/steps.ts) | Agent analysis pipeline                  |
+| Report display | [`app/report/page.tsx`](app/report/page.tsx)              | Tabs and layouts for results             |
+| Design/theme | [`components/theme-provider.tsx`](components/theme-provider.tsx) | Dark/light mode and Tailwind config
 
 ## Built with
 
-- [Next.js 16](https://nextjs.org)—App Router with cacheComponents
-- [Chat SDK](https://chat-sdk.dev)—Slack adapter and bot framework
-- [AI SDK 6](https://ai-sdk.dev)—AI model integration with AI Gateway support
-- [Vercel Workflow](https://vercel.com/docs/workflow)—durable workflow execution
-- [Better Auth](https://www.better-auth.com)—Slack OAuth for the admin panel
-- [shadcn/ui](https://ui.shadcn.com)—component library
-- [Upstash Redis](https://upstash.com)—bot action logging, stats, and conversation storage
+- [Next.js 16](https://nextjs.org)—App Router with React 19
+- [AI SDK 6](https://ai-sdk.dev)—AI model integration with streaming and tool calling
+- [Anthropic Claude](https://www.anthropic.com)—advanced reasoning for gap analysis
+- [Vercel Workflow](https://vercel.com/docs/workflow)—durable, resumable job readiness processing
+- [Vercel AI Gateway](https://vercel.com/docs/ai-gateway)—model routing and rate limiting
+- [shadcn/ui](https://ui.shadcn.com)—accessible component library
+- [Tailwind CSS](https://tailwindcss.com)—utility-first styling
+- [Geist Font](https://vercel.com/font)—clean, modern typography
 
 ## License
 
